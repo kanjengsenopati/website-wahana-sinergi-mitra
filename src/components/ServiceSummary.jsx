@@ -53,47 +53,51 @@ export const ServiceSummary = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {services.map((service) => {
           const IconComponent = service.icon;
           return (
             <div
               key={service.id}
-              className="group relative bg-white/80 backdrop-blur-md rounded-[24px] p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 hover:shadow-pakrt-lg flex flex-col justify-between"
+              className="group relative bg-white/80 backdrop-blur-md rounded-[24px] p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 hover:shadow-pakrt-lg flex flex-col justify-between"
             >
-              {/* Top-Right Action Cluster & Header */}
-              <div className="flex items-start justify-between gap-3 mb-2.5">
-                <div className="w-10 h-10 rounded-[14px] bg-blue-600/10 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-200">
-                  <IconComponent className="w-[18px] h-[18px] stroke-[2]" />
+              {/* Top Row: Icon + Title ALIGNED IN 1 ROW, with Action/Badge Cluster on the Right */}
+              <div className="flex items-center justify-between gap-3 mb-3">
+                {/* Left: Icon & Title in 1 single horizontal row */}
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="w-10 h-10 rounded-[14px] bg-blue-600/10 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-200 flex-shrink-0">
+                    <IconComponent className="w-[18px] h-[18px] stroke-[2]" />
+                  </div>
+                  <h3 className="text-[15px] sm:text-[16px] font-semibold text-slate-800 leading-snug truncate">
+                    {service.title}
+                  </h3>
                 </div>
-                {/* Action / Metadata Cluster di pojok kanan atas */}
-                <div className="flex items-center gap-2">
-                  <Text.Caption className="not-italic text-[11px] text-slate-400 font-mono">
+
+                {/* Right: Badge & ID in the same row */}
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  <Text.Caption className="hidden sm:inline not-italic text-[11px] text-slate-400 font-mono">
                     {service.id}
                   </Text.Caption>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                  <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 whitespace-nowrap">
                     {service.badge}
                   </span>
                 </div>
               </div>
 
               {/* Body Content */}
-              <div className="space-y-1 mb-3">
-                <h3 className="text-[15px] font-semibold text-slate-800 leading-snug">
-                  {service.title}
-                </h3>
+              <div className="mb-4 pl-0 sm:pl-[52px]">
                 <Text.Body className="text-[13px] text-slate-500 leading-relaxed">
                   {service.description}
                 </Text.Body>
               </div>
 
               {/* Bottom Density - Zero Waste Space */}
-              <div className="pt-2 border-t border-slate-100/60 flex items-center justify-between">
+              <div className="pt-2.5 border-t border-slate-100/80 flex items-center justify-between">
                 <Text.Label className="text-[10px] text-slate-400">
                   {service.tag}
                 </Text.Label>
-                <div className="flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                   <span className="text-[11px] font-semibold text-emerald-600">Siap Melayani</span>
                 </div>
               </div>
