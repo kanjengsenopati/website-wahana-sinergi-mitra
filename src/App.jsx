@@ -2,6 +2,7 @@ import React from 'react';
 import { Text } from './components/Typography';
 import CountdownTimer from './components/CountdownTimer';
 import ServiceSummary from './components/ServiceSummary';
+import ConstructionVectorBg from './components/ConstructionVectorBg';
 import { 
   Building, 
   HardHat, 
@@ -17,16 +18,19 @@ import {
 export function App() {
   return (
     <div className="relative min-h-screen w-full flex flex-col justify-between overflow-x-hidden bg-slate-100/90 text-slate-800">
-      {/* Background Konstruksi Bangunan dengan Light Overlay Minimalis */}
+      {/* Background Foto Konstruksi Bangunan dengan Light Overlay Minimalis */}
       <div 
-        className="fixed inset-0 pointer-events-none z-0 bg-cover bg-center bg-no-repeat opacity-[0.22] mix-blend-multiply scale-105 filter blur-[0.5px]"
+        className="fixed inset-0 pointer-events-none z-0 bg-cover bg-center bg-no-repeat opacity-[0.16] mix-blend-multiply scale-105 filter blur-[0.5px]"
         style={{
           backgroundImage: `url('https://images.unsplash.com/photo-1541888946425-d0fbb1861564?auto=format&fit=crop&w=2000&q=80')`,
         }}
       />
 
+      {/* Vektor Dekorasi Blueprint Arsitektural Gedung Bertingkat & Tower Crane */}
+      <ConstructionVectorBg />
+
       {/* Subtle Ambient Mesh Gradients */}
-      <div className="fixed inset-0 pointer-events-none z-0 bg-gradient-to-b from-blue-50/70 via-slate-50/90 to-slate-100" />
+      <div className="fixed inset-0 pointer-events-none z-0 bg-gradient-to-b from-blue-50/60 via-slate-50/80 to-slate-100/90" />
       <div className="fixed -top-40 -left-40 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none z-0" />
       <div className="fixed -bottom-40 -right-40 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none z-0" />
 
