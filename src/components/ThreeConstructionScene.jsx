@@ -45,11 +45,62 @@ export default function ThreeConstructionScene() {
     cyanLight.position.set(12, 10, -6);
     scene.add(cyanLight);
 
-    // Materials Palette
-    const steelMat = new THREE.MeshStandardMaterial({
-      color: '#334155',
+    // Dedicated Construction Floodlights for Bright Silver Steel Illumination
+    const buildingFloodlight = new THREE.DirectionalLight('#ffffff', 3.8);
+    buildingFloodlight.position.set(-14, 28, 16);
+    scene.add(buildingFloodlight);
+
+    const baseSpotlight = new THREE.SpotLight('#e0f2fe', 5.5, 60, Math.PI / 2.8, 0.35);
+    baseSpotlight.position.set(-3, 1, 9);
+    baseSpotlight.target.position.set(-11, 10, -6);
+    scene.add(baseSpotlight);
+    scene.add(baseSpotlight.target);
+
+    // Materials Palette (Galvanized Bright Silver Steel & 3D Bolt Joint Details)
+    const silverSteelMat = new THREE.MeshStandardMaterial({
+      color: '#f1f5f9', // Bright polished silver
+      roughness: 0.2,
+      metalness: 0.9,
+      emissive: '#475569',
+      emissiveIntensity: 0.35, // Ensures steel is always luminous & never appears black
+    });
+
+    const gussetPlateMat = new THREE.MeshStandardMaterial({
+      color: '#cbd5e1',
+      roughness: 0.28,
+      metalness: 0.92,
+      emissive: '#334155',
+      emissiveIntensity: 0.28,
+    });
+
+    const boltMat = new THREE.MeshStandardMaterial({
+      color: '#ffffff',
+      roughness: 0.12,
+      metalness: 0.98,
+      emissive: '#94a3b8',
+      emissiveIntensity: 0.45,
+    });
+
+    const metalDeckMat = new THREE.MeshStandardMaterial({
+      color: '#cbd5e1',
       roughness: 0.35,
-      metalness: 0.85,
+      metalness: 0.78,
+      emissive: '#334155',
+      emissiveIntensity: 0.25,
+    });
+
+    const brightSilverLineMat = new THREE.LineBasicMaterial({
+      color: '#ffffff',
+      transparent: true,
+      opacity: 0.9,
+    });
+
+    const lightConcreteMat = new THREE.MeshStandardMaterial({
+      color: '#64748b',
+      roughness: 0.65,
+      metalness: 0.25,
+      emissive: '#1e293b',
+      emissiveIntensity: 0.2,
     });
 
     const yellowCraneMat = new THREE.MeshStandardMaterial({
@@ -63,19 +114,13 @@ export default function ThreeConstructionScene() {
     const glowBlueLineMat = new THREE.LineBasicMaterial({
       color: '#38bdf8',
       transparent: true,
-      opacity: 0.6,
+      opacity: 0.7,
     });
 
     const neonCyanLineMat = new THREE.LineBasicMaterial({
       color: '#22d3ee',
       transparent: true,
-      opacity: 0.8,
-    });
-
-    const concreteMat = new THREE.MeshStandardMaterial({
-      color: '#1e293b',
-      roughness: 0.9,
-      metalness: 0.1,
+      opacity: 0.85,
     });
 
     const beaconMat = new THREE.MeshBasicMaterial({ color: '#ef4444' });
@@ -104,7 +149,7 @@ export default function ThreeConstructionScene() {
     ringMesh2.scale.set(1.8, 1.8, 1.8);
     scene.add(ringMesh2);
 
-    // --- Skyscraper Lattice / Framework Under Construction ---
+    // --- Skyscraper Lattice / Framework Under Construction (Bright Silver Steel with 3D Bolt Joints) ---
     const buildingGroup = new THREE.Group();
     buildingGroup.position.set(-11, 0, -6);
     scene.add(buildingGroup);
@@ -115,55 +160,153 @@ export default function ThreeConstructionScene() {
     const span = 3.6;
     const floorH = 3.0;
 
-    // Foundation slab
+    // Foundation slab (Clean technical concrete)
     const foundationGeo = new THREE.BoxGeometry(colsX * span + 2, 0.8, colsZ * span + 2);
-    const foundation = new THREE.Mesh(foundationGeo, concreteMat);
+    const foundation = new THREE.Mesh(foundationGeo, lightConcreteMat);
     foundation.position.set((colsX - 1) * span * 0.5, 0.4, (colsZ - 1) * span * 0.5);
     buildingGroup.add(foundation);
 
-    // Floor slabs & vertical steel columns
-    const colGeo = new THREE.BoxGeometry(0.3, floors * floorH, 0.3);
+    const foundationEdges = new THREE.LineSegments(
+      new THREE.EdgesGeometry(foundationGeo),
+      new THREE.LineBasicMaterial({ color: '#94a3b8', transparent: true, opacity: 0.7 })
+    );
+    foundationEdges.position.copy(foundation.position);
+    buildingGroup.add(foundationEdges);
+
+    // Reusable Geometries for Connection Joints & 3D Bolts
+    const jointPlateGeo = new THREE.BoxGeometry(0.56, 0.56, 0.56);
+    const jointPlateEdgesGeo = new THREE.EdgesGeometry(jointPlateGeo);
+    const boltHeadGeoZ = new THREE.CylinderGeometry(0.065, 0.065, 0.08, 8);
+    boltHeadGeoZ.rotateX(Math.PI / 2);
+    const boltHeadGeoX = new THREE.CylinderGeometry(0.065, 0.065, 0.08, 8);
+    boltHeadGeoX.rotateZ(Math.PI / 2);
+
+    // Vertical Silver Steel Columns
+    const colGeo = new THREE.BoxGeometry(0.32, floors * floorH, 0.32);
+    const colEdgesGeo = new THREE.EdgesGeometry(colGeo);
+
     for (let ix = 0; ix < colsX; ix++) {
       for (let iz = 0; iz < colsZ; iz++) {
-        const col = new THREE.Mesh(colGeo, steelMat);
+        const col = new THREE.Mesh(colGeo, silverSteelMat);
         col.position.set(ix * span, (floors * floorH) / 2, iz * span);
         buildingGroup.add(col);
+
+        // Luminous Silver Outline on Columns
+        const colLines = new THREE.LineSegments(colEdgesGeo, brightSilverLineMat);
+        colLines.position.copy(col.position);
+        buildingGroup.add(colLines);
       }
     }
 
-    // Floor slabs (some complete, top ones under construction/hollow)
+    // Floor levels with Perimeter Beams, Gusset Plates, and 3D Bolt Joints
     for (let f = 1; f <= floors; f++) {
       const y = f * floorH;
-      // Perimeter beams
-      const beamGeoX = new THREE.BoxGeometry(colsX * span, 0.25, 0.25);
-      const beamGeoZ = new THREE.BoxGeometry(0.25, 0.25, colsZ * span);
+
+      // Longitudinal & Transverse Silver Steel Beams
+      const beamGeoX = new THREE.BoxGeometry(colsX * span, 0.28, 0.24);
+      const beamGeoZ = new THREE.BoxGeometry(0.24, 0.28, colsZ * span);
+      const beamEdgesGeoX = new THREE.EdgesGeometry(beamGeoX);
+      const beamEdgesGeoZ = new THREE.EdgesGeometry(beamGeoZ);
 
       for (let iz = 0; iz < colsZ; iz++) {
-        const beamX = new THREE.Mesh(beamGeoX, steelMat);
+        const beamX = new THREE.Mesh(beamGeoX, silverSteelMat);
         beamX.position.set(((colsX - 1) * span) / 2, y, iz * span);
         buildingGroup.add(beamX);
+
+        const beamLinesX = new THREE.LineSegments(beamEdgesGeoX, brightSilverLineMat);
+        beamLinesX.position.copy(beamX.position);
+        buildingGroup.add(beamLinesX);
       }
+
       for (let ix = 0; ix < colsX; ix++) {
-        const beamZ = new THREE.Mesh(beamGeoZ, steelMat);
+        const beamZ = new THREE.Mesh(beamGeoZ, silverSteelMat);
         beamZ.position.set(ix * span, y, ((colsZ - 1) * span) / 2);
         buildingGroup.add(beamZ);
+
+        const beamLinesZ = new THREE.LineSegments(beamEdgesGeoZ, brightSilverLineMat);
+        beamLinesZ.position.copy(beamZ.position);
+        buildingGroup.add(beamLinesZ);
       }
 
-      // Add floor deck for lower floors
+      // Mechanical Gusset Plates & 3D Bolt Clusters at Every Column-Beam Node
+      for (let ix = 0; ix < colsX; ix++) {
+        for (let iz = 0; iz < colsZ; iz++) {
+          const jointPlate = new THREE.Mesh(jointPlateGeo, gussetPlateMat);
+          jointPlate.position.set(ix * span, y, iz * span);
+          buildingGroup.add(jointPlate);
+
+          const jointLines = new THREE.LineSegments(jointPlateEdgesGeo, brightSilverLineMat);
+          jointLines.position.copy(jointPlate.position);
+          buildingGroup.add(jointLines);
+
+          // 3D Bolt Rivet clusters on Gusset Plate Faces
+          const boltOffsets = [-0.16, 0.16];
+          for (let bo1 of boltOffsets) {
+            for (let bo2 of boltOffsets) {
+              // Front & back face bolts (along Z)
+              const boltF = new THREE.Mesh(boltHeadGeoZ, boltMat);
+              boltF.position.set(ix * span + bo1, y + bo2, iz * span + 0.3);
+              buildingGroup.add(boltF);
+
+              const boltB = new THREE.Mesh(boltHeadGeoZ, boltMat);
+              boltB.position.set(ix * span + bo1, y + bo2, iz * span - 0.3);
+              buildingGroup.add(boltB);
+
+              // Side face bolts (along X)
+              const boltL = new THREE.Mesh(boltHeadGeoX, boltMat);
+              boltL.position.set(ix * span + 0.3, y + bo2, iz * span + bo1);
+              buildingGroup.add(boltL);
+
+              const boltR = new THREE.Mesh(boltHeadGeoX, boltMat);
+              boltR.position.set(ix * span - 0.3, y + bo2, iz * span + bo1);
+              buildingGroup.add(boltR);
+            }
+          }
+        }
+      }
+
+      // Metal Decking / Bondek Composite Slab (Bright Silver-Grey)
       if (f <= 4) {
         const deckGeo = new THREE.BoxGeometry((colsX - 1) * span + 0.3, 0.15, (colsZ - 1) * span + 0.3);
-        const deck = new THREE.Mesh(deckGeo, concreteMat);
-        deck.position.set(((colsX - 1) * span) / 2, y - 0.05, ((colsZ - 1) * span) / 2);
+        const deck = new THREE.Mesh(deckGeo, metalDeckMat);
+        deck.position.set(((colsX - 1) * span) / 2, y - 0.08, ((colsZ - 1) * span) / 2);
         buildingGroup.add(deck);
+
+        const deckEdges = new THREE.LineSegments(
+          new THREE.EdgesGeometry(deckGeo),
+          new THREE.LineBasicMaterial({ color: '#cbd5e1', transparent: true, opacity: 0.8 })
+        );
+        deckEdges.position.copy(deck.position);
+        buildingGroup.add(deckEdges);
       }
 
-      // Add architectural wireframe line highlights to floor
+      // Architectural Wireframe Ring Highlight on each Floor
       const edgeBox = new THREE.BoxGeometry((colsX - 1) * span, 0.1, (colsZ - 1) * span);
       const edges = new THREE.EdgesGeometry(edgeBox);
       const line = new THREE.LineSegments(edges, glowBlueLineMat);
       line.position.set(((colsX - 1) * span) / 2, y, ((colsZ - 1) * span) / 2);
       buildingGroup.add(line);
     }
+
+    // Diagonal Cross-Bracing Steel Tension Rods across Outer Bays
+    const bracingPoints = [];
+    for (let f = 0; f < floors - 1; f++) {
+      const y1 = (f + 1) * floorH;
+      const y2 = (f + 2) * floorH;
+      // Front and side facade X-bracing
+      bracingPoints.push(
+        new THREE.Vector3(0, y1, (colsZ - 1) * span), new THREE.Vector3(span, y2, (colsZ - 1) * span),
+        new THREE.Vector3(span, y1, (colsZ - 1) * span), new THREE.Vector3(0, y2, (colsZ - 1) * span),
+        new THREE.Vector3((colsX - 1) * span, y1, 0), new THREE.Vector3((colsX - 1) * span, y2, span),
+        new THREE.Vector3((colsX - 1) * span, y1, span), new THREE.Vector3((colsX - 1) * span, y2, 0)
+      );
+    }
+    const bracingGeo = new THREE.BufferGeometry().setFromPoints(bracingPoints);
+    const bracingLines = new THREE.LineSegments(
+      bracingGeo,
+      new THREE.LineBasicMaterial({ color: '#f1f5f9', transparent: true, opacity: 0.85 })
+    );
+    buildingGroup.add(bracingLines);
 
     // Scaffolding on side of building
     const scaffoldPoints = [];
