@@ -18,7 +18,7 @@ function getOrSetTargetTimestamp() {
   return target;
 }
 
-export const CountdownTimer = () => {
+export const CountdownTimer = ({ layout = '2x2' }) => {
   const [timeLeft, setTimeLeft] = useState({
     days: 60,
     hours: 0,
@@ -75,14 +75,18 @@ export const CountdownTimer = () => {
     },
   ];
 
+  const gridClass = layout === '2x2'
+    ? 'grid grid-cols-2 gap-3.5 sm:gap-4.5 w-full max-w-[340px] sm:max-w-[380px]'
+    : 'grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-5 w-full';
+
   return (
-    <div className="w-full">
-      {/* Prominent Outstanding Countdown Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-5">
+    <div className={layout === '2x2' ? 'w-full flex justify-center lg:justify-end' : 'w-full'}>
+      {/* 2x2 Grid Ultra-Glassmorphism Countdown Cards */}
+      <div className={gridClass}>
         {timeUnits.map((unit, idx) => (
           <div
             key={idx}
-            className={`relative group flex flex-col items-center justify-center py-6 sm:py-9 px-4 rounded-[24px] bg-slate-950/30 backdrop-blur-md border border-white/10 shadow-[0_12px_32px_rgba(0,0,0,0.4)] transition-all duration-300 hover:bg-slate-900/40 hover:border-cyan-400/40 hover:shadow-[0_12px_40px_rgba(6,182,212,0.2)] hover:-translate-y-1 ${
+            className={`relative group flex flex-col items-center justify-center py-5 sm:py-7 px-3.5 sm:px-5 rounded-[24px] bg-slate-950/35 backdrop-blur-md border border-white/10 shadow-[0_12px_32px_rgba(0,0,0,0.45)] transition-all duration-300 hover:bg-slate-900/45 hover:border-cyan-400/40 hover:shadow-[0_12px_40px_rgba(6,182,212,0.2)] hover:-translate-y-1 ${
               unit.isAccent ? 'border-emerald-400/30 shadow-[0_12px_36px_rgba(16,185,129,0.18)] hover:border-emerald-400/60' : ''
             }`}
           >
@@ -100,14 +104,14 @@ export const CountdownTimer = () => {
             {/* Outstanding Giant Digits with intense drop-shadow for 100% legibility */}
             <div className="relative">
               <span
-                className={`block text-[48px] sm:text-[64px] md:text-[76px] font-black font-mono leading-none tracking-tight ${unit.color} drop-shadow-[0_4px_18px_rgba(0,0,0,0.95)] select-none`}
+                className={`block text-[44px] sm:text-[54px] md:text-[58px] font-black font-mono leading-none tracking-tight ${unit.color} drop-shadow-[0_4px_18px_rgba(0,0,0,0.95)] select-none`}
               >
                 {unit.value}
               </span>
             </div>
 
             {/* Clean Tag Label with subtle glass background */}
-            <span className="mt-3 px-3 py-1 rounded-full bg-slate-900/60 backdrop-blur-sm border border-white/10 text-slate-200 text-[11px] sm:text-[12px] font-bold tracking-widest uppercase shadow-sm">
+            <span className="mt-2.5 px-3 py-0.5 rounded-full bg-slate-900/70 backdrop-blur-sm border border-white/10 text-slate-200 text-[11px] sm:text-[12px] font-bold tracking-widest uppercase shadow-sm">
               {unit.label}
             </span>
           </div>

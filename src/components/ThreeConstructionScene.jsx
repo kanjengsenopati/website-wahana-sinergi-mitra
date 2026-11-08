@@ -184,7 +184,7 @@ export default function ThreeConstructionScene() {
 
     // --- 2. Advanced 3D Tower Crane ---
     const craneGroup = new THREE.Group();
-    craneGroup.position.set(2, 0, 1);
+    craneGroup.position.set(0, 0, 0);
     scene.add(craneGroup);
 
     // Crane Base Foundation
@@ -443,9 +443,9 @@ export default function ThreeConstructionScene() {
       // Camera gentle cinematic orbit + parallax
       const baseAngle = elapsedTime * 0.04;
       const radius = 34;
-      camera.position.x = Math.sin(baseAngle) * radius * 0.4 + 18 + currentMouseX * 4;
-      camera.position.y = 14 - currentMouseY * 3;
-      camera.position.z = Math.cos(baseAngle) * radius * 0.4 + 22;
+      camera.position.x = Math.sin(baseAngle) * radius * 0.35 + 16 + currentMouseX * 4;
+      camera.position.y = 13 - currentMouseY * 3;
+      camera.position.z = Math.cos(baseAngle) * radius * 0.35 + 23;
       camera.lookAt(0, 9, 0);
 
       // Smooth slewing crane rotation (swaying over construction site)
