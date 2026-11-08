@@ -19,8 +19,8 @@ export default function ThreeConstructionScene() {
       0.1,
       200
     );
-    camera.position.set(24, 18, 28);
-    camera.lookAt(0, 7, 0);
+    camera.position.set(20, 15, 26);
+    camera.lookAt(0, 9, 0);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -104,9 +104,9 @@ export default function ThreeConstructionScene() {
     ringMesh2.scale.set(1.8, 1.8, 1.8);
     scene.add(ringMesh2);
 
-    // --- 1. Skyscraper Lattice / Framework Under Construction ---
+    // --- Skyscraper Lattice / Framework Under Construction ---
     const buildingGroup = new THREE.Group();
-    buildingGroup.position.set(-8, 0, -4);
+    buildingGroup.position.set(-11, 0, -6);
     scene.add(buildingGroup);
 
     const floors = 6;
@@ -184,7 +184,7 @@ export default function ThreeConstructionScene() {
 
     // --- 2. Advanced 3D Tower Crane ---
     const craneGroup = new THREE.Group();
-    craneGroup.position.set(4, 0, 3);
+    craneGroup.position.set(2, 0, 1);
     scene.add(craneGroup);
 
     // Crane Base Foundation
@@ -442,11 +442,11 @@ export default function ThreeConstructionScene() {
 
       // Camera gentle cinematic orbit + parallax
       const baseAngle = elapsedTime * 0.04;
-      const radius = 38;
-      camera.position.x = Math.sin(baseAngle) * radius * 0.4 + 20 + currentMouseX * 5;
-      camera.position.y = 17 - currentMouseY * 4;
-      camera.position.z = Math.cos(baseAngle) * radius * 0.4 + 24;
-      camera.lookAt(-1, 8, 0);
+      const radius = 34;
+      camera.position.x = Math.sin(baseAngle) * radius * 0.4 + 18 + currentMouseX * 4;
+      camera.position.y = 14 - currentMouseY * 3;
+      camera.position.z = Math.cos(baseAngle) * radius * 0.4 + 22;
+      camera.lookAt(0, 9, 0);
 
       // Smooth slewing crane rotation (swaying over construction site)
       const craneAngle = Math.sin(elapsedTime * 0.35) * 0.55 - 0.25;

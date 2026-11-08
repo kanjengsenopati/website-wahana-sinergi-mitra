@@ -82,8 +82,8 @@ export const CountdownTimer = () => {
         {timeUnits.map((unit, idx) => (
           <div
             key={idx}
-            className={`relative group flex flex-col items-center justify-center py-6 sm:py-9 px-4 rounded-[24px] bg-slate-900/70 backdrop-blur-xl border border-slate-700/50 shadow-[0_12px_40px_rgba(0,0,0,0.5)] transition-all duration-300 hover:border-cyan-500/50 hover:shadow-[0_12px_40px_rgba(6,182,212,0.15)] hover:-translate-y-1 ${
-              unit.isAccent ? 'border-emerald-500/40 shadow-[0_12px_40px_rgba(16,185,129,0.12)]' : ''
+            className={`relative group flex flex-col items-center justify-center py-6 sm:py-9 px-4 rounded-[24px] bg-slate-950/30 backdrop-blur-md border border-white/10 shadow-[0_12px_32px_rgba(0,0,0,0.4)] transition-all duration-300 hover:bg-slate-900/40 hover:border-cyan-400/40 hover:shadow-[0_12px_40px_rgba(6,182,212,0.2)] hover:-translate-y-1 ${
+              unit.isAccent ? 'border-emerald-400/30 shadow-[0_12px_36px_rgba(16,185,129,0.18)] hover:border-emerald-400/60' : ''
             }`}
           >
             {/* Top status pulse dot */}
@@ -91,23 +91,23 @@ export const CountdownTimer = () => {
               <span 
                 className={`w-2 h-2 rounded-full ${
                   unit.isAccent 
-                    ? 'bg-emerald-400 animate-ping opacity-80' 
-                    : 'bg-cyan-500/60'
+                    ? 'bg-emerald-400 animate-ping opacity-90' 
+                    : 'bg-cyan-400/70'
                 }`} 
               />
             </div>
 
-            {/* Outstanding Giant Digits */}
+            {/* Outstanding Giant Digits with intense drop-shadow for 100% legibility */}
             <div className="relative">
               <span
-                className={`block text-[48px] sm:text-[64px] md:text-[76px] font-black font-mono leading-none tracking-tight ${unit.color} drop-shadow-[0_4px_16px_rgba(0,0,0,0.8)]`}
+                className={`block text-[48px] sm:text-[64px] md:text-[76px] font-black font-mono leading-none tracking-tight ${unit.color} drop-shadow-[0_4px_18px_rgba(0,0,0,0.95)] select-none`}
               >
                 {unit.value}
               </span>
             </div>
 
-            {/* Clean Tag Label */}
-            <span className="mt-3 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-[11px] sm:text-[12px] font-bold tracking-widest uppercase">
+            {/* Clean Tag Label with subtle glass background */}
+            <span className="mt-3 px-3 py-1 rounded-full bg-slate-900/60 backdrop-blur-sm border border-white/10 text-slate-200 text-[11px] sm:text-[12px] font-bold tracking-widest uppercase shadow-sm">
               {unit.label}
             </span>
           </div>
