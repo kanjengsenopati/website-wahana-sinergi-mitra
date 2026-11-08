@@ -102,6 +102,8 @@ export default function ThreeConstructionScene() {
       emissive: '#1e293b',
       emissiveIntensity: 0.2,
     });
+    const concreteMat = lightConcreteMat;
+    const steelMat = silverSteelMat;
 
     const yellowCraneMat = new THREE.MeshStandardMaterial({
       color: '#f59e0b',
@@ -332,7 +334,7 @@ export default function ThreeConstructionScene() {
 
     // Crane Base Foundation
     const craneBaseGeo = new THREE.BoxGeometry(4, 1.2, 4);
-    const craneBase = new THREE.Mesh(craneBaseGeo, concreteMat);
+    const craneBase = new THREE.Mesh(craneBaseGeo, lightConcreteMat);
     craneBase.position.y = 0.6;
     craneGroup.add(craneBase);
 
@@ -375,7 +377,7 @@ export default function ThreeConstructionScene() {
     craneGroup.add(slewingGroup);
 
     // Turntable ring
-    const turntable = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 0.8, 16), steelMat);
+    const turntable = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 0.8, 16), silverSteelMat);
     slewingGroup.add(turntable);
 
     // Operator Cabin
@@ -452,7 +454,7 @@ export default function ThreeConstructionScene() {
 
     // Counterweight slabs
     for (let c = 0; c < 3; c++) {
-      const cw = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.4, 1.8), concreteMat);
+      const cw = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.4, 1.8), lightConcreteMat);
       cw.position.set(-counterJibLength + 1.2 + c * 1.8, -0.2, 0);
       slewingGroup.add(cw);
     }
