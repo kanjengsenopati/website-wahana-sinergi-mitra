@@ -27,9 +27,11 @@ php artisan migrate --force
 echo "🔗 [5/7] Memastikan storage symlink terhubung..."
 php artisan storage:link || true
 
-echo "⚡ [6/7] Meng-compile aset frontend Vite (React + Tailwind)..."
-npm ci --prefer-offline --no-audit || npm install --prefer-offline --no-audit
-npm run build
+echo "⚡ [6/7] Memeriksa aset frontend Vite (Pre-compiled via Git)..."
+if [ ! -f "public/build/manifest.json" ]; then
+    echo "Manifest belum ada, mencoba compile aset frontend..."
+    npm run build || true
+fi
 
 echo "🧹 [7/7] Optimasi caching Laravel (Config, Route, View, Filament)..."
 php artisan config:cache
