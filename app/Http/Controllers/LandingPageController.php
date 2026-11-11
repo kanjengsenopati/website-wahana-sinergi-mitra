@@ -45,12 +45,32 @@ class LandingPageController extends Controller
             'about' => CompanySetting::get('company_about', 'Perusahaan penyedia jasa pelaksana konstruksi terpercaya yang melayani pekerjaan gedung komersial, industri pergudangan, infrastruktur jalan/jembatan, dan rekayasa sipil berstandar mutu tinggi.'),
         ];
 
+        // SSOT Section Visibility & Section Dynamic Contents
+        $visibility = CompanySetting::getSectionVisibility();
+        $heroData = CompanySetting::getSectionData('hero');
+        $servicesMeta = CompanySetting::getSectionData('services_meta');
+        $estimatorData = CompanySetting::getSectionData('estimator_data');
+        $portfolioMeta = CompanySetting::getSectionData('portfolio_meta');
+        $workflowData = CompanySetting::getSectionData('workflow_data');
+        $proksiData = CompanySetting::getSectionData('proksi_data');
+        $testimonialsMeta = CompanySetting::getSectionData('testimonials_meta');
+        $inquiryMeta = CompanySetting::getSectionData('inquiry_meta');
+
         return Inertia::render('LandingPage', [
             'services' => $services,
             'projects' => $projects,
             'testimonials' => $testimonials,
             'stats' => $stats,
             'company' => $company,
+            'visibility' => $visibility,
+            'heroData' => $heroData,
+            'servicesMeta' => $servicesMeta,
+            'estimatorData' => $estimatorData,
+            'portfolioMeta' => $portfolioMeta,
+            'workflowData' => $workflowData,
+            'proksiData' => $proksiData,
+            'testimonialsMeta' => $testimonialsMeta,
+            'inquiryMeta' => $inquiryMeta,
         ]);
     }
 

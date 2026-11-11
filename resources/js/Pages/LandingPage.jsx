@@ -6,6 +6,7 @@ import ServicesSection from '../Components/ServicesSection';
 import PortfolioSection from '../Components/PortfolioSection';
 import CostEstimator from '../Components/CostEstimator';
 import WorkflowSection from '../Components/WorkflowSection';
+import ProksiSection from '../Components/ProksiSection';
 import TestimonialsSection from '../Components/TestimonialsSection';
 import InquiryForm from '../Components/InquiryForm';
 import Footer from '../Components/Footer';
@@ -15,7 +16,16 @@ export default function LandingPage({
   projects = [], 
   testimonials = [], 
   stats = {}, 
-  company = {} 
+  company = {},
+  visibility = {},
+  heroData = {},
+  servicesMeta = {},
+  estimatorData = {},
+  portfolioMeta = {},
+  workflowData = {},
+  proksiData = {},
+  testimonialsMeta = {},
+  inquiryMeta = {},
 }) {
   const [inquiryInitialData, setInquiryInitialData] = useState({});
 
@@ -38,32 +48,57 @@ export default function LandingPage({
       </Head>
 
       <div className="min-h-screen bg-[#F8FAFC] text-slate-800 antialiased selection:bg-emerald-500 selection:text-white">
-        {/* Sticky Header */}
-        <Navbar company={company} />
+        {/* Sticky Header with Dynamic Nav Filter */}
+        <Navbar company={company} visibility={visibility} />
 
         {/* Hero Section with Hybrid 3D Scene */}
-        <HeroSection stats={stats} />
+        {visibility?.hero !== false && (
+          <HeroSection 
+            stats={stats} 
+            data={heroData} 
+            show3D={visibility?.hero_3d !== false} 
+          />
+        )}
 
         {/* Services Showcase */}
-        <ServicesSection services={services} />
+        {visibility?.services !== false && (
+          <ServicesSection services={services} meta={servicesMeta} />
+        )}
 
         {/* Interactive Cost Estimator (RAB Calculator) */}
-        <CostEstimator onApplyToForm={handleApplyEstimate} />
+        {visibility?.estimator !== false && (
+          <CostEstimator data={estimatorData} onApplyToForm={handleApplyEstimate} />
+        )}
 
         {/* Project Portfolio */}
-        <PortfolioSection projects={projects} company={company} />
+        {visibility?.portfolio !== false && (
+          <PortfolioSection projects={projects} company={company} meta={portfolioMeta} />
+        )}
 
         {/* Methodology & Workflow */}
-        <WorkflowSection />
+        {visibility?.workflow !== false && (
+          <WorkflowSection data={workflowData} />
+        )}
+
+        {/* PROKSI Digital Ecosystem Showcase */}
+        {visibility?.proksi !== false && (
+          <ProksiSection data={proksiData} />
+        )}
 
         {/* Client Testimonials */}
-        <TestimonialsSection testimonials={testimonials} />
+        {visibility?.testimonials !== false && (
+          <TestimonialsSection testimonials={testimonials} meta={testimonialsMeta} />
+        )}
 
         {/* Inquiry & Consultation Form */}
-        <InquiryForm company={company} initialData={inquiryInitialData} />
+        {visibility?.inquiry !== false && (
+          <InquiryForm company={company} meta={inquiryMeta} initialData={inquiryInitialData} />
+        )}
 
         {/* Footer */}
-        <Footer company={company} />
+        {visibility?.footer !== false && (
+          <Footer company={company} visibility={visibility} />
+        )}
       </div>
     </>
   );

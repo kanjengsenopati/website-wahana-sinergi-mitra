@@ -26,7 +26,16 @@ import {
   Calendar, 
   Layers, 
   Sparkles,
-  PhoneCall
+  PhoneCall,
+  Eye,
+  EyeOff,
+  Calculator,
+  Laptop,
+  ToggleLeft,
+  ToggleRight,
+  FileSpreadsheet,
+  ClipboardCheck,
+  Check
 } from 'lucide-react';
 import Text, { formatRupiah, formatThousands } from '../../Components/Typography';
 import CurrencyInput from '../../Components/CurrencyInput';
@@ -38,10 +47,140 @@ export default function Dashboard({
   inquiries = [], 
   testimonials = [], 
   settings = {}, 
-  metrics = {} 
+  metrics = {},
+  visibility = {},
+  sectionData = {}
 }) {
   const { flash, auth } = usePage().props;
-  const [activeTab, setActiveTab] = useState('overview'); // overview, projects, services, inquiries, testimonials, settings
+  const [activeTab, setActiveTab] = useState('overview'); // overview, sections, projects, services, inquiries, testimonials, settings
+
+  // Dedicated Section Manager & Visibility State
+  const [sectionVisibility, setSectionVisibility] = useState(visibility || {});
+  const [activeSectionEditor, setActiveSectionEditor] = useState(null); // 'hero', 'estimator', 'workflow', 'proksi', 'services_meta', 'portfolio_meta', 'testimonials_meta', 'inquiry_meta'
+
+  React.useEffect(() => {
+    if (visibility) {
+      setSectionVisibility(visibility);
+    }
+  }, [visibility]);
+
+  // Section Content Forms
+  const [heroForm, setHeroForm] = useState({
+    badge: sectionData?.hero?.badge || '3D Visualisation & Architectural Engineering',
+    title_line1: sectionData?.hero?.title_line1 || 'Membangun Masa Depan',
+    title_line2: sectionData?.hero?.title_line2 || 'Presisi Konstruksi Nyata',
+    description: sectionData?.hero?.description || 'Eksplorasi mahakarya arsitektur modern dengan rekayasa sipil berstandar tinggi. Pantau progres proyek, mutu beton, dan ketepatan struktur secara real-time.',
+    cta_primary_text: sectionData?.hero?.cta_primary_text || 'Konsultasi Proyek Baru',
+    cta_primary_link: sectionData?.hero?.cta_primary_link || '#inquiry',
+    cta_secondary_text: sectionData?.hero?.cta_secondary_text || 'Galeri Portofolio',
+    cta_secondary_link: sectionData?.hero?.cta_secondary_link || '#portofolio',
+  });
+
+  const [estimatorForm, setEstimatorForm] = useState({
+    badge: sectionData?.estimator_data?.badge || 'Kalkulator Biaya Proyek',
+    title: sectionData?.estimator_data?.title || 'Simulasi Estimasi Rencana Anggaran Biaya (RAB)',
+    subtitle: sectionData?.estimator_data?.subtitle || 'Dapatkan estimasi awal biaya pembangunan proyek Anda secara transparan berdasarkan luas bangunan dan spesifikasi mutu material berstandar SNI.',
+    rate_gudang: sectionData?.estimator_data?.building_options?.find((b) => b.id === 'gudang')?.baseRatePerM2 || 3600000,
+    rate_komersial: sectionData?.estimator_data?.building_options?.find((b) => b.id === 'komersial')?.baseRatePerM2 || 5200000,
+    rate_residensial: sectionData?.estimator_data?.building_options?.find((b) => b.id === 'residensial')?.baseRatePerM2 || 5800000,
+    rate_renovasi: sectionData?.estimator_data?.building_options?.find((b) => b.id === 'renovasi')?.baseRatePerM2 || 2800000,
+  });
+
+  const [workflowForm, setWorkflowForm] = useState({
+    badge: sectionData?.workflow_data?.badge || 'Metodologi Kerja',
+    title: sectionData?.workflow_data?.title || 'Standar Eksekusi Proyek Yang Terukur & Akuntabel',
+    subtitle: sectionData?.workflow_data?.subtitle || 'Kami menerapkan tata kelola konstruksi modern untuk memastikan zero-miscommunication, menghindari biaya membengkak, dan mencapai target serah terima tepat waktu.',
+    steps: sectionData?.workflow_data?.steps || [
+      { number: '01', title: 'Survei & Analisis Struktur', icon: 'ClipboardCheck', description: 'Pengukuran topografi, pengujian daya dukung tanah (soil test), dan diskusi kebutuhan spesifikasi teknis.' },
+      { number: '02', title: 'DED & Transparansi RAB', icon: 'FileSpreadsheet', description: 'Pembuatan gambar kerja DED (Detail Engineering Design), jadwal kurva-S, dan kontrak perjanjian kerja mengikat.' },
+      { number: '03', title: 'Konstruksi Berstandar K3', icon: 'ShieldAlert', description: 'Eksekusi lapangan dengan material SNI teruji lab, pengawasan mandor ahli, dan kepatuhan keselamatan zero-accident.' },
+      { number: '04', title: 'Handover & Masa Retensi', icon: 'KeyRound', description: 'Berita acara serah terima resmi (BAST 1 & 2), as-built drawing, serta jaminan garansi pemeliharaan struktural.' },
+    ],
+  });
+
+  const [proksiForm, setProksiForm] = useState({
+    badge: sectionData?.proksi_data?.badge || 'Teknologi Ekosistem Digital WSM',
+    title_prefix: sectionData?.proksi_data?.title_prefix || 'Ekosistem Aplikasi',
+    title_highlight: sectionData?.proksi_data?.title_highlight || 'PROKSI',
+    title_suffix: sectionData?.proksi_data?.title_suffix || '(Proyek Konstruksi)',
+    subtitle: sectionData?.proksi_data?.subtitle || 'Seluruh proyek konstruksi kami diawasi langsung secara real-time berbasis Automated Digitalization. Pemilik proyek (owner) memiliki hak akses mandiri untuk memantau kurva-S harian, jadwal Gantt Chart, kepatuhan K3, dan log foto progres lapangan tanpa manipulasi data.',
+    scurve_plan: sectionData?.proksi_data?.scurve_plan || '64.50%',
+    scurve_actual: sectionData?.proksi_data?.scurve_actual || '68.20%',
+    scurve_deviation: sectionData?.proksi_data?.scurve_deviation || '+3.70%',
+    zero_accident_days: sectionData?.proksi_data?.zero_accident_days || 428,
+    apd_compliance: sectionData?.proksi_data?.apd_compliance || '99.8%',
+    ptw_active: sectionData?.proksi_data?.ptw_active || 14,
+  });
+
+  const [metaForms, setMetaForms] = useState({
+    services_meta: {
+      badge: sectionData?.services_meta?.badge || 'Layanan Konstruksi Terpadu',
+      title: sectionData?.services_meta?.title || 'Solusi Total Rancang Bangun & Rekayasa Sipil',
+      subtitle: sectionData?.services_meta?.subtitle || 'Dari perencanaan konseptual, perhitungan struktur tahan gempa, hingga pelaksanaan konstruksi di lapangan dengan standar mutu terjamin.',
+    },
+    portfolio_meta: {
+      badge: sectionData?.portfolio_meta?.badge || 'Portofolio Terpercaya',
+      title: sectionData?.portfolio_meta?.title || 'Rekam Jejak Karya Konstruksi & Rekayasa Sipil',
+      subtitle: sectionData?.portfolio_meta?.subtitle || 'Jelajahi portofolio proyek selesai dan sedang berjalan yang telah kami kerjakan dengan komitmen mutu tinggi dan ketepatan waktu.',
+    },
+    testimonials_meta: {
+      badge: sectionData?.testimonials_meta?.badge || 'Testimoni Klien',
+      title: sectionData?.testimonials_meta?.title || 'Kepercayaan Klien Adalah Tolok Ukur Keberhasilan Kami',
+      subtitle: sectionData?.testimonials_meta?.subtitle || 'Ulasan jujur dari para pemimpin perusahaan dan pemilik proyek yang telah mempercayakan pembangunan fasilitas mereka kepada CV. Wahana Sinergi Mitra.',
+    },
+    inquiry_meta: {
+      badge: sectionData?.inquiry_meta?.badge || 'Konsultasi Gratis',
+      title: sectionData?.inquiry_meta?.title || 'Rencanakan Proyek Impian Anda Bersama Kami',
+      subtitle: sectionData?.inquiry_meta?.subtitle || 'Konsultasikan kebutuhan konstruksi Anda dengan tim engineer ahli kami. Dapatkan analisis kelayakan awal, estimasi biaya akurat, dan jadwal pelaksanaan yang realistis.',
+    },
+  });
+
+  const handleToggleSection = (sectionKey) => {
+    const nextVal = !sectionVisibility[sectionKey];
+    setSectionVisibility((prev) => ({ ...prev, [sectionKey]: nextVal }));
+    router.post(
+      '/admin/sections/visibility',
+      { section: sectionKey, is_visible: nextVal },
+      { preserveScroll: true, preserveState: true }
+    );
+  };
+
+  const handleSaveHeroSection = (e) => {
+    e.preventDefault();
+    router.post('/admin/sections/hero', { data: heroForm }, { preserveScroll: true });
+  };
+
+  const handleSaveEstimatorSection = (e) => {
+    e.preventDefault();
+    const updatedOptions = [
+      { id: 'gudang', label: 'Gudang & Industri', icon: 'Warehouse', baseRatePerM2: Number(estimatorForm.rate_gudang), description: 'Struktur baja WF, pelat beton heavy-duty, atap zincalume' },
+      { id: 'komersial', label: 'Komersial / Ruko / Kantor', icon: 'Building2', baseRatePerM2: Number(estimatorForm.rate_komersial), description: 'Struktur beton bertulang, fasad ACP/kaca, partisi rapi' },
+      { id: 'residensial', label: 'Hunian Residensial', icon: 'Home', baseRatePerM2: Number(estimatorForm.rate_residensial), description: 'Kusen aluminium powder coating, granit 60x60, sanitary Toto' },
+      { id: 'renovasi', label: 'Renovasi & Retrofitting', icon: 'Wrench', baseRatePerM2: Number(estimatorForm.rate_renovasi), description: 'Peremajaan fasad, perkuatan struktur, utilitas MEP baru' },
+    ];
+    router.post('/admin/sections/estimator_data', {
+      data: {
+        badge: estimatorForm.badge,
+        title: estimatorForm.title,
+        subtitle: estimatorForm.subtitle,
+        building_options: updatedOptions,
+      }
+    }, { preserveScroll: true });
+  };
+
+  const handleSaveWorkflowSection = (e) => {
+    e.preventDefault();
+    router.post('/admin/sections/workflow_data', { data: workflowForm }, { preserveScroll: true });
+  };
+
+  const handleSaveProksiSection = (e) => {
+    e.preventDefault();
+    router.post('/admin/sections/proksi_data', { data: proksiForm }, { preserveScroll: true });
+  };
+
+  const handleSaveMetaSection = (metaKey) => {
+    router.post(`/admin/sections/${metaKey}`, { data: metaForms[metaKey] }, { preserveScroll: true });
+  };
 
   // Dedicated Workspace State for Forms (NO MODAL)
   const [editorMode, setEditorMode] = useState(null); // 'create-project', 'edit-project', 'create-service', 'edit-service', 'create-testimonial', 'edit-testimonial', null
@@ -340,6 +479,24 @@ export default function Dashboard({
 
               <button
                 type="button"
+                onClick={() => { setActiveTab('sections'); setEditorMode(null); }}
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold tracking-[-0.015em] transition-all cursor-pointer ${
+                  activeTab === 'sections' && !editorMode
+                    ? 'bg-sky-600 text-white shadow-md shadow-sky-600/30'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Layers className="w-4 h-4 text-emerald-400" />
+                  <span>Konten Landing Page (SSOT)</span>
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                  Toggle
+                </span>
+              </button>
+
+              <button
+                type="button"
                 onClick={() => { setActiveTab('projects'); setEditorMode(null); }}
                 className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold tracking-[-0.015em] transition-all cursor-pointer ${
                   activeTab === 'projects' && !editorMode
@@ -627,6 +784,741 @@ export default function Dashboard({
                   </div>
                 </div>
 
+              </div>
+            )}
+
+            {/* ==================================================== */}
+            {/* TAB: SECTIONS MANAGEMENT (SSOT & VISIBILITY)          */}
+            {/* ==================================================== */}
+            {activeTab === 'sections' && (
+              <div className="space-y-6">
+                {/* Header Banner */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-[24px] border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                  <div>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200/80 mb-2 shadow-xs">
+                      <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+                      <Text.Label className="text-blue-700">Centralized SSOT Manager</Text.Label>
+                    </div>
+                    <Text.H1 className="text-[20px] sm:text-[24px] text-slate-900 font-bold">
+                      Konten & Tampilan Landing Page Publik
+                    </Text.H1>
+                    <Text.Body className="text-[13px] text-slate-600 max-w-2xl mt-1">
+                      Kendalikan visibilitas (ON/OFF) seluruh seksi secara instan dan sesuaikan teks, tarif dasar RAB, metrik teknologi PROKSI, serta alur metodologi kerja tanpa hardcoded.
+                    </Text.Body>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <a
+                      href="/"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-colors shrink-0"
+                    >
+                      <ExternalLink className="w-4 h-4 text-slate-600" />
+                      <span>Buka Web Publik</span>
+                    </a>
+                  </div>
+                </div>
+
+                {/* If an editor is active, display that specific editor workspace */}
+                {activeSectionEditor ? (
+                  <div className="bg-white rounded-[24px] p-6 sm:p-8 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-6">
+                    <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setActiveSectionEditor(null)}
+                          className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
+                        >
+                          <ArrowLeft className="w-4 h-4" />
+                        </button>
+                        <div>
+                          <Text.Label className="text-blue-600">Editor Konten Seksi</Text.Label>
+                          <Text.H2 className="text-[18px]">
+                            {activeSectionEditor === 'hero' && 'Seksi Banner Hero Utama'}
+                            {activeSectionEditor === 'estimator' && 'Kalkulator Simulasi Estimasi RAB'}
+                            {activeSectionEditor === 'workflow' && 'Seksi Metodologi Kerja & Tahapan Proyek'}
+                            {activeSectionEditor === 'proksi' && 'Seksi Ekosistem Aplikasi PROKSI'}
+                            {activeSectionEditor === 'services_meta' && 'Header Seksi Layanan Konstruksi'}
+                            {activeSectionEditor === 'portfolio_meta' && 'Header Seksi Portofolio Proyek'}
+                            {activeSectionEditor === 'testimonials_meta' && 'Header Seksi Testimoni Klien'}
+                            {activeSectionEditor === 'inquiry_meta' && 'Header Seksi Formulir Konsultasi'}
+                          </Text.H2>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* HERO EDITOR */}
+                    {activeSectionEditor === 'hero' && (
+                      <form onSubmit={handleSaveHeroSection} className="space-y-5 max-w-3xl">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                              Badge Teks (Overline)
+                            </label>
+                            <input
+                              type="text"
+                              value={heroForm.badge}
+                              onChange={(e) => setHeroForm({ ...heroForm, badge: e.target.value })}
+                              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                              Judul Baris 1 (Hitam Pekat)
+                            </label>
+                            <input
+                              type="text"
+                              value={heroForm.title_line1}
+                              onChange={(e) => setHeroForm({ ...heroForm, title_line1: e.target.value })}
+                              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                            Judul Baris 2 (Gradien Aksen Biru-Hijau)
+                          </label>
+                          <input
+                            type="text"
+                            value={heroForm.title_line2}
+                            onChange={(e) => setHeroForm({ ...heroForm, title_line2: e.target.value })}
+                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                            Deskripsi / Subtitle Hero
+                          </label>
+                          <textarea
+                            rows={3}
+                            value={heroForm.description}
+                            onChange={(e) => setHeroForm({ ...heroForm, description: e.target.value })}
+                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                              Teks Tombol CTA Utama
+                            </label>
+                            <input
+                              type="text"
+                              value={heroForm.cta_primary_text}
+                              onChange={(e) => setHeroForm({ ...heroForm, cta_primary_text: e.target.value })}
+                              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                              Link Tombol CTA Utama
+                            </label>
+                            <input
+                              type="text"
+                              value={heroForm.cta_primary_link}
+                              onChange={(e) => setHeroForm({ ...heroForm, cta_primary_link: e.target.value })}
+                              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                              Teks Tombol CTA Sekunder
+                            </label>
+                            <input
+                              type="text"
+                              value={heroForm.cta_secondary_text}
+                              onChange={(e) => setHeroForm({ ...heroForm, cta_secondary_text: e.target.value })}
+                              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                              Link Tombol CTA Sekunder
+                            </label>
+                            <input
+                              type="text"
+                              value={heroForm.cta_secondary_link}
+                              onChange={(e) => setHeroForm({ ...heroForm, cta_secondary_link: e.target.value })}
+                              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="pt-4 flex justify-end">
+                          <button
+                            type="submit"
+                            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/20 cursor-pointer"
+                          >
+                            <Save className="w-4 h-4" />
+                            <span>Simpan Konten Hero</span>
+                          </button>
+                        </div>
+                      </form>
+                    )}
+
+                    {/* ESTIMATOR RAB EDITOR */}
+                    {activeSectionEditor === 'estimator' && (
+                      <form onSubmit={handleSaveEstimatorSection} className="space-y-5 max-w-3xl">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                              Badge Teks
+                            </label>
+                            <input
+                              type="text"
+                              value={estimatorForm.badge}
+                              onChange={(e) => setEstimatorForm({ ...estimatorForm, badge: e.target.value })}
+                              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                              Judul Seksi
+                            </label>
+                            <input
+                              type="text"
+                              value={estimatorForm.title}
+                              onChange={(e) => setEstimatorForm({ ...estimatorForm, title: e.target.value })}
+                              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                            Subjudul / Deskripsi Seksi
+                          </label>
+                          <textarea
+                            rows={2}
+                            value={estimatorForm.subtitle}
+                            onChange={(e) => setEstimatorForm({ ...estimatorForm, subtitle: e.target.value })}
+                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                          />
+                        </div>
+
+                        <div className="pt-2">
+                          <Text.Label className="text-emerald-700 block mb-3">
+                            Tarif Dasar Biaya per M2 (Rp) - Digunakan untuk Rumus Perhitungan Otomatis
+                          </Text.Label>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                                Gudang & Industri (Rp/m²)
+                              </label>
+                              <CurrencyInput
+                                value={estimatorForm.rate_gudang}
+                                onChange={(val) => setEstimatorForm({ ...estimatorForm, rate_gudang: val })}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                                Komersial / Ruko / Kantor (Rp/m²)
+                              </label>
+                              <CurrencyInput
+                                value={estimatorForm.rate_komersial}
+                                onChange={(val) => setEstimatorForm({ ...estimatorForm, rate_komersial: val })}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                                Hunian Residensial (Rp/m²)
+                              </label>
+                              <CurrencyInput
+                                value={estimatorForm.rate_residensial}
+                                onChange={(val) => setEstimatorForm({ ...estimatorForm, rate_residensial: val })}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                                Renovasi & Retrofitting (Rp/m²)
+                              </label>
+                              <CurrencyInput
+                                value={estimatorForm.rate_renovasi}
+                                onChange={(val) => setEstimatorForm({ ...estimatorForm, rate_renovasi: val })}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="pt-4 flex justify-end">
+                          <button
+                            type="submit"
+                            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/20 cursor-pointer"
+                          >
+                            <Save className="w-4 h-4" />
+                            <span>Simpan Tarif & Pengaturan RAB</span>
+                          </button>
+                        </div>
+                      </form>
+                    )}
+
+                    {/* WORKFLOW METODOLOGI EDITOR */}
+                    {activeSectionEditor === 'workflow' && (
+                      <form onSubmit={handleSaveWorkflowSection} className="space-y-5 max-w-3xl">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                              Badge Teks
+                            </label>
+                            <input
+                              type="text"
+                              value={workflowForm.badge}
+                              onChange={(e) => setWorkflowForm({ ...workflowForm, badge: e.target.value })}
+                              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                              Judul Seksi
+                            </label>
+                            <input
+                              type="text"
+                              value={workflowForm.title}
+                              onChange={(e) => setWorkflowForm({ ...workflowForm, title: e.target.value })}
+                              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                            Subjudul / Deskripsi Seksi
+                          </label>
+                          <textarea
+                            rows={2}
+                            value={workflowForm.subtitle}
+                            onChange={(e) => setWorkflowForm({ ...workflowForm, subtitle: e.target.value })}
+                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                          />
+                        </div>
+
+                        <div className="space-y-4 pt-2">
+                          <Text.Label className="text-blue-700 block">4 Langkah Utama Eksekusi Proyek</Text.Label>
+                          {workflowForm.steps.map((st, i) => (
+                            <div key={i} className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                              <div className="flex items-center gap-3">
+                                <span className="w-8 h-8 rounded-lg bg-blue-600 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                                  {st.number}
+                                </span>
+                                <input
+                                  type="text"
+                                  value={st.title}
+                                  onChange={(e) => {
+                                    const nextSteps = [...workflowForm.steps];
+                                    nextSteps[i] = { ...nextSteps[i], title: e.target.value };
+                                    setWorkflowForm({ ...workflowForm, steps: nextSteps });
+                                  }}
+                                  placeholder="Judul Tahap"
+                                  className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-900"
+                                />
+                              </div>
+                              <textarea
+                                rows={2}
+                                value={st.description}
+                                onChange={(e) => {
+                                  const nextSteps = [...workflowForm.steps];
+                                  nextSteps[i] = { ...nextSteps[i], description: e.target.value };
+                                  setWorkflowForm({ ...workflowForm, steps: nextSteps });
+                                }}
+                                placeholder="Deskripsi rinci langkah"
+                                className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-700"
+                              />
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="pt-4 flex justify-end">
+                          <button
+                            type="submit"
+                            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/20 cursor-pointer"
+                          >
+                            <Save className="w-4 h-4" />
+                            <span>Simpan Tahapan Metodologi</span>
+                          </button>
+                        </div>
+                      </form>
+                    )}
+
+                    {/* PROKSI ECOSYSTEM EDITOR */}
+                    {activeSectionEditor === 'proksi' && (
+                      <form onSubmit={handleSaveProksiSection} className="space-y-5 max-w-3xl">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                              Badge Teks
+                            </label>
+                            <input
+                              type="text"
+                              value={proksiForm.badge}
+                              onChange={(e) => setProksiForm({ ...proksiForm, badge: e.target.value })}
+                              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                              Highlight Kata Kunci (Warna Gradien)
+                            </label>
+                            <input
+                              type="text"
+                              value={proksiForm.title_highlight}
+                              onChange={(e) => setProksiForm({ ...proksiForm, title_highlight: e.target.value })}
+                              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                            Subjudul / Narasi Ekosistem PROKSI
+                          </label>
+                          <textarea
+                            rows={3}
+                            value={proksiForm.subtitle}
+                            onChange={(e) => setProksiForm({ ...proksiForm, subtitle: e.target.value })}
+                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                          />
+                        </div>
+
+                        <div className="pt-2">
+                          <Text.Label className="text-sky-700 block mb-3">Metrik Live Demo Simulator PROKSI</Text.Label>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                                Kurva-S Rencana (Plan)
+                              </label>
+                              <input
+                                type="text"
+                                value={proksiForm.scurve_plan}
+                                onChange={(e) => setProksiForm({ ...proksiForm, scurve_plan: e.target.value })}
+                                placeholder="64.50%"
+                                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                                Kurva-S Aktual (Real)
+                              </label>
+                              <input
+                                type="text"
+                                value={proksiForm.scurve_actual}
+                                onChange={(e) => setProksiForm({ ...proksiForm, scurve_actual: e.target.value })}
+                                placeholder="68.20%"
+                                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                                Deviasi Kurva-S
+                              </label>
+                              <input
+                                type="text"
+                                value={proksiForm.scurve_deviation}
+                                onChange={(e) => setProksiForm({ ...proksiForm, scurve_deviation: e.target.value })}
+                                placeholder="+3.70%"
+                                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                                Hari Kerja Aman (Zero Accident)
+                              </label>
+                              <input
+                                type="number"
+                                value={proksiForm.zero_accident_days}
+                                onChange={(e) => setProksiForm({ ...proksiForm, zero_accident_days: e.target.value })}
+                                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                                Kepatuhan APD Lapangan
+                              </label>
+                              <input
+                                type="text"
+                                value={proksiForm.apd_compliance}
+                                onChange={(e) => setProksiForm({ ...proksiForm, apd_compliance: e.target.value })}
+                                placeholder="99.8%"
+                                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                                Izin Kerja Aktif (PTW)
+                              </label>
+                              <input
+                                type="number"
+                                value={proksiForm.ptw_active}
+                                onChange={(e) => setProksiForm({ ...proksiForm, ptw_active: e.target.value })}
+                                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="pt-4 flex justify-end">
+                          <button
+                            type="submit"
+                            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/20 cursor-pointer"
+                          >
+                            <Save className="w-4 h-4" />
+                            <span>Simpan Metrik PROKSI</span>
+                          </button>
+                        </div>
+                      </form>
+                    )}
+
+                    {/* GENERIC META EDITORS (SERVICES, PORTFOLIO, TESTIMONIALS, INQUIRY) */}
+                    {['services_meta', 'portfolio_meta', 'testimonials_meta', 'inquiry_meta'].includes(activeSectionEditor) && (
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          handleSaveMetaSection(activeSectionEditor);
+                        }}
+                        className="space-y-5 max-w-3xl"
+                      >
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                              Badge Teks (Overline)
+                            </label>
+                            <input
+                              type="text"
+                              value={metaForms[activeSectionEditor]?.badge || ''}
+                              onChange={(e) => setMetaForms({
+                                ...metaForms,
+                                [activeSectionEditor]: { ...metaForms[activeSectionEditor], badge: e.target.value },
+                              })}
+                              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                              Judul Utama Seksi
+                            </label>
+                            <input
+                              type="text"
+                              value={metaForms[activeSectionEditor]?.title || ''}
+                              onChange={(e) => setMetaForms({
+                                ...metaForms,
+                                [activeSectionEditor]: { ...metaForms[activeSectionEditor], title: e.target.value },
+                              })}
+                              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                            Subjudul / Keterangan Seksi
+                          </label>
+                          <textarea
+                            rows={3}
+                            value={metaForms[activeSectionEditor]?.subtitle || ''}
+                            onChange={(e) => setMetaForms({
+                              ...metaForms,
+                              [activeSectionEditor]: { ...metaForms[activeSectionEditor], subtitle: e.target.value },
+                            })}
+                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                          />
+                        </div>
+
+                        <div className="pt-4 flex justify-end">
+                          <button
+                            type="submit"
+                            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/20 cursor-pointer"
+                          >
+                            <Save className="w-4 h-4" />
+                            <span>Simpan Pengaturan Header Seksi</span>
+                          </button>
+                        </div>
+                      </form>
+                    )}
+                  </div>
+                ) : (
+                  /* Section Cards Grid */
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[
+                      {
+                        key: 'hero',
+                        title: 'Hero Banner Utama',
+                        description: 'Seksi sambutan paling atas dengan judul, subjudul, dan tombol call-to-action.',
+                        icon: Sparkles,
+                        editorKey: 'hero',
+                        extraToggle: {
+                          key: 'hero_3d',
+                          label: 'Motion 3D Interaktif',
+                        },
+                      },
+                      {
+                        key: 'services',
+                        title: 'Layanan Konstruksi',
+                        description: 'Daftar layanan spesialisasi sipil, baja, dan rekayasa struktur.',
+                        icon: HardHat,
+                        editorKey: 'services_meta',
+                      },
+                      {
+                        key: 'estimator',
+                        title: 'Kalkulator Simulasi RAB',
+                        description: 'Perhitungan estimasi biaya otomatis per m2 untuk calon klien.',
+                        icon: Calculator,
+                        editorKey: 'estimator',
+                      },
+                      {
+                        key: 'portfolio',
+                        title: 'Portofolio & Rekam Jejak',
+                        description: 'Galeri proyek komersial, pergudangan, dan perumahan.',
+                        icon: Building2,
+                        editorKey: 'portfolio_meta',
+                      },
+                      {
+                        key: 'workflow',
+                        title: 'Metodologi Kerja',
+                        description: 'Tahapan eksekusi proyek 01 s/d 04 berstandar mutu dan K3.',
+                        icon: Layers,
+                        editorKey: 'workflow',
+                      },
+                      {
+                        key: 'proksi',
+                        title: 'Ekosistem Aplikasi PROKSI',
+                        description: 'Simulator Kurva-S real-time, Portal Klien 24/7, dan K3 digital.',
+                        icon: Laptop,
+                        editorKey: 'proksi',
+                      },
+                      {
+                        key: 'testimonials',
+                        title: 'Testimoni Klien',
+                        description: 'Ulasan dan tingkat kepuasan dari para pemilik proyek.',
+                        icon: Star,
+                        editorKey: 'testimonials_meta',
+                      },
+                      {
+                        key: 'inquiry',
+                        title: 'Formulir Konsultasi & Leads',
+                        description: 'Formulir pesan konsultasi dan kontak hotline resmi.',
+                        icon: MessageSquareText,
+                        editorKey: 'inquiry_meta',
+                      },
+                      {
+                        key: 'footer',
+                        title: 'Footer Publik & Legalitas',
+                        description: 'Informasi legalitas PT/CV, alamat, peta, dan navigasi cepat.',
+                        icon: ShieldCheck,
+                        editorKey: null,
+                      },
+                    ].map((sec) => {
+                      const IconComp = sec.icon;
+                      const isVis = sectionVisibility[sec.key] !== false;
+
+                      return (
+                        <div
+                          key={sec.key}
+                          className="bg-white rounded-[24px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col justify-between transition-all hover:border-slate-200"
+                        >
+                          <div>
+                            {/* Top row: Icon, Title & Live Status */}
+                            <div className="flex items-center justify-between gap-3 mb-4">
+                              <div className="flex items-center gap-3 min-w-0">
+                                <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 shadow-xs">
+                                  <IconComp className="w-5 h-5" />
+                                </div>
+                                <div className="min-w-0">
+                                  <Text.H2 title={sec.title} singleLine className="text-[15px]">
+                                    {sec.title}
+                                  </Text.H2>
+                                  <span className="text-[11px] text-slate-500 font-mono">
+                                    ID: #{sec.key}
+                                  </span>
+                                </div>
+                              </div>
+
+                              <span
+                                className={`px-2.5 py-1 rounded-full text-[11px] font-bold border shrink-0 ${
+                                  isVis
+                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                    : 'bg-slate-100 text-slate-600 border-slate-200'
+                                }`}
+                              >
+                                {isVis ? 'Live' : 'Invisible'}
+                              </span>
+                            </div>
+
+                            <Text.Body className="text-[13px] text-slate-600 leading-relaxed mb-5">
+                              {sec.description}
+                            </Text.Body>
+
+                            {/* Main Toggle Switch Row */}
+                            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between gap-3 mb-3">
+                              <div className="flex items-center gap-2">
+                                {isVis ? (
+                                  <Eye className="w-4 h-4 text-emerald-600 shrink-0" />
+                                ) : (
+                                  <EyeOff className="w-4 h-4 text-slate-400 shrink-0" />
+                                )}
+                                <span className="text-xs font-bold text-slate-700">
+                                  Tampilkan di Web
+                                </span>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() => handleToggleSection(sec.key)}
+                                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
+                                  isVis ? 'bg-emerald-600' : 'bg-slate-300'
+                                }`}
+                              >
+                                <span
+                                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                                    isVis ? 'translate-x-5' : 'translate-x-0'
+                                  }`}
+                                />
+                              </button>
+                            </div>
+
+                            {/* Extra Toggle (e.g. 3D motion for Hero) */}
+                            {sec.extraToggle && (
+                              <div className="p-3 rounded-2xl bg-sky-50/60 border border-sky-100 flex items-center justify-between gap-3 mb-3">
+                                <span className="text-[11px] font-semibold text-sky-900">
+                                  {sec.extraToggle.label}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleToggleSection(sec.extraToggle.key)}
+                                  className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
+                                    sectionVisibility[sec.extraToggle.key] !== false ? 'bg-sky-600' : 'bg-slate-300'
+                                  }`}
+                                >
+                                  <span
+                                    className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                                      sectionVisibility[sec.extraToggle.key] !== false ? 'translate-x-4' : 'translate-x-0'
+                                    }`}
+                                  />
+                                </button>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Footer Action */}
+                          {sec.editorKey && (
+                            <button
+                              type="button"
+                              onClick={() => setActiveSectionEditor(sec.editorKey)}
+                              className="w-full mt-2 py-2 px-4 rounded-xl bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                              <span>Kelola Konten & Data</span>
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
 

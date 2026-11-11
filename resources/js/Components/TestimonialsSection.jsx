@@ -2,24 +2,31 @@ import React from 'react';
 import { Star, Quote, CheckCircle2 } from 'lucide-react';
 import Text from './Typography';
 
-export function TestimonialsSection({ testimonials = [] }) {
+export function TestimonialsSection({ testimonials = [], meta = {} }) {
+  const badge = meta?.badge || 'Testimoni Klien';
+  const title = meta?.title || 'Kepercayaan Nyata Dari Para Pemilik Proyek';
+  const subtitle = meta?.subtitle || 'Simak ulasan langsung dari pimpinan perusahaan, pengembang properti, dan pemilik bisnis yang telah mempercayakan konstruksi bangunannya kepada CV. Wahana Sinergi Mitra.';
+
   return (
     <section className="py-16 sm:py-24 bg-white">
       <div className="max-w-7xl mx-auto px-5">
         
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-14">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 mb-3">
-            <span className="w-2 h-2 rounded-full bg-emerald-600" />
-            <Text.Label className="text-emerald-700">Testimoni Klien</Text.Label>
-          </div>
+          {badge && (
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 mb-3">
+              <span className="w-2 h-2 rounded-full bg-emerald-600" />
+              <Text.Label className="text-emerald-700">{badge}</Text.Label>
+            </div>
+          )}
           <Text.H1 className="text-[28px] sm:text-[38px] mb-3">
-            Kepercayaan Nyata Dari Para Pemilik Proyek
+            {title}
           </Text.H1>
-          <Text.Body>
-            Simak ulasan langsung dari pimpinan perusahaan, pengembang properti, dan pemilik bisnis 
-            yang telah mempercayakan konstruksi bangunannya kepada CV. Wahana Sinergi Mitra.
-          </Text.Body>
+          {subtitle && (
+            <Text.Body>
+              {subtitle}
+            </Text.Body>
+          )}
         </div>
 
         {/* 3-Column Grid */}

@@ -1,34 +1,67 @@
 import React from 'react';
-import { ClipboardCheck, FileSpreadsheet, ShieldAlert, KeyRound, ArrowRight } from 'lucide-react';
+import { 
+  ClipboardCheck, 
+  FileSpreadsheet, 
+  ShieldAlert, 
+  KeyRound, 
+  ArrowRight,
+  CheckCircle2,
+  HardHat,
+  Building,
+  Layers,
+  Sparkles
+} from 'lucide-react';
 import Text from './Typography';
 
-export function WorkflowSection() {
-  const steps = [
-    {
-      number: '01',
-      title: 'Survei & Analisis Struktur',
-      icon: ClipboardCheck,
-      description: 'Pengukuran topografi, pengujian daya dukung tanah (soil test), dan diskusi kebutuhan spesifikasi teknis.',
-    },
-    {
-      number: '02',
-      title: 'DED & Transparansi RAB',
-      icon: FileSpreadsheet,
-      description: 'Pembuatan gambar kerja DED (Detail Engineering Design), jadwal kurva-S, dan kontrak perjanjian kerja mengikat.',
-    },
-    {
-      number: '03',
-      title: 'Konstruksi Berstandar K3',
-      icon: ShieldAlert,
-      description: 'Eksekusi lapangan dengan material SNI teruji lab, pengawasan mandor ahli, dan kepatuhan keselamatan zero-accident.',
-    },
-    {
-      number: '04',
-      title: 'Handover & Masa Retensi',
-      icon: KeyRound,
-      description: 'Berita acara serah terima resmi (BAST 1 & 2), as-built drawing, serta jaminan garansi pemeliharaan struktural.',
-    },
-  ];
+const iconMap = {
+  ClipboardCheck,
+  FileSpreadsheet,
+  ShieldAlert,
+  KeyRound,
+  CheckCircle2,
+  HardHat,
+  Building,
+  Layers,
+  Sparkles,
+};
+
+const defaultSteps = [
+  {
+    number: '01',
+    title: 'Survei & Analisis Struktur',
+    icon: 'ClipboardCheck',
+    description: 'Pengukuran topografi, pengujian daya dukung tanah (soil test), dan diskusi kebutuhan spesifikasi teknis.',
+  },
+  {
+    number: '02',
+    title: 'DED & Transparansi RAB',
+    icon: 'FileSpreadsheet',
+    description: 'Pembuatan gambar kerja DED (Detail Engineering Design), jadwal kurva-S, dan kontrak perjanjian kerja mengikat.',
+  },
+  {
+    number: '03',
+    title: 'Konstruksi Berstandar K3',
+    icon: 'ShieldAlert',
+    description: 'Eksekusi lapangan dengan material SNI teruji lab, pengawasan mandor ahli, dan kepatuhan keselamatan zero-accident.',
+  },
+  {
+    number: '04',
+    title: 'Handover & Masa Retensi',
+    icon: 'KeyRound',
+    description: 'Berita acara serah terima resmi (BAST 1 & 2), as-built drawing, serta jaminan garansi pemeliharaan struktural.',
+  },
+];
+
+export function WorkflowSection({ data = {} }) {
+  const badge = data?.badge || 'Metodologi Kerja';
+  const title = data?.title || 'Standar Eksekusi Proyek Yang Terukur & Akuntabel';
+  const subtitle = data?.subtitle || 'Kami menerapkan tata kelola konstruksi modern untuk memastikan zero-miscommunication, menghindari biaya membengkak, dan mencapai target serah terima tepat waktu.';
+  const rawSteps = (data?.steps && data.steps.length > 0) ? data.steps : defaultSteps;
+
+  const steps = rawSteps.map((step) => ({
+    ...step,
+    iconComponent: typeof step.icon === 'string' ? (iconMap[step.icon] || ClipboardCheck) : (step.icon || ClipboardCheck),
+  }));
 
   return (
     <section id="keunggulan" className="py-16 sm:py-24 bg-[#F8FAFC]">
@@ -36,26 +69,29 @@ export function WorkflowSection() {
         
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-14">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200/80 mb-3">
-            <span className="w-2 h-2 rounded-full bg-blue-600" />
-            <Text.Label className="text-blue-700">Metodologi Kerja</Text.Label>
-          </div>
+          {badge && (
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200/80 mb-3">
+              <span className="w-2 h-2 rounded-full bg-blue-600" />
+              <Text.Label className="text-blue-700">{badge}</Text.Label>
+            </div>
+          )}
           <Text.H1 className="text-[28px] sm:text-[38px] mb-3">
-            Standar Eksekusi Proyek Yang Terukur & Akuntabel
+            {title}
           </Text.H1>
-          <Text.Body>
-            Kami menerapkan tata kelola konstruksi modern untuk memastikan zero-miscommunication, 
-            menghindari biaya membengkak, dan mencapai target serah terima tepat waktu.
-          </Text.Body>
+          {subtitle && (
+            <Text.Body>
+              {subtitle}
+            </Text.Body>
+          )}
         </div>
 
-        {/* 4 Cards Grid */}
+        {/* Dynamic Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {steps.map((step, idx) => {
-            const IconComponent = step.icon;
+            const IconComponent = step.iconComponent;
             return (
               <div
-                key={step.number}
+                key={step.number || idx}
                 className="bg-white rounded-[24px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col justify-between relative group hover:-translate-y-1 transition-transform duration-300"
               >
                 <div>

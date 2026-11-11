@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { PhoneCall, Menu, X, ArrowUpRight, ShieldCheck, Lock } from 'lucide-react';
 import Text from './Typography';
 
-export function Navbar({ company = {} }) {
+export function Navbar({ company = {}, visibility = {} }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -19,14 +19,17 @@ export function Navbar({ company = {} }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navLinks = [
-    { name: 'Beranda', href: '#beranda' },
-    { name: 'Layanan', href: '#layanan' },
-    { name: 'Portofolio', href: '#portofolio' },
-    { name: 'Simulasi RAB', href: '#estimator' },
-    { name: 'Keunggulan', href: '#keunggulan' },
-    { name: 'Kontak', href: '#kontak' },
+  const allNavLinks = [
+    { key: 'hero', name: 'Beranda', href: '#beranda' },
+    { key: 'services', name: 'Layanan', href: '#layanan' },
+    { key: 'portfolio', name: 'Portofolio', href: '#portofolio' },
+    { key: 'estimator', name: 'Simulasi RAB', href: '#estimator' },
+    { key: 'proksi', name: 'Sistem PROKSI', href: '#proksi' },
+    { key: 'workflow', name: 'Keunggulan', href: '#keunggulan' },
+    { key: 'inquiry', name: 'Kontak', href: '#kontak' },
   ];
+
+  const navLinks = allNavLinks.filter((item) => visibility?.[item.key] !== false);
 
   return (
     <header

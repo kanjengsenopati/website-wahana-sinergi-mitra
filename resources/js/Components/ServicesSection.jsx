@@ -20,7 +20,11 @@ const iconMap = {
   Hammer,
 };
 
-export function ServicesSection({ services = [] }) {
+export function ServicesSection({ services = [], meta = {} }) {
+  const badge = meta?.badge || 'Layanan Komprehensif';
+  const title = meta?.title || 'Solusi Konstruksi Terintegrasi Dari Pondasi Hingga Serah Terima';
+  const subtitle = meta?.subtitle || 'Setiap proyek dikelola oleh tenaga ahli bersertifikat dengan standar keselamatan kerja (K3) dan garansi pemeliharaan struktural.';
+
   return (
     <section id="layanan" className="py-16 sm:py-24 bg-[#F8FAFC]">
       <div className="max-w-7xl mx-auto px-5">
@@ -28,18 +32,21 @@ export function ServicesSection({ services = [] }) {
         {/* Section Heading */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200/80 mb-3">
-              <span className="w-2 h-2 rounded-full bg-blue-600" />
-              <Text.Label className="text-blue-700">Layanan Komprehensif</Text.Label>
-            </div>
+            {badge && (
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200/80 mb-3">
+                <span className="w-2 h-2 rounded-full bg-blue-600" />
+                <Text.Label className="text-blue-700">{badge}</Text.Label>
+              </div>
+            )}
             <Text.H1 className="text-[28px] sm:text-[38px]">
-              Solusi Konstruksi Terintegrasi Dari Pondasi Hingga Serah Terima
+              {title}
             </Text.H1>
           </div>
-          <Text.Body className="max-w-md text-slate-600">
-            Setiap proyek dikelola oleh tenaga ahli bersertifikat dengan standar keselamatan kerja (K3) 
-            dan garansi pemeliharaan struktural.
-          </Text.Body>
+          {subtitle && (
+            <Text.Body className="max-w-md text-slate-600">
+              {subtitle}
+            </Text.Body>
+          )}
         </div>
 
         {/* Services 3-Column Grid */}

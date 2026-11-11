@@ -41,6 +41,10 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     // Company Settings
     Route::post('/settings', [AdminDashboardController::class, 'updateSettings'])->name('settings.update');
 
+    // SSOT Section Manager (Visibility & Content)
+    Route::post('/sections/visibility', [AdminDashboardController::class, 'updateSectionVisibility'])->name('sections.visibility');
+    Route::post('/sections/{section}', [AdminDashboardController::class, 'updateSectionContent'])->name('sections.content');
+
     // Local Storage Image Upload Handler
     Route::post('/upload', [AdminDashboardController::class, 'uploadImage'])->name('upload');
 });

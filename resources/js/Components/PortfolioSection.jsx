@@ -2,9 +2,13 @@ import React, { useState, useMemo } from 'react';
 import { MapPin, Calendar, ExternalLink, ArrowRight, X, Building, CheckCircle } from 'lucide-react';
 import Text, { formatRupiah } from './Typography';
 
-export function PortfolioSection({ projects = [], company = {} }) {
+export function PortfolioSection({ projects = [], company = {}, meta = {} }) {
   const [activeTab, setActiveTab] = useState('All');
   const [selectedProject, setSelectedProject] = useState(null);
+
+  const badge = meta?.badge || 'Portofolio & Rekam Jejak';
+  const title = meta?.title || 'Karya Konstruksi Yang Terbukti Kokoh & Bernilai Tinggi';
+  const subtitle = meta?.subtitle || '';
 
   // Dynamic Categories: Standard Base + Distinct Database Categories
   const categories = useMemo(() => {
@@ -28,13 +32,20 @@ export function PortfolioSection({ projects = [], company = {} }) {
         {/* Header & Category Filters */}
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10">
           <div className="max-w-xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 mb-3">
-              <span className="w-2 h-2 rounded-full bg-emerald-600" />
-              <Text.Label className="text-emerald-700">Portofolio & Rekam Jejak</Text.Label>
-            </div>
+            {badge && (
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 mb-3">
+                <span className="w-2 h-2 rounded-full bg-emerald-600" />
+                <Text.Label className="text-emerald-700">{badge}</Text.Label>
+              </div>
+            )}
             <Text.H1 className="text-[28px] sm:text-[38px]">
-              Karya Konstruksi Yang Terbukti Kokoh & Bernilai Tinggi
+              {title}
             </Text.H1>
+            {subtitle && (
+              <Text.Body className="mt-2 text-slate-600">
+                {subtitle}
+              </Text.Body>
+            )}
           </div>
 
           {/* Category Filter Pills */}

@@ -45,6 +45,19 @@ class AdminDashboardController extends Controller
             'total_testimonials' => $testimonials->count(),
         ];
 
+        // SSOT Section Visibility & Dynamic Contents for Section Manager
+        $visibility = CompanySetting::getSectionVisibility();
+        $sectionData = [
+            'hero' => CompanySetting::getSectionData('hero'),
+            'services_meta' => CompanySetting::getSectionData('services_meta'),
+            'estimator_data' => CompanySetting::getSectionData('estimator_data'),
+            'portfolio_meta' => CompanySetting::getSectionData('portfolio_meta'),
+            'workflow_data' => CompanySetting::getSectionData('workflow_data'),
+            'proksi_data' => CompanySetting::getSectionData('proksi_data'),
+            'testimonials_meta' => CompanySetting::getSectionData('testimonials_meta'),
+            'inquiry_meta' => CompanySetting::getSectionData('inquiry_meta'),
+        ];
+
         return Inertia::render('Admin/Dashboard', [
             'projects' => $projects,
             'services' => $services,
@@ -52,6 +65,8 @@ class AdminDashboardController extends Controller
             'testimonials' => $testimonials,
             'settings' => $settings,
             'metrics' => $metrics,
+            'visibility' => $visibility,
+            'sectionData' => $sectionData,
         ]);
     }
 
@@ -298,5 +313,58 @@ class AdminDashboardController extends Controller
             'url' => "/storage/{$path}",
             'filename' => $filename,
         ]);
+    }
+
+    /**
+     * UPDATE SECTION VISIBILITY (TOGGLE ON/OFF)
+     */
+    public function updateSectionVisibility(Request $request)
+    {
+        $current = CompanySetting::getSectionVisibility();
+
+        if ($request->has('section')) {
+            $section = $request->input('section');
+            $isVisible = $request->boolean('is_visible');
+            $current[$section] = $isVisible;
+        } elseif ($request->has('visibility')) {
+            $incoming = $request->input('visibility');
+            if (is_array($incoming)) {
+                $current = array_merge($current, $incoming);
+            }
+        }
+
+        CompanySetting::setJson('section_visibility', $current);
+
+        return redirect()->back()->with('success', 'Visibilitas seksi landing page berhasil diperbarui.');
+    }
+
+    /**
+     * UPDATE SECTION CONTENT (SSOT DYNAMIC DATA)
+     */
+    public function updateSectionContent(Request $request, string $section)
+    {
+        $allowedSections = [
+            'hero',
+            'services_meta',
+            'estimator_data',
+            'portfolio_meta',
+            'workflow_data',
+            'proksi_data',
+            'testimonials_meta',
+            'inquiry_meta',
+        ];
+
+        if (!in_array($section, $allowedSections)) {
+            return redirect()->back()->withErrors(['section' => 'Seksi tidak valid.']);
+        }
+
+        $data = $request->input('data', $request->except(['_token', '_method']));
+        
+        $current = CompanySetting::getSectionData($section);
+        $merged = is_array($data) ? array_merge($current, $data) : $current;
+
+        CompanySetting::setJson("section_{$section}", $merged);
+
+        return redirect()->back()->with('success', "Konten seksi {$section} berhasil disimpan.");
     }
 }

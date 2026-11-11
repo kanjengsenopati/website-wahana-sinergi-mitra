@@ -2,48 +2,75 @@ import React, { useState, useMemo } from 'react';
 import { Calculator, ArrowRight, Check, HelpCircle, Building2, Warehouse, Home, Wrench, Sparkles } from 'lucide-react';
 import Text, { formatRupiah } from './Typography';
 
-export function CostEstimator({ onApplyToForm }) {
+const iconMap = {
+  Warehouse,
+  Building2,
+  Home,
+  Wrench,
+  Calculator,
+  Sparkles,
+};
+
+const defaultBuildingOptions = [
+  {
+    id: 'gudang',
+    label: 'Gudang & Industri',
+    icon: 'Warehouse',
+    baseRatePerM2: 3600000,
+    description: 'Struktur baja WF, pelat beton heavy-duty, atap zincalume',
+  },
+  {
+    id: 'komersial',
+    label: 'Komersial / Ruko / Kantor',
+    icon: 'Building2',
+    baseRatePerM2: 5200000,
+    description: 'Struktur beton bertulang, fasad ACP/kaca, partisi rapi',
+  },
+  {
+    id: 'residensial',
+    label: 'Hunian Residensial',
+    icon: 'Home',
+    baseRatePerM2: 5800000,
+    description: 'Kusen aluminium powder coating, granit 60x60, sanitary Toto',
+  },
+  {
+    id: 'renovasi',
+    label: 'Renovasi & Retrofitting',
+    icon: 'Wrench',
+    baseRatePerM2: 2800000,
+    description: 'Peremajaan fasad, perkuatan struktur, utilitas MEP baru',
+  },
+];
+
+const defaultMaterialTiers = [
+  { id: 'standar', name: 'Standar Proyek', multiplier: 1.0, desc: 'Bahan SNI teruji ekonomis' },
+  { id: 'premium', name: 'Premium (Rekomendasi)', multiplier: 1.2, desc: 'Brand terkemuka daya tahan tinggi' },
+  { id: 'eksklusif', name: 'Eksklusif / Heavy-Duty', multiplier: 1.45, desc: 'Spesifikasi industrial & mewah' },
+];
+
+export function CostEstimator({ data = {}, onApplyToForm }) {
+  const buildingOptions = useMemo(() => {
+    const raw = (data?.building_options && data.building_options.length > 0) 
+      ? data.building_options 
+      : defaultBuildingOptions;
+    return raw.map((item) => ({
+      ...item,
+      icon: typeof item.icon === 'string' ? (iconMap[item.icon] || Building2) : (item.icon || Building2),
+    }));
+  }, [data?.building_options]);
+
+  const materialTiers = (data?.material_tiers && data.material_tiers.length > 0)
+    ? data.material_tiers
+    : defaultMaterialTiers;
+
   const [buildingType, setBuildingType] = useState('komersial');
   const [areaM2, setAreaM2] = useState(350);
   const [materialTier, setMaterialTier] = useState('premium');
   const [floors, setFloors] = useState(2);
 
-  const buildingOptions = [
-    {
-      id: 'gudang',
-      label: 'Gudang & Industri',
-      icon: Warehouse,
-      baseRatePerM2: 3600000,
-      description: 'Struktur baja WF, pelat beton heavy-duty, atap zincalume',
-    },
-    {
-      id: 'komersial',
-      label: 'Komersial / Ruko / Kantor',
-      icon: Building2,
-      baseRatePerM2: 5200000,
-      description: 'Struktur beton bertulang, fasad ACP/kaca, partisi rapi',
-    },
-    {
-      id: 'residensial',
-      label: 'Hunian Residensial',
-      icon: Home,
-      baseRatePerM2: 5800000,
-      description: 'Kusen aluminium powder coating, granit 60x60, sanitary Toto',
-    },
-    {
-      id: 'renovasi',
-      label: 'Renovasi & Retrofitting',
-      icon: Wrench,
-      baseRatePerM2: 2800000,
-      description: 'Peremajaan fasad, perkuatan struktur, utilitas MEP baru',
-    },
-  ];
-
-  const materialTiers = [
-    { id: 'standar', name: 'Standar Proyek', multiplier: 1.0, desc: 'Bahan SNI teruji ekonomis' },
-    { id: 'premium', name: 'Premium (Rekomendasi)', multiplier: 1.2, desc: 'Brand terkemuka daya tahan tinggi' },
-    { id: 'eksklusif', name: 'Eksklusif / Heavy-Duty', multiplier: 1.45, desc: 'Spesifikasi industrial & mewah' },
-  ];
+  const badge = data?.badge || 'Kalkulator Simulasi Biaya';
+  const title = data?.title || 'Estimasi Kasar RAB Proyek Anda';
+  const subtitle = data?.subtitle || 'Dapatkan gambaran nilai investasi konstruksi secara transparan berdasarkan luas bangunan dan spesifikasi mutu material berstandar SNI.';
 
   // Calculation logic
   const calculation = useMemo(() => {
@@ -81,17 +108,20 @@ export function CostEstimator({ onApplyToForm }) {
         
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 mb-3">
-            <Calculator className="w-3.5 h-3.5 text-emerald-600" />
-            <Text.Label className="text-emerald-700">Kalkulator Simulasi Biaya</Text.Label>
-          </div>
+          {badge && (
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 mb-3">
+              <Calculator className="w-3.5 h-3.5 text-emerald-600" />
+              <Text.Label className="text-emerald-700">{badge}</Text.Label>
+            </div>
+          )}
           <Text.H1 className="text-[28px] sm:text-[38px] mb-3">
-            Estimasi Kasar RAB Proyek Anda
+            {title}
           </Text.H1>
-          <Text.Body>
-            Dapatkan gambaran nilai investasi konstruksi secara transparan berdasarkan luas 
-            bangunan dan spesifikasi mutu material berstandar SNI.
-          </Text.Body>
+          {subtitle && (
+            <Text.Body>
+              {subtitle}
+            </Text.Body>
+          )}
         </div>
 
         {/* Main Card Container */}

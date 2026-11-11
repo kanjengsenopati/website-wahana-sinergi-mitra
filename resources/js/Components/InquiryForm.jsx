@@ -4,8 +4,12 @@ import { Send, PhoneCall, CheckCircle2, AlertCircle, Building2, MapPin, Mail, Me
 import Text from './Typography';
 import CurrencyInput from './CurrencyInput';
 
-export function InquiryForm({ initialData = {}, company = {} }) {
+export function InquiryForm({ initialData = {}, company = {}, meta = {} }) {
   const { flash } = usePage().props;
+
+  const badge = meta?.badge || 'Formulir Konsultasi Proyek';
+  const title = meta?.title || 'Diskusikan Rencana Konstruksi Anda Bersama Kami';
+  const subtitle = meta?.subtitle || 'Konsultasikan kebutuhan teknis, survei lokasi lahan, atau perhitungan RAB Anda. Tim estimator dan insinyur CV. Wahana Sinergi Mitra siap memberikan rekomendasi efisien dan tepat sasaran.';
 
   const cleanPhone = (company?.phone || '+62 812-3456-7890')
     .replace(/\D/g, '')
@@ -52,17 +56,20 @@ export function InquiryForm({ initialData = {}, company = {} }) {
             {/* Left Column: Context & Contact Info */}
             <div className="lg:col-span-5 space-y-6">
               <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 mb-3">
-                  <span className="w-2 h-2 rounded-full bg-emerald-600" />
-                  <Text.Label className="text-emerald-700">Formulir Konsultasi Proyek</Text.Label>
-                </div>
+                {badge && (
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 mb-3">
+                    <span className="w-2 h-2 rounded-full bg-emerald-600" />
+                    <Text.Label className="text-emerald-700">{badge}</Text.Label>
+                  </div>
+                )}
                 <Text.H1 className="text-[28px] sm:text-[36px] mb-3">
-                  Diskusikan Rencana Konstruksi Anda Bersama Kami
+                  {title}
                 </Text.H1>
-                <Text.Body className="text-slate-600">
-                  Konsultasikan kebutuhan teknis, survei lokasi lahan, atau perhitungan RAB Anda. 
-                  Tim estimator dan insinyur CV. Wahana Sinergi Mitra siap memberikan rekomendasi efisien dan tepat sasaran.
-                </Text.Body>
+                {subtitle && (
+                  <Text.Body className="text-slate-600">
+                    {subtitle}
+                  </Text.Body>
+                )}
               </div>
 
               {/* Quick Contacts */}

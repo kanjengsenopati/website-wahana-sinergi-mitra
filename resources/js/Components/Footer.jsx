@@ -2,7 +2,7 @@ import React from 'react';
 import { Mail, Phone, MapPin, ShieldCheck, ArrowUpRight } from 'lucide-react';
 import Text from './Typography';
 
-export function Footer({ company = {} }) {
+export function Footer({ company = {}, visibility = {} }) {
   const cleanPhone = (company?.phone || '+62 812-3456-7890')
     .replace(/\D/g, '')
     .replace(/^0/, '62');
@@ -11,6 +11,15 @@ export function Footer({ company = {} }) {
   const emailDisplay = company?.email || 'info@wahanasinergimitra.id';
   const addressDisplay = company?.address || 'Jl. Sinergi Raya No. 88, Kawasan Niaga Terpadu, Jawa Barat, Indonesia';
   const aboutDisplay = company?.about || 'Perusahaan penyedia jasa pelaksana konstruksi terpercaya yang melayani pekerjaan gedung komersial, industri pergudangan, infrastruktur jalan/jembatan, dan rekayasa sipil berstandar mutu tinggi di seluruh wilayah Indonesia.';
+
+  const quickLinks = [
+    { key: 'hero', name: 'Beranda', href: '#beranda' },
+    { key: 'services', name: 'Layanan Konstruksi', href: '#layanan' },
+    { key: 'portfolio', name: 'Portofolio Proyek', href: '#portofolio' },
+    { key: 'estimator', name: 'Kalkulator Simulasi RAB', href: '#estimator' },
+    { key: 'proksi', name: 'Ekosistem PROKSI', href: '#proksi' },
+    { key: 'workflow', name: 'Metodologi Kerja', href: '#keunggulan' },
+  ].filter((item) => visibility?.[item.key] !== false);
 
   return (
     <footer id="kontak" className="bg-slate-900 text-slate-300 pt-16 pb-10 border-t border-slate-800">
@@ -60,21 +69,11 @@ export function Footer({ company = {} }) {
               Navigasi Cepat
             </span>
             <ul className="space-y-2 text-[13px] text-slate-400 font-medium">
-              <li>
-                <a href="#beranda" className="hover:text-white transition-colors">Beranda</a>
-              </li>
-              <li>
-                <a href="#layanan" className="hover:text-white transition-colors">Layanan Konstruksi</a>
-              </li>
-              <li>
-                <a href="#portofolio" className="hover:text-white transition-colors">Portofolio Proyek</a>
-              </li>
-              <li>
-                <a href="#estimator" className="hover:text-white transition-colors">Kalkulator Simulasi RAB</a>
-              </li>
-              <li>
-                <a href="#keunggulan" className="hover:text-white transition-colors">Metodologi Kerja</a>
-              </li>
+              {quickLinks.map((link) => (
+                <li key={link.href}>
+                  <a href={link.href} className="hover:text-white transition-colors">{link.name}</a>
+                </li>
+              ))}
               <li>
                 <a href="/admin" className="hover:text-emerald-400 transition-colors flex items-center gap-1">
                   <span>Portal CMS Internal</span>
