@@ -2,7 +2,8 @@
 # ==============================================================================
 # DEPLOYMENT SCRIPT: CV. WAHANA SINERGI MITRA
 # Subdomain: website.wahanasinergimitra.id
-# Target: VPS Ubuntu / Debian with Nginx & PHP 8.3-FPM
+# Target: VPS (aaPanel / Ubuntu / Debian with Nginx & PHP 8.3)
+# Path: /www/wwwroot/website.wahanasinergimitra.id
 # ==============================================================================
 
 set -e
@@ -37,7 +38,11 @@ php artisan view:cache
 php artisan filament:optimize || true
 
 echo "🔒 Memperbaiki hak akses direktori storage dan database..."
-chown -R www-data:www-data storage bootstrap/cache database
+WEB_USER="www-data"
+if id "www" &>/dev/null; then
+    WEB_USER="www"
+fi
+chown -R $WEB_USER:$WEB_USER storage bootstrap/cache database
 chmod -R 775 storage bootstrap/cache database
 
 echo "✅ Menonaktifkan Maintenance Mode..."
