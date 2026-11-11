@@ -8,7 +8,7 @@ export function InquiryForm({ initialData = {}, company = {}, meta = {} }) {
   const { flash } = usePage().props;
 
   const badge = meta?.badge || 'Formulir Konsultasi Proyek';
-  const title = meta?.title || 'Diskusikan Rencana Konstruksi Anda Bersama Kami';
+  const title = meta?.title || 'Rencanakan Proyek Impian {Bersama Tim Engineer Kami}';
   const subtitle = meta?.subtitle || 'Konsultasikan kebutuhan teknis, survei lokasi lahan, atau perhitungan RAB Anda. Tim estimator dan insinyur CV. Wahana Sinergi Mitra siap memberikan rekomendasi efisien dan tepat sasaran.';
 
   const cleanPhone = (company?.phone || '+62 812-3456-7890')
@@ -62,9 +62,7 @@ export function InquiryForm({ initialData = {}, company = {}, meta = {} }) {
                     <Text.Label className="text-emerald-700">{badge}</Text.Label>
                   </div>
                 )}
-                <Text.H1 className="text-[28px] sm:text-[36px] mb-3">
-                  {title}
-                </Text.H1>
+                <Text.AccentTitle text={title} className="text-[28px] sm:text-[36px] mb-3" />
                 {subtitle && (
                   <Text.Body className="text-slate-600">
                     {subtitle}

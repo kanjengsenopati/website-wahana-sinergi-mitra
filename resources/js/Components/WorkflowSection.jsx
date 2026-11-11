@@ -54,7 +54,7 @@ const defaultSteps = [
 
 export function WorkflowSection({ data = {} }) {
   const badge = data?.badge || 'Metodologi Kerja';
-  const title = data?.title || 'Standar Eksekusi Proyek Yang Terukur & Akuntabel';
+  const title = data?.title || 'Standar Eksekusi Proyek Yang {Terukur & Akuntabel}';
   const subtitle = data?.subtitle || 'Kami menerapkan tata kelola konstruksi modern untuk memastikan zero-miscommunication, menghindari biaya membengkak, dan mencapai target serah terima tepat waktu.';
   const rawSteps = (data?.steps && data.steps.length > 0) ? data.steps : defaultSteps;
 
@@ -75,9 +75,7 @@ export function WorkflowSection({ data = {} }) {
               <Text.Label className="text-blue-700">{badge}</Text.Label>
             </div>
           )}
-          <Text.H1 className="text-[28px] sm:text-[38px] mb-3">
-            {title}
-          </Text.H1>
+          <Text.AccentTitle text={title} className="text-[28px] sm:text-[38px] mb-3" />
           {subtitle && (
             <Text.Body>
               {subtitle}

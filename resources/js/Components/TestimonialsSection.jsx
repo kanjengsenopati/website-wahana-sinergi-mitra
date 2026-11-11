@@ -4,7 +4,7 @@ import Text from './Typography';
 
 export function TestimonialsSection({ testimonials = [], meta = {} }) {
   const badge = meta?.badge || 'Testimoni Klien';
-  const title = meta?.title || 'Kepercayaan Nyata Dari Para Pemilik Proyek';
+  const title = meta?.title || 'Kepercayaan Nyata Dari {Para Pemilik Proyek}';
   const subtitle = meta?.subtitle || 'Simak ulasan langsung dari pimpinan perusahaan, pengembang properti, dan pemilik bisnis yang telah mempercayakan konstruksi bangunannya kepada CV. Wahana Sinergi Mitra.';
 
   return (
@@ -19,9 +19,7 @@ export function TestimonialsSection({ testimonials = [], meta = {} }) {
               <Text.Label className="text-emerald-700">{badge}</Text.Label>
             </div>
           )}
-          <Text.H1 className="text-[28px] sm:text-[38px] mb-3">
-            {title}
-          </Text.H1>
+          <Text.AccentTitle text={title} className="text-[28px] sm:text-[38px] mb-3" />
           {subtitle && (
             <Text.Body>
               {subtitle}

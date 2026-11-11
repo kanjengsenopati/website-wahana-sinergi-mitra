@@ -7,7 +7,7 @@ export function PortfolioSection({ projects = [], company = {}, meta = {} }) {
   const [selectedProject, setSelectedProject] = useState(null);
 
   const badge = meta?.badge || 'Portofolio & Rekam Jejak';
-  const title = meta?.title || 'Karya Konstruksi Yang Terbukti Kokoh & Bernilai Tinggi';
+  const title = meta?.title || 'Karya Konstruksi Terbukti {Kokoh & Bernilai Tinggi}';
   const subtitle = meta?.subtitle || '';
 
   // Dynamic Categories: Standard Base + Distinct Database Categories
@@ -38,9 +38,7 @@ export function PortfolioSection({ projects = [], company = {}, meta = {} }) {
                 <Text.Label className="text-emerald-700">{badge}</Text.Label>
               </div>
             )}
-            <Text.H1 className="text-[28px] sm:text-[38px]">
-              {title}
-            </Text.H1>
+            <Text.AccentTitle text={title} className="text-[28px] sm:text-[38px]" />
             {subtitle && (
               <Text.Body className="mt-2 text-slate-600">
                 {subtitle}

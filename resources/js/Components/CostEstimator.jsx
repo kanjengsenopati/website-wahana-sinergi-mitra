@@ -69,7 +69,7 @@ export function CostEstimator({ data = {}, onApplyToForm }) {
   const [floors, setFloors] = useState(2);
 
   const badge = data?.badge || 'Kalkulator Simulasi Biaya';
-  const title = data?.title || 'Estimasi Kasar RAB Proyek Anda';
+  const title = data?.title || 'Simulasi Estimasi Rencana {Anggaran Biaya (RAB)}';
   const subtitle = data?.subtitle || 'Dapatkan gambaran nilai investasi konstruksi secara transparan berdasarkan luas bangunan dan spesifikasi mutu material berstandar SNI.';
 
   // Calculation logic
@@ -114,9 +114,7 @@ export function CostEstimator({ data = {}, onApplyToForm }) {
               <Text.Label className="text-emerald-700">{badge}</Text.Label>
             </div>
           )}
-          <Text.H1 className="text-[28px] sm:text-[38px] mb-3">
-            {title}
-          </Text.H1>
+          <Text.AccentTitle text={title} className="text-[28px] sm:text-[38px] mb-3" />
           {subtitle && (
             <Text.Body>
               {subtitle}

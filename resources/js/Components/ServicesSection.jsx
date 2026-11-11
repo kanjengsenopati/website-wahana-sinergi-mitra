@@ -22,7 +22,7 @@ const iconMap = {
 
 export function ServicesSection({ services = [], meta = {} }) {
   const badge = meta?.badge || 'Layanan Komprehensif';
-  const title = meta?.title || 'Solusi Konstruksi Terintegrasi Dari Pondasi Hingga Serah Terima';
+  const title = meta?.title || 'Solusi Total Rancang Bangun & {Rekayasa Sipil}';
   const subtitle = meta?.subtitle || 'Setiap proyek dikelola oleh tenaga ahli bersertifikat dengan standar keselamatan kerja (K3) dan garansi pemeliharaan struktural.';
 
   return (
@@ -38,9 +38,7 @@ export function ServicesSection({ services = [], meta = {} }) {
                 <Text.Label className="text-blue-700">{badge}</Text.Label>
               </div>
             )}
-            <Text.H1 className="text-[28px] sm:text-[38px]">
-              {title}
-            </Text.H1>
+            <Text.AccentTitle text={title} asBlock className="text-[28px] sm:text-[38px]" />
           </div>
           {subtitle && (
             <Text.Body className="max-w-md text-slate-600">

@@ -99,12 +99,12 @@ class CompanySetting extends Model
             ],
             'services_meta' => [
                 'badge' => 'Layanan Konstruksi Terpadu',
-                'title' => 'Solusi Total Rancang Bangun & Rekayasa Sipil',
+                'title' => 'Solusi Total Rancang Bangun & {Rekayasa Sipil}',
                 'subtitle' => 'Dari perencanaan konseptual, perhitungan struktur tahan gempa, hingga pelaksanaan konstruksi di lapangan dengan standar mutu terjamin.',
             ],
             'estimator_data' => [
                 'badge' => 'Kalkulator Biaya Proyek',
-                'title' => 'Simulasi Estimasi Rencana Anggaran Biaya (RAB)',
+                'title' => 'Simulasi Estimasi Rencana {Anggaran Biaya (RAB)}',
                 'subtitle' => 'Dapatkan estimasi awal biaya pembangunan proyek Anda secara transparan berdasarkan kategori bangunan, luas lantai, dan kelas material standar SNI.',
                 'building_options' => [
                     ['id' => 'gudang', 'label' => 'Gudang & Industri', 'baseRatePerM2' => 3600000, 'description' => 'Struktur baja WF, pelat beton heavy-duty, atap zincalume'],
@@ -120,12 +120,12 @@ class CompanySetting extends Model
             ],
             'portfolio_meta' => [
                 'badge' => 'Portofolio Terpercaya',
-                'title' => 'Rekam Jejak Karya Konstruksi & Rekayasa Sipil',
+                'title' => 'Karya Konstruksi Terbukti {Kokoh & Bernilai Tinggi}',
                 'subtitle' => 'Jelajahi portofolio proyek selesai dan sedang berjalan yang telah kami kerjakan dengan komitmen mutu tinggi dan ketepatan waktu.',
             ],
             'workflow_data' => [
                 'badge' => 'Metodologi Kerja',
-                'title' => 'Standar Eksekusi Proyek Yang Terukur & Akuntabel',
+                'title' => 'Standar Eksekusi Proyek Yang {Terukur & Akuntabel}',
                 'subtitle' => 'Kami menerapkan tata kelola konstruksi modern untuk memastikan zero-miscommunication, menghindari biaya membengkak, dan mencapai target serah terima tepat waktu.',
                 'steps' => [
                     ['number' => '01', 'title' => 'Survei & Analisis Struktur', 'icon' => 'ClipboardCheck', 'description' => 'Pengukuran topografi, pengujian daya dukung tanah (soil test), dan diskusi kebutuhan spesifikasi teknis.'],
@@ -149,12 +149,12 @@ class CompanySetting extends Model
             ],
             'testimonials_meta' => [
                 'badge' => 'Testimoni Klien',
-                'title' => 'Kepercayaan Klien Adalah Tolok Ukur Keberhasilan Kami',
+                'title' => 'Kepercayaan Nyata Dari {Para Pemilik Proyek}',
                 'subtitle' => 'Ulasan jujur dari para pemimpin perusahaan dan pemilik proyek yang telah mempercayakan pembangunan fasilitas mereka kepada CV. Wahana Sinergi Mitra.',
             ],
             'inquiry_meta' => [
                 'badge' => 'Konsultasi Gratis',
-                'title' => 'Rencanakan Proyek Impian Anda Bersama Kami',
+                'title' => 'Rencanakan Proyek Impian {Bersama Tim Engineer Kami}',
                 'subtitle' => 'Konsultasikan kebutuhan konstruksi Anda dengan tim engineer ahli kami. Dapatkan analisis kelayakan awal, estimasi biaya akurat, dan jadwal pelaksanaan yang realistis.',
             ],
         ];

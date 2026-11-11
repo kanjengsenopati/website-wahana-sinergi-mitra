@@ -987,6 +987,7 @@ export default function Dashboard({
                               onChange={(e) => setEstimatorForm({ ...estimatorForm, title: e.target.value })}
                               className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
                             />
+                            <p className="text-[11px] text-slate-500 mt-1">Gunakan <code>{'{kata}'}</code> untuk warna gradien (contoh: <code>Simulasi Estimasi Rencana {'{Anggaran Biaya (RAB)}'}</code>).</p>
                           </div>
                         </div>
 
@@ -1083,6 +1084,7 @@ export default function Dashboard({
                               onChange={(e) => setWorkflowForm({ ...workflowForm, title: e.target.value })}
                               className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
                             />
+                            <p className="text-[11px] text-slate-500 mt-1">Gunakan <code>{'{kata}'}</code> untuk warna gradien (contoh: <code>Standar Eksekusi Proyek Yang {'{Terukur & Akuntabel}'}</code>).</p>
                           </div>
                         </div>
 
@@ -1310,6 +1312,7 @@ export default function Dashboard({
                               })}
                               className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
                             />
+                            <p className="text-[11px] text-slate-500 mt-1">Gunakan <code>{'{kata}'}</code> untuk warna gradien (contoh: <code>Solusi Total Rancang Bangun & {'{Rekayasa Sipil}'}</code>).</p>
                           </div>
                         </div>
 

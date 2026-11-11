@@ -98,6 +98,64 @@ export const Text = {
       {children}
     </span>
   ),
+
+  /**
+   * Text.AccentTitle: Render premium two-tone gradient title.
+   * If string contains `{accent text}`, the wrapped portion is styled with gradient.
+   * If no curly brackets, smartly highlights the concluding phrase.
+   * Supports `asBlock` to put the accent text on a new line (as in Gambar 1 & Gambar 3).
+   */
+  AccentTitle: ({ text = '', className = '', accentClassName = '', asBlock = false, ...props }) => {
+    if (!text || typeof text !== 'string') {
+      return (
+        <h1 className={`text-[26px] sm:text-[34px] lg:text-[38px] font-bold text-slate-900 tracking-[-0.03em] leading-tight ${className}`} {...props}>
+          {text}
+        </h1>
+      );
+    }
+
+    // Pattern for {accent text}
+    const match = text.match(/^(.*?)\{(.*?)\}(.*)$/);
+
+    let prefix = '';
+    let accent = '';
+    let suffix = '';
+
+    if (match) {
+      prefix = match[1];
+      accent = match[2];
+      suffix = match[3];
+    } else {
+      // Auto fallback: split last 2 words or last phrase
+      const words = text.trim().split(' ');
+      if (words.length > 2) {
+        accent = words.slice(-2).join(' ');
+        prefix = words.slice(0, -2).join(' ') + ' ';
+      } else if (words.length === 2) {
+        prefix = words[0] + ' ';
+        accent = words[1];
+      } else {
+        accent = text;
+      }
+    }
+
+    const defaultGradientClass = "text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-sky-600 to-emerald-600";
+
+    return (
+      <h1
+        className={`text-[26px] sm:text-[34px] lg:text-[38px] font-bold text-slate-900 tracking-[-0.03em] leading-tight ${className}`}
+        {...props}
+      >
+        {prefix && (asBlock ? <span className="block">{prefix.trim()}</span> : <span>{prefix}</span>)}
+        {accent && (
+          <span className={`${asBlock ? 'block ' : ''}${defaultGradientClass} ${accentClassName}`}>
+            {accent}
+          </span>
+        )}
+        {suffix && <span>{suffix}</span>}
+      </h1>
+    );
+  },
 };
 
 export default Text;
