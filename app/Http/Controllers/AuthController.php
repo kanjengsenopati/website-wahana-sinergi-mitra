@@ -20,9 +20,9 @@ class AuthController extends Controller
 
         return Inertia::render('Auth/Login', [
             'demoUser' => [
-                'name' => 'Administrator WSM',
+                'name' => 'Admin Website WSM',
                 'email' => 'admin@wahanasinergimitra.id',
-                'role' => 'Super Admin WSM',
+                'role' => 'CMS Manager',
                 'password' => 'password123',
             ],
         ]);
