@@ -1029,49 +1029,95 @@ export default function Dashboard({
             {activeTab === 'overview' && !editorMode && (
               <div className="space-y-6">
                 
-                {/* Metric Summary Cards */}
+                {/* Metric Summary Cards (3-Gradient Luminous Opal Pearl: rounded-[24px], crystal hairline border, micro-interaction) */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="bg-white rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col justify-between">
-                    <div className="flex items-center justify-between gap-2 min-w-0 mb-2">
-                      <Text.Label title="Total Proyek Terverifikasi" singleLine>Total Proyek</Text.Label>
-                      <Building2 className="w-4 h-4 text-sky-600" />
+                  {/* Card 1: Total Proyek */}
+                  <div className="relative group bg-gradient-to-br from-white via-slate-50/95 to-sky-50/40 hover:to-sky-100/50 rounded-[24px] p-5 shadow-[0_10px_35px_rgba(0,0,0,0.05)] hover:shadow-[0_16px_45px_rgba(0,0,0,0.09)] border border-white/90 hover:border-slate-300/80 transition-all duration-300 flex flex-col justify-between hover:-translate-y-1 overflow-hidden backdrop-blur-sm">
+                    <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-sky-400/50 to-transparent group-hover:via-sky-500 transition-all" />
+                    <div className="flex items-center justify-between gap-2 min-w-0 mb-3">
+                      <Text.Label title="Total Proyek Terverifikasi" singleLine className="text-slate-700 font-bold">Total Proyek</Text.Label>
+                      <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500/15 via-sky-500/10 to-transparent text-sky-600 border border-blue-500/20 flex items-center justify-center shrink-0 shadow-xs group-hover:scale-110 transition-transform">
+                        <Building2 className="w-4 h-4 stroke-[2.2]" />
+                      </div>
                     </div>
-                    <Text.Amount value={metrics.total_projects} prefix="" suffix=" Proyek" className="text-[24px]" />
-                    <Text.Caption className="mt-1">Dikelola di portofolio</Text.Caption>
+                    <div>
+                      <Text.Amount value={metrics.total_projects} prefix="" suffix=" Proyek" className="text-[24px] font-black tracking-[-0.03em] drop-shadow-xs" />
+                      <div className="flex items-center justify-between gap-2 mt-1.5 pt-1.5 border-t border-slate-100/80">
+                        <Text.Caption className="text-slate-600 font-semibold truncate">Dikelola di portofolio</Text.Caption>
+                        <span className="text-[10px] font-extrabold text-sky-700 bg-sky-500/10 border border-sky-500/20 px-2 py-0.5 rounded-full shrink-0">
+                          Portofolio
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="bg-white rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col justify-between">
-                    <div className="flex items-center justify-between gap-2 min-w-0 mb-2">
-                      <Text.Label title="Total Nilai Kontrak" singleLine>Nilai Portofolio</Text.Label>
-                      <TrendingUp className="w-4 h-4 text-emerald-600" />
+                  {/* Card 2: Nilai Portofolio */}
+                  <div className="relative group bg-gradient-to-br from-white via-slate-50/95 to-emerald-50/40 hover:to-emerald-100/50 rounded-[24px] p-5 shadow-[0_10px_35px_rgba(0,0,0,0.05)] hover:shadow-[0_16px_45px_rgba(0,0,0,0.09)] border border-white/90 hover:border-slate-300/80 transition-all duration-300 flex flex-col justify-between hover:-translate-y-1 overflow-hidden backdrop-blur-sm">
+                    <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent group-hover:via-emerald-500 transition-all" />
+                    <div className="flex items-center justify-between gap-2 min-w-0 mb-3">
+                      <Text.Label title="Total Nilai Kontrak" singleLine className="text-slate-700 font-bold">Nilai Portofolio</Text.Label>
+                      <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500/15 via-teal-500/10 to-transparent text-emerald-600 border border-emerald-500/20 flex items-center justify-center shrink-0 shadow-xs group-hover:scale-110 transition-transform">
+                        <TrendingUp className="w-4 h-4 stroke-[2.2]" />
+                      </div>
                     </div>
-                    <Text.Amount value={metrics.total_portfolio_value} className="text-[20px]" />
-                    <Text.Caption className="mt-1">Total kontrak terlaksana</Text.Caption>
+                    <div>
+                      <Text.Amount value={metrics.total_portfolio_value} className="text-[20px] font-black tracking-[-0.03em] drop-shadow-xs" />
+                      <div className="flex items-center justify-between gap-2 mt-1.5 pt-1.5 border-t border-slate-100/80">
+                        <Text.Caption className="text-slate-600 font-semibold truncate">Total kontrak terlaksana</Text.Caption>
+                        <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full shrink-0">
+                          Terverifikasi
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="bg-white rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col justify-between">
-                    <div className="flex items-center justify-between gap-2 min-w-0 mb-2">
-                      <Text.Label title="Pesan Masuk" singleLine>Leads & Pesan RAB</Text.Label>
-                      <MessageSquareText className="w-4 h-4 text-blue-600" />
+                  {/* Card 3: Leads & Pesan RAB */}
+                  <div className="relative group bg-gradient-to-br from-white via-slate-50/95 to-blue-50/40 hover:to-blue-100/50 rounded-[24px] p-5 shadow-[0_10px_35px_rgba(0,0,0,0.05)] hover:shadow-[0_16px_45px_rgba(0,0,0,0.09)] border border-white/90 hover:border-slate-300/80 transition-all duration-300 flex flex-col justify-between hover:-translate-y-1 overflow-hidden backdrop-blur-sm">
+                    <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-blue-400/50 to-transparent group-hover:via-blue-500 transition-all" />
+                    <div className="flex items-center justify-between gap-2 min-w-0 mb-3">
+                      <Text.Label title="Pesan Masuk" singleLine className="text-slate-700 font-bold">Leads & Pesan RAB</Text.Label>
+                      <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500/15 via-indigo-500/10 to-transparent text-blue-600 border border-blue-500/20 flex items-center justify-center shrink-0 shadow-xs group-hover:scale-110 transition-transform">
+                        <MessageSquareText className="w-4 h-4 stroke-[2.2]" />
+                      </div>
                     </div>
-                    <div className="text-[24px] font-bold text-slate-900 tracking-tight">
-                      {metrics.total_inquiries}{' '}
-                      <span className="text-xs font-semibold text-rose-600 font-normal">
-                        ({metrics.new_inquiries} baru)
-                      </span>
+                    <div>
+                      <div className="text-[24px] font-black text-slate-900 tracking-[-0.03em] tabular-nums flex items-center gap-2">
+                        <span>{metrics.total_inquiries}</span>
+                        {metrics.new_inquiries > 0 && (
+                          <span className="text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full">
+                            {metrics.new_inquiries} baru
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between gap-2 mt-1.5 pt-1.5 border-t border-slate-100/80">
+                        <Text.Caption className="text-slate-600 font-semibold truncate">Form landing page & RAB</Text.Caption>
+                        <span className="text-[10px] font-extrabold text-blue-700 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full shrink-0">
+                          Inbound
+                        </span>
+                      </div>
                     </div>
-                    <Text.Caption className="mt-1">Form landing page & RAB</Text.Caption>
                   </div>
 
-                  <div className="bg-white rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col justify-between">
-                    <div className="flex items-center justify-between gap-2 min-w-0 mb-2">
-                      <Text.Label title="Layanan Konstruksi" singleLine>Layanan Aktif</Text.Label>
-                      <HardHat className="w-4 h-4 text-amber-500" />
+                  {/* Card 4: Layanan Aktif */}
+                  <div className="relative group bg-gradient-to-br from-white via-slate-50/95 to-amber-50/35 hover:to-amber-100/50 rounded-[24px] p-5 shadow-[0_10px_35px_rgba(0,0,0,0.05)] hover:shadow-[0_16px_45px_rgba(0,0,0,0.09)] border border-white/90 hover:border-slate-300/80 transition-all duration-300 flex flex-col justify-between hover:-translate-y-1 overflow-hidden backdrop-blur-sm">
+                    <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400/50 to-transparent group-hover:via-amber-500 transition-all" />
+                    <div className="flex items-center justify-between gap-2 min-w-0 mb-3">
+                      <Text.Label title="Layanan Konstruksi" singleLine className="text-slate-700 font-bold">Layanan Aktif</Text.Label>
+                      <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500/15 via-orange-500/10 to-transparent text-amber-600 border border-amber-500/20 flex items-center justify-center shrink-0 shadow-xs group-hover:scale-110 transition-transform">
+                        <HardHat className="w-4 h-4 stroke-[2.2]" />
+                      </div>
                     </div>
-                    <div className="text-[24px] font-bold text-slate-900 tracking-tight">
-                      {metrics.total_services} Layanan
+                    <div>
+                      <div className="text-[24px] font-black text-slate-900 tracking-[-0.03em] tabular-nums">
+                        {metrics.total_services} <span className="text-sm font-bold text-slate-600">Layanan</span>
+                      </div>
+                      <div className="flex items-center justify-between gap-2 mt-1.5 pt-1.5 border-t border-slate-100/80">
+                        <Text.Caption className="text-slate-600 font-semibold truncate">Divisi spesialisasi WSM</Text.Caption>
+                        <span className="text-[10px] font-extrabold text-amber-700 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full shrink-0">
+                          Divisi Ahli
+                        </span>
+                      </div>
                     </div>
-                    <Text.Caption className="mt-1">Divisi spesialisasi WSM</Text.Caption>
                   </div>
                 </div>
 
