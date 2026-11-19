@@ -87,6 +87,94 @@ export default function Dashboard({
     password: '',
   });
 
+  // Password Visibility (Eye) Toggle States
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showUserPassword, setShowUserPassword] = useState(false);
+
+  // Password Security Evaluator
+  const evaluatePasswordSecurity = (val = '') => {
+    const hasLength = val.length >= 8;
+    const hasUpper = /[A-Z]/.test(val);
+    const hasLower = /[a-z]/.test(val);
+    const hasNumber = /[0-9]/.test(val);
+    const hasSymbol = /[^A-Za-z0-9]/.test(val);
+    const score = [hasLength, (hasUpper && hasLower), hasNumber, hasSymbol].filter(Boolean).length;
+    const isValid = hasLength && hasUpper && hasLower && hasNumber && hasSymbol;
+    return { hasLength, hasUpper, hasLower, hasNumber, hasSymbol, score, isValid };
+  };
+
+  const renderPasswordSecurityChecklist = (password) => {
+    if (!password) return null;
+    const { hasLength, hasUpper, hasLower, hasNumber, hasSymbol, score } = evaluatePasswordSecurity(password);
+
+    const getStrengthMeta = () => {
+      if (score <= 1) return { label: 'Sangat Lemah', color: 'text-rose-500', barColor: 'bg-rose-500' };
+      if (score === 2) return { label: 'Cukup', color: 'text-amber-500', barColor: 'bg-amber-500' };
+      if (score === 3) return { label: 'Kuat', color: 'text-blue-500', barColor: 'bg-blue-500' };
+      return { label: 'Sangat Kuat & Sesuai Standar', color: 'text-emerald-600', barColor: 'bg-emerald-500' };
+    };
+
+    const meta = getStrengthMeta();
+
+    return (
+      <div className="mt-2.5 space-y-2 animate-in fade-in">
+        <div className="space-y-1">
+          <div className="flex items-center justify-between text-[11px]">
+            <span className="text-slate-500 font-medium">Kekuatan Sandi:</span>
+            <span className={`font-bold ${meta.color}`}>{meta.label}</span>
+          </div>
+          <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden flex gap-1">
+            <div className={`h-full w-1/4 rounded-full transition-all duration-300 ${score >= 1 ? meta.barColor : 'bg-slate-200'}`} />
+            <div className={`h-full w-1/4 rounded-full transition-all duration-300 ${score >= 2 ? meta.barColor : 'bg-slate-200'}`} />
+            <div className={`h-full w-1/4 rounded-full transition-all duration-300 ${score >= 3 ? meta.barColor : 'bg-slate-200'}`} />
+            <div className={`h-full w-1/4 rounded-full transition-all duration-300 ${score >= 4 ? meta.barColor : 'bg-slate-200'}`} />
+          </div>
+        </div>
+
+        <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 space-y-1.5 text-[11px]">
+          <p className="font-bold text-slate-700 tracking-[-0.015em] mb-1">Kriteria Keamanan Sandi Wajib:</p>
+          
+          <div className={`flex items-center gap-2 transition-colors ${hasLength ? 'text-emerald-700 font-semibold' : 'text-slate-400'}`}>
+            <span className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${hasLength ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-400'}`}>
+              <Check className="w-2.5 h-2.5" />
+            </span>
+            <span>Minimal <strong>8 digit karakter</strong></span>
+          </div>
+
+          <div className={`flex items-center gap-2 transition-colors ${hasUpper ? 'text-emerald-700 font-semibold' : 'text-slate-400'}`}>
+            <span className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${hasUpper ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-400'}`}>
+              <Check className="w-2.5 h-2.5" />
+            </span>
+            <span>Minimal <strong>1 huruf besar (A-Z)</strong></span>
+          </div>
+
+          <div className={`flex items-center gap-2 transition-colors ${hasLower ? 'text-emerald-700 font-semibold' : 'text-slate-400'}`}>
+            <span className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${hasLower ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-400'}`}>
+              <Check className="w-2.5 h-2.5" />
+            </span>
+            <span>Minimal <strong>1 huruf kecil (a-z)</strong></span>
+          </div>
+
+          <div className={`flex items-center gap-2 transition-colors ${hasNumber ? 'text-emerald-700 font-semibold' : 'text-slate-400'}`}>
+            <span className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${hasNumber ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-400'}`}>
+              <Check className="w-2.5 h-2.5" />
+            </span>
+            <span>Minimal <strong>1 angka (0-9)</strong></span>
+          </div>
+
+          <div className={`flex items-center gap-2 transition-colors ${hasSymbol ? 'text-emerald-700 font-semibold' : 'text-slate-400'}`}>
+            <span className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${hasSymbol ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-400'}`}>
+              <Check className="w-2.5 h-2.5" />
+            </span>
+            <span>Minimal <strong>1 simbol / karakter khusus (!@#$%^&*)</strong></span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // Vertical Carousel Accordion State (first item auto-expanded by default)
   const [expandedSection, setExpandedSection] = useState('hero');
 
@@ -285,9 +373,39 @@ export default function Dashboard({
     router.post(`/admin/sections/${metaKey}`, { data: metaForms[metaKey] }, { preserveScroll: true });
   };
 
-  // Profile Update Handler
+  // Profile Update Handler & Modal Opener
+  const openProfileModal = () => {
+    setShowCurrentPassword(false);
+    setShowNewPassword(false);
+    setShowConfirmPassword(false);
+    setProfileForm({
+      name: currentUser?.name || '',
+      email: currentUser?.email || '',
+      current_password: '',
+      password: '',
+      password_confirmation: '',
+    });
+    setProfileModalOpen(true);
+  };
+
   const handleSaveProfile = (e) => {
     e.preventDefault();
+    if (profileForm.password) {
+      const sec = evaluatePasswordSecurity(profileForm.password);
+      if (!sec.isValid) {
+        alert('Kata sandi baru harus memenuhi seluruh 5 kriteria keamanan (min. 8 digit, huruf besar, kecil, angka, dan simbol).');
+        return;
+      }
+      if (profileForm.password !== profileForm.password_confirmation) {
+        alert('Konfirmasi kata sandi baru tidak cocok dengan kata sandi baru.');
+        return;
+      }
+      if (!profileForm.current_password) {
+        alert('Harap masukkan kata sandi saat ini untuk mengonfirmasi perubahan kata sandi.');
+        return;
+      }
+    }
+
     router.post('/admin/profile', profileForm, {
       preserveScroll: true,
       onSuccess: () => {
@@ -311,6 +429,7 @@ export default function Dashboard({
       role: 'Editor',
       password: '',
     });
+    setShowUserPassword(false);
     setUserModalOpen(true);
   };
 
@@ -322,11 +441,26 @@ export default function Dashboard({
       role: u.role || 'Editor',
       password: '',
     });
+    setShowUserPassword(false);
     setUserModalOpen(true);
   };
 
   const handleSaveUser = (e) => {
     e.preventDefault();
+    if (!editingUser) {
+      const sec = evaluatePasswordSecurity(userForm.password);
+      if (!sec.isValid) {
+        alert('Kata sandi pengguna baru harus memenuhi seluruh 5 kriteria keamanan (min. 8 digit, huruf besar, kecil, angka, dan simbol).');
+        return;
+      }
+    } else if (userForm.password) {
+      const sec = evaluatePasswordSecurity(userForm.password);
+      if (!sec.isValid) {
+        alert('Kata sandi baru pengguna harus memenuhi seluruh 5 kriteria keamanan (min. 8 digit, huruf besar, kecil, angka, dan simbol).');
+        return;
+      }
+    }
+
     if (editingUser) {
       router.put(`/admin/users/${editingUser.id}`, userForm, {
         preserveScroll: true,
@@ -791,7 +925,7 @@ export default function Dashboard({
             <div className="p-3 rounded-2xl bg-slate-800/70 border border-slate-700/60 flex items-center justify-between gap-2">
               <button
                 type="button"
-                onClick={() => setProfileModalOpen(true)}
+                onClick={openProfileModal}
                 title="Kelola Profil & Kata Sandi Saya"
                 className="flex items-center gap-2.5 min-w-0 text-left hover:opacity-90 transition-opacity cursor-pointer group flex-1"
               >
@@ -840,7 +974,7 @@ export default function Dashboard({
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                onClick={() => setProfileModalOpen(true)}
+                onClick={openProfileModal}
                 className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 hover:bg-blue-50 text-[11px] font-bold text-slate-700 hover:text-blue-700 border border-slate-200 transition-colors cursor-pointer"
               >
                 <div className="w-5 h-5 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center font-extrabold">
@@ -3607,9 +3741,16 @@ export default function Dashboard({
                       />
                     </div>
 
-                    <div className="pt-3 border-t border-slate-100 space-y-3">
+                    <div className="pt-3 border-t border-slate-100 space-y-3.5">
                       <div>
-                        <Text.Label className="text-blue-600 block mb-0.5">Ubah Kata Sandi (Opsional)</Text.Label>
+                        <div className="flex items-center justify-between">
+                          <Text.Label className="text-blue-600 block mb-0.5">Ubah Kata Sandi (Opsional)</Text.Label>
+                          {profileForm.password && (
+                            <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60">
+                              Live Security Checker
+                            </span>
+                          )}
+                        </div>
                         <Text.Caption className="text-slate-500">Kosongkan jika tidak ingin mengubah kata sandi.</Text.Caption>
                       </div>
 
@@ -3617,39 +3758,88 @@ export default function Dashboard({
                         <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
                           Kata Sandi Saat Ini
                         </label>
-                        <input
-                          type="password"
-                          value={profileForm.current_password}
-                          onChange={(e) => setProfileForm({ ...profileForm, current_password: e.target.value })}
-                          placeholder="Masukkan kata sandi lama Anda"
-                          className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900"
-                        />
+                        <div className="relative">
+                          <input
+                            type={showCurrentPassword ? 'text' : 'password'}
+                            value={profileForm.current_password}
+                            onChange={(e) => setProfileForm({ ...profileForm, current_password: e.target.value })}
+                            placeholder="Masukkan kata sandi lama Anda"
+                            className="w-full pl-3.5 pr-10 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                            tabIndex={-1}
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer p-1"
+                            title={showCurrentPassword ? 'Sembunyikan Kata Sandi' : 'Lihat Kata Sandi'}
+                          >
+                            {showCurrentPassword ? <EyeOff className="w-4 h-4 text-blue-600" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </div>
                       </div>
 
                       <div>
                         <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
-                          Kata Sandi Baru (Min. 8 karakter)
+                          Kata Sandi Baru
                         </label>
-                        <input
-                          type="password"
-                          value={profileForm.password}
-                          onChange={(e) => setProfileForm({ ...profileForm, password: e.target.value })}
-                          placeholder="Minimal 8 karakter baru"
-                          className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900"
-                        />
+                        <div className="relative">
+                          <input
+                            type={showNewPassword ? 'text' : 'password'}
+                            value={profileForm.password}
+                            onChange={(e) => setProfileForm({ ...profileForm, password: e.target.value })}
+                            placeholder="Kombinasi min. 8 karakter, A-Z, a-z, 0-9, simbol"
+                            className="w-full pl-3.5 pr-10 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowNewPassword(!showNewPassword)}
+                            tabIndex={-1}
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer p-1"
+                            title={showNewPassword ? 'Sembunyikan Kata Sandi' : 'Lihat Kata Sandi'}
+                          >
+                            {showNewPassword ? <EyeOff className="w-4 h-4 text-blue-600" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </div>
+                        {renderPasswordSecurityChecklist(profileForm.password)}
                       </div>
 
                       <div>
                         <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
                           Konfirmasi Kata Sandi Baru
                         </label>
-                        <input
-                          type="password"
-                          value={profileForm.password_confirmation}
-                          onChange={(e) => setProfileForm({ ...profileForm, password_confirmation: e.target.value })}
-                          placeholder="Ulangi kata sandi baru"
-                          className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900"
-                        />
+                        <div className="relative">
+                          <input
+                            type={showConfirmPassword ? 'text' : 'password'}
+                            value={profileForm.password_confirmation}
+                            onChange={(e) => setProfileForm({ ...profileForm, password_confirmation: e.target.value })}
+                            placeholder="Ulangi kata sandi baru"
+                            className="w-full pl-3.5 pr-10 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            tabIndex={-1}
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer p-1"
+                            title={showConfirmPassword ? 'Sembunyikan Kata Sandi' : 'Lihat Kata Sandi'}
+                          >
+                            {showConfirmPassword ? <EyeOff className="w-4 h-4 text-blue-600" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </div>
+                        {profileForm.password_confirmation && (
+                          <div className="mt-1 text-[11px] font-semibold flex items-center gap-1.5">
+                            {profileForm.password === profileForm.password_confirmation ? (
+                              <span className="text-emerald-600 flex items-center gap-1">
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                Kata sandi konfirmasi cocok
+                              </span>
+                            ) : (
+                              <span className="text-rose-500 flex items-center gap-1">
+                                <X className="w-3.5 h-3.5" />
+                                Kata sandi konfirmasi tidak cocok
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -3663,7 +3853,8 @@ export default function Dashboard({
                       </button>
                       <button
                         type="submit"
-                        className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-600/20 transition-all cursor-pointer"
+                        disabled={Boolean(profileForm.password && (!evaluatePasswordSecurity(profileForm.password).isValid || profileForm.password !== profileForm.password_confirmation || !profileForm.current_password))}
+                        className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold shadow-md shadow-blue-600/20 transition-all cursor-pointer"
                       >
                         Simpan Profil
                       </button>
@@ -3751,17 +3942,36 @@ export default function Dashboard({
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
-                        Kata Sandi {editingUser ? '(Opsional - Isi jika ingin reset)' : '(Wajib - Min. 8 karakter)'}
-                      </label>
-                      <input
-                        type="password"
-                        required={!editingUser}
-                        value={userForm.password}
-                        onChange={(e) => setUserForm({ ...userForm, password: e.target.value })}
-                        placeholder={editingUser ? 'Kosongkan jika tidak diubah' : 'Minimal 8 karakter'}
-                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-blue-600"
-                      />
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em]">
+                          Kata Sandi {editingUser ? '(Opsional - Isi jika ingin reset)' : '(Wajib)'}
+                        </label>
+                        {userForm.password && (
+                          <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60">
+                            Live Security Checker
+                          </span>
+                        )}
+                      </div>
+                      <div className="relative">
+                        <input
+                          type={showUserPassword ? 'text' : 'password'}
+                          required={!editingUser}
+                          value={userForm.password}
+                          onChange={(e) => setUserForm({ ...userForm, password: e.target.value })}
+                          placeholder={editingUser ? 'Kosongkan jika tidak ingin diubah' : 'Kombinasi min. 8 karakter, A-Z, a-z, 0-9, simbol'}
+                          className="w-full pl-3.5 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowUserPassword(!showUserPassword)}
+                          tabIndex={-1}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer p-1"
+                          title={showUserPassword ? 'Sembunyikan Kata Sandi' : 'Lihat Kata Sandi'}
+                        >
+                          {showUserPassword ? <EyeOff className="w-4 h-4 text-blue-600" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                      {renderPasswordSecurityChecklist(userForm.password)}
                     </div>
 
                     <div className="pt-4 flex items-center justify-end gap-2 border-t border-slate-100">
@@ -3774,7 +3984,8 @@ export default function Dashboard({
                       </button>
                       <button
                         type="submit"
-                        className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-600/20 transition-all cursor-pointer"
+                        disabled={Boolean((!editingUser && !evaluatePasswordSecurity(userForm.password).isValid) || (editingUser && userForm.password && !evaluatePasswordSecurity(userForm.password).isValid))}
+                        className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold shadow-md shadow-blue-600/20 transition-all cursor-pointer"
                       >
                         {editingUser ? 'Simpan Perubahan' : 'Buat Pengguna'}
                       </button>

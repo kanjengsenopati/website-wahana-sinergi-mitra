@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -391,7 +392,13 @@ class AdminDashboardController extends Controller
             'name' => 'required|string|max:255',
             'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'current_password' => 'nullable|string',
-            'password' => 'nullable|string|min:8|confirmed',
+            'password' => ['nullable', 'string', 'confirmed', Password::min(8)->mixedCase()->numbers()->symbols()],
+        ], [
+            'password.min' => 'Kata sandi baru minimal 8 karakter.',
+            'password.mixed_case' => 'Kata sandi baru harus mengandung kombinasi huruf besar dan kecil.',
+            'password.numbers' => 'Kata sandi baru harus mengandung minimal 1 angka.',
+            'password.symbols' => 'Kata sandi baru harus mengandung minimal 1 simbol/karakter khusus.',
+            'password.confirmed' => 'Konfirmasi kata sandi baru tidak cocok.',
         ]);
 
         if (!empty($validated['password'])) {
@@ -422,7 +429,12 @@ class AdminDashboardController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email',
             'role' => 'required|string|in:Super Admin,Editor',
-            'password' => 'required|string|min:8',
+            'password' => ['required', 'string', Password::min(8)->mixedCase()->numbers()->symbols()],
+        ], [
+            'password.min' => 'Kata sandi minimal 8 karakter.',
+            'password.mixed_case' => 'Kata sandi harus mengandung kombinasi huruf besar dan kecil.',
+            'password.numbers' => 'Kata sandi harus mengandung minimal 1 angka.',
+            'password.symbols' => 'Kata sandi harus mengandung minimal 1 simbol/karakter khusus.',
         ]);
 
         User::create([
@@ -447,7 +459,12 @@ class AdminDashboardController extends Controller
             'name' => 'required|string|max:255',
             'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'role' => 'required|string|in:Super Admin,Editor',
-            'password' => 'nullable|string|min:8',
+            'password' => ['nullable', 'string', Password::min(8)->mixedCase()->numbers()->symbols()],
+        ], [
+            'password.min' => 'Kata sandi minimal 8 karakter.',
+            'password.mixed_case' => 'Kata sandi harus mengandung kombinasi huruf besar dan kecil.',
+            'password.numbers' => 'Kata sandi harus mengandung minimal 1 angka.',
+            'password.symbols' => 'Kata sandi harus mengandung minimal 1 simbol/karakter khusus.',
         ]);
 
         // If demoting from Super Admin to Editor, ensure at least one other Super Admin exists
