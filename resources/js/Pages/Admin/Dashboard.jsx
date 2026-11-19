@@ -45,11 +45,24 @@ import {
   ChevronUp,
   X,
   ShieldAlert,
-  User
+  User,
+  Warehouse,
+  Briefcase,
+  Wrench,
+  Hammer
 } from 'lucide-react';
 import Text, { formatRupiah, formatThousands } from '../../Components/Typography';
 import CurrencyInput from '../../Components/CurrencyInput';
 import ImageUploader from '../../Components/ImageUploader';
+
+const iconMap = {
+  Building2,
+  HardHat,
+  Warehouse,
+  Briefcase,
+  Wrench,
+  Hammer,
+};
 
 export default function Dashboard({ 
   projects = [], 
