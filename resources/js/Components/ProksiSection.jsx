@@ -45,7 +45,7 @@ export function ProksiSection({ data = {} }) {
       <div className="relative z-10 max-w-7xl mx-auto px-5">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-14 space-y-3">
+        <div className="text-center max-w-5xl mx-auto mb-14 space-y-3">
           {badge && (
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200/80 shadow-xs">
               <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
@@ -60,7 +60,7 @@ export function ProksiSection({ data = {} }) {
           </Text.H1>
 
           {subtitle && (
-            <Text.Body className="text-[15px] sm:text-[16px] text-slate-600 leading-relaxed max-w-2xl mx-auto">
+            <Text.Body className="text-[15px] sm:text-[16px] text-slate-600 leading-relaxed max-w-4xl mx-auto">
               {subtitle}
             </Text.Body>
           )}

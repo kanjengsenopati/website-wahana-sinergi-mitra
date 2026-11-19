@@ -50,7 +50,7 @@ export function InquiryForm({ initialData = {}, company = {}, meta = {} }) {
     <section id="inquiry" className="py-16 sm:py-24 bg-[#F8FAFC]">
       <div className="max-w-7xl mx-auto px-5">
         
-        <div className="bg-white rounded-[24px] p-6 sm:p-12 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
+        <div className="bg-white rounded-[24px] p-6 sm:p-12 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
             
             {/* Left Column: Context & Contact Info */}

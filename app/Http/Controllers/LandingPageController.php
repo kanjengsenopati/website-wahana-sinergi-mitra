@@ -42,12 +42,14 @@ class LandingPageController extends Controller
             'phone' => CompanySetting::get('company_phone', '+62 812-3456-7890'),
             'email' => CompanySetting::get('company_email', 'info@wahanasinergimitra.id'),
             'address' => CompanySetting::get('company_address', 'Jl. Sinergi Raya No. 88, Kawasan Niaga Terpadu, Jawa Barat, Indonesia'),
+            'operating_hours' => CompanySetting::get('company_operating_hours', 'Senin – Sabtu: 08.00 – 17.00 WIB'),
             'about' => CompanySetting::get('company_about', 'Perusahaan penyedia jasa pelaksana konstruksi terpercaya yang melayani pekerjaan gedung komersial, industri pergudangan, infrastruktur jalan/jembatan, dan rekayasa sipil berstandar mutu tinggi.'),
         ];
 
         // SSOT Section Visibility & Section Dynamic Contents
         $visibility = CompanySetting::getSectionVisibility();
         $heroData = CompanySetting::getSectionData('hero');
+        $aboutData = CompanySetting::getSectionData('about_data');
         $servicesMeta = CompanySetting::getSectionData('services_meta');
         $estimatorData = CompanySetting::getSectionData('estimator_data');
         $portfolioMeta = CompanySetting::getSectionData('portfolio_meta');
@@ -64,6 +66,7 @@ class LandingPageController extends Controller
             'company' => $company,
             'visibility' => $visibility,
             'heroData' => $heroData,
+            'aboutData' => $aboutData,
             'servicesMeta' => $servicesMeta,
             'estimatorData' => $estimatorData,
             'portfolioMeta' => $portfolioMeta,

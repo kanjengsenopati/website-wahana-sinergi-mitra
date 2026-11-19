@@ -35,7 +35,8 @@ import {
   ToggleRight,
   FileSpreadsheet,
   ClipboardCheck,
-  Check
+  Check,
+  Award
 } from 'lucide-react';
 import Text, { formatRupiah, formatThousands } from '../../Components/Typography';
 import CurrencyInput from '../../Components/CurrencyInput';
@@ -66,14 +67,76 @@ export default function Dashboard({
 
   // Section Content Forms
   const [heroForm, setHeroForm] = useState({
-    badge: sectionData?.hero?.badge || '3D Visualisation & Architectural Engineering',
+    badge: sectionData?.hero?.badge || 'SBU Konstruksi Aktif • General Contractor & Civil Engineering',
     title_line1: sectionData?.hero?.title_line1 || 'Membangun Masa Depan',
     title_line2: sectionData?.hero?.title_line2 || 'Presisi Konstruksi Nyata',
-    description: sectionData?.hero?.description || 'Eksplorasi mahakarya arsitektur modern dengan rekayasa sipil berstandar tinggi. Pantau progres proyek, mutu beton, dan ketepatan struktur secara real-time.',
+    description: sectionData?.hero?.description || 'Pelaksana konstruksi gedung komersial, gudang industri struktur baja WF, dan rekayasa sipil berstandar SNI. Didukung pengawasan mutu K3 Zero-Accident serta transparansi kurva-S real-time.',
     cta_primary_text: sectionData?.hero?.cta_primary_text || 'Konsultasi Proyek Baru',
     cta_primary_link: sectionData?.hero?.cta_primary_link || '#inquiry',
-    cta_secondary_text: sectionData?.hero?.cta_secondary_text || 'Galeri Portofolio',
+    cta_secondary_text: sectionData?.hero?.cta_secondary_text || 'Lihat Portofolio & Tabel Kontrak',
     cta_secondary_link: sectionData?.hero?.cta_secondary_link || '#portofolio',
+    slides: sectionData?.hero?.slides || [
+      {
+        id: 1,
+        tag: 'SBU KONSTRUKSI AKTIF • ISO 9001 & 45001 CERTIFIED',
+        location: 'Kawasan Industri Cikarang & Karawang',
+        caption: 'Dokumentasi Lapangan: Erection Struktur Baja WF 400 & Inspeksi HSE',
+        image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1800&q=85',
+        sector: 'Konstruksi Gudang, Pabrik & Struktur Baja Bentang Lebar',
+      },
+      {
+        id: 2,
+        tag: 'GENERAL CONTRACTOR & ARCHITECTURAL FIT-OUT',
+        location: 'Jabodetabek & Jawa Barat',
+        caption: 'Dokumentasi Proyek: Konstruksi Gedung Perkantoran & Fasad Komersial',
+        image: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1800&q=85',
+        sector: 'Pembangunan Gedung Kantor, Ruko Komersial & Fasilitas Publik',
+      },
+      {
+        id: 3,
+        tag: 'ZERO-ACCIDENT K3 CULTURE • SMK3 TERVERIFIKASI',
+        location: 'Pengawasan Mutu Terpadu (PROKSI)',
+        caption: 'Dokumentasi Tim Engineer: Pengawasan Mutu Beton K-350 & Keselamatan Kerja',
+        image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1800&q=85',
+        sector: 'Manajemen Proyek Berstandar SNI dengan Pelaporan Real-Time',
+      },
+      {
+        id: 4,
+        tag: 'CIVIL ENGINEERING & HEAVY INFRASTRUCTURE',
+        location: 'Jawa Barat, Banten & Nasional',
+        caption: 'Dokumentasi Infrastruktur: Perkerasan Jalan Rigid Pavement & Drainase Kawasan',
+        image: 'https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=1800&q=85',
+        sector: 'Rekayasa Sipil, Perkerasan Jalan Beton, Pondasi Bore Pile & MEP',
+      },
+    ],
+  });
+
+  const [aboutForm, setAboutForm] = useState({
+    badge: sectionData?.about_data?.badge || '• TENTANG CV. WAHANA SINERGI MITRA',
+    title: sectionData?.about_data?.title || 'Kontraktor Umum & Rekayasa Sipil {Berpengalaman & Terpercaya}',
+    subtitle: sectionData?.about_data?.subtitle || 'Dengan dukungan tim insinyur sipil bersertifikat SKA/SKT, peralatan konstruksi modern, serta sistem pemantauan digital PROKSI, kami memastikan setiap tahapan proyek berjalan sesuai spesifikasi teknis SNI, tepat anggaran, dan tepat jadwal.',
+    experience_years: sectionData?.about_data?.experience_years || '12+ Tahun',
+    photo_main_url: sectionData?.about_data?.photo_main_url || 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=900&q=80',
+    photo_secondary_url: sectionData?.about_data?.photo_secondary_url || 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=600&q=80',
+    pillars: sectionData?.about_data?.pillars || [
+      { code: '01', title: 'Fokus Kepuasan Klien', subtitle: 'Customer Focus & Dedicated PM', description: 'Didampingi Project Manager khusus sejak tahap pra-desain hingga masa pemeliharaan selesai.', icon: 'Target' },
+      { code: '02', title: 'Prioritas Mutu SNI', subtitle: 'Lab-Tested Material Quality', description: 'Seluruh baja WF, besi beton ulir, dan ready-mix K-350 dilengkapi sertifikat uji laboratorium.', icon: 'Award' },
+      { code: '03', title: 'Layanan Teknis Prima', subtitle: 'Full Engineering & MEP Support', description: 'Integrasi pekerjaan sipil, arsitektur, struktur baja, dan instalasi MEP dalam satu komando.', icon: 'ThumbsUp' },
+      { code: '04', title: 'RAB Transparan & Kompetitif', subtitle: 'Auditable Engineering Estimate', description: 'Rincian volume dan harga satuan material terbuka tanpa biaya tersembunyi di tengah proyek.', icon: 'FileCheck2' },
+      { code: '05', title: 'Pengalaman & K3 Teruji', subtitle: 'Zero-Accident HSE Culture', description: 'Rekam jejak lebih dari 12 tahun menangani proyek industri, pergudangan, dan gedung komersial.', icon: 'HardHat' },
+    ],
+    certifications: sectionData?.about_data?.certifications || [
+      { code: 'ISO 9001:2015', title: 'Sistem Manajemen Mutu Konstruksi', issuer: 'Quality Management System Certified', desc: 'Standarisasi pengendalian mutu pengecoran, fabrikasi baja, dan ketepatan gambar kerja DED.', badgeText: 'Verified QMS' },
+      { code: 'ISO 45001:2018 & SMK3', title: 'Keselamatan & Kesehatan Kerja (K3)', issuer: 'Occupational Health & Safety System', desc: 'Penerapan wajib APD lengkap, izin kerja risiko tinggi (PTW), dan toolbox meeting harian.', badgeText: 'Zero Accident' },
+      { code: 'SBUJK & GAPENSI', title: 'Sertifikat Badan Usaha Jasa Konstruksi', issuer: 'Anggota Resmi GAPENSI & Terdaftar LPSE', desc: 'Legalitas penuh untuk mengikuti tender korporasi swasta nasional, BUMN, dan instansi pemerintah.', badgeText: 'Active License' },
+    ],
+    client_sectors: sectionData?.about_data?.client_sectors || [
+      { name: 'Kawasan Industri & Manufaktur', region: 'Cikarang • Karawang • Bekasi' },
+      { name: 'Pergudangan & Cold-Storage Logistik', region: 'Jabodetabek • Subang • Banten' },
+      { name: 'Gedung Perkantoran & Ruko Komersial', region: 'Jakarta • Bandung • Jawa Barat' },
+      { name: 'Fasilitas Pendidikan & Rumah Sakit', region: 'Jawa Barat • Jawa Tengah • Nasional' },
+      { name: 'Infrastruktur Jalan Beton & Drainase', region: 'Kawasan Niaga & Proyek Pemerintah' },
+    ],
   });
 
   const [estimatorForm, setEstimatorForm] = useState({
@@ -148,6 +211,11 @@ export default function Dashboard({
   const handleSaveHeroSection = (e) => {
     e.preventDefault();
     router.post('/admin/sections/hero', { data: heroForm }, { preserveScroll: true });
+  };
+
+  const handleSaveAboutSection = (e) => {
+    e.preventDefault();
+    router.post('/admin/sections/about_data', { data: aboutForm }, { preserveScroll: true });
   };
 
   const handleSaveEstimatorSection = (e) => {
@@ -238,6 +306,7 @@ export default function Dashboard({
     company_phone: settings.company_phone || '+62 812-3456-7890',
     company_email: settings.company_email || 'info@wahanasinergimitra.id',
     company_address: settings.company_address || '',
+    company_operating_hours: settings.company_operating_hours || 'Senin – Sabtu: 08.00 – 17.00 WIB',
     company_about: settings.company_about || '',
   });
 
@@ -835,7 +904,8 @@ export default function Dashboard({
                         <div>
                           <Text.Label className="text-blue-600">Editor Konten Seksi</Text.Label>
                           <Text.H2 className="text-[18px]">
-                            {activeSectionEditor === 'hero' && 'Seksi Banner Hero Utama'}
+                            {activeSectionEditor === 'hero' && 'Seksi Banner Hero Utama & 4 Slide Foto'}
+                            {activeSectionEditor === 'about_data' && 'Seksi Tentang Kami, 5 Pilar & Kredibilitas'}
                             {activeSectionEditor === 'estimator' && 'Kalkulator Simulasi Estimasi RAB'}
                             {activeSectionEditor === 'workflow' && 'Seksi Metodologi Kerja & Tahapan Proyek'}
                             {activeSectionEditor === 'proksi' && 'Seksi Ekosistem Aplikasi PROKSI'}
@@ -950,6 +1020,107 @@ export default function Dashboard({
                           </div>
                         </div>
 
+                        {/* 4-Slide Photo Slider Editor */}
+                        <div className="pt-5 border-t border-slate-100 space-y-4">
+                          <div>
+                            <Text.Label className="text-blue-600 block mb-1">
+                              Kelola 4 Slide Foto Konstruksi Hero
+                            </Text.Label>
+                            <Text.Caption className="text-slate-600">
+                              Unggah foto proyek lapangan atau masukkan URL gambar beserta caption untuk slider otomatis di bagian Hero.
+                            </Text.Caption>
+                          </div>
+
+                          <div className="space-y-4">
+                            {(heroForm.slides || []).map((slide, sIdx) => (
+                              <div key={slide.id || sIdx} className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs font-extrabold text-slate-800">
+                                    Slide #{sIdx + 1}
+                                  </span>
+                                  <span className="text-[11px] font-semibold text-slate-500">
+                                    {slide.location || 'Lokasi Proyek'}
+                                  </span>
+                                </div>
+
+                                <ImageUploader
+                                  value={slide.image}
+                                  onChange={(url) => {
+                                    const next = [...heroForm.slides];
+                                    next[sIdx] = { ...next[sIdx], image: url };
+                                    setHeroForm({ ...heroForm, slides: next });
+                                  }}
+                                  folder="general"
+                                  aspect="landscape"
+                                />
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                  <div>
+                                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                                      Tag Sertifikasi / Kategori
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={slide.tag || ''}
+                                      onChange={(e) => {
+                                        const next = [...heroForm.slides];
+                                        next[sIdx] = { ...next[sIdx], tag: e.target.value };
+                                        setHeroForm({ ...heroForm, slides: next });
+                                      }}
+                                      className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                                      Lokasi / Wilayah
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={slide.location || ''}
+                                      onChange={(e) => {
+                                        const next = [...heroForm.slides];
+                                        next[sIdx] = { ...next[sIdx], location: e.target.value };
+                                        setHeroForm({ ...heroForm, slides: next });
+                                      }}
+                                      className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                                      Judul / Caption Dokumentasi
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={slide.caption || ''}
+                                      onChange={(e) => {
+                                        const next = [...heroForm.slides];
+                                        next[sIdx] = { ...next[sIdx], caption: e.target.value };
+                                        setHeroForm({ ...heroForm, slides: next });
+                                      }}
+                                      className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                                      Fokus Spesialisasi Slide
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={slide.sector || ''}
+                                      onChange={(e) => {
+                                        const next = [...heroForm.slides];
+                                        next[sIdx] = { ...next[sIdx], sector: e.target.value };
+                                        setHeroForm({ ...heroForm, slides: next });
+                                      }}
+                                      className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900"
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
                         <div className="pt-4 flex justify-end">
                           <button
                             type="submit"
@@ -957,6 +1128,228 @@ export default function Dashboard({
                           >
                             <Save className="w-4 h-4" />
                             <span>Simpan Konten Hero</span>
+                          </button>
+                        </div>
+                      </form>
+                    )}
+
+                    {/* ABOUT & CREDIBILITY EDITOR */}
+                    {activeSectionEditor === 'about_data' && (
+                      <form onSubmit={handleSaveAboutSection} className="space-y-6 max-w-4xl">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                              Badge Overline
+                            </label>
+                            <input
+                              type="text"
+                              value={aboutForm.badge}
+                              onChange={(e) => setAboutForm({ ...aboutForm, badge: e.target.value })}
+                              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                              Pengalaman (Highlight Card)
+                            </label>
+                            <input
+                              type="text"
+                              value={aboutForm.experience_years}
+                              onChange={(e) => setAboutForm({ ...aboutForm, experience_years: e.target.value })}
+                              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                            Judul Utama (Gunakan &#123;kata&#125; untuk highlight gradien)
+                          </label>
+                          <input
+                            type="text"
+                            value={aboutForm.title}
+                            onChange={(e) => setAboutForm({ ...aboutForm, title: e.target.value })}
+                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                            Paragraf Pendukung / Engineering & PROKSI
+                          </label>
+                          <textarea
+                            rows={3}
+                            value={aboutForm.subtitle}
+                            onChange={(e) => setAboutForm({ ...aboutForm, subtitle: e.target.value })}
+                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-2">
+                              Foto Utama Proyek (Kolom Kanan Besar)
+                            </label>
+                            <ImageUploader
+                              value={aboutForm.photo_main_url}
+                              onChange={(url) => setAboutForm({ ...aboutForm, photo_main_url: url })}
+                              folder="general"
+                              aspect="landscape"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-2">
+                              Foto Sekunder Inspeksi K3 / HSE
+                            </label>
+                            <ImageUploader
+                              value={aboutForm.photo_secondary_url}
+                              onChange={(url) => setAboutForm({ ...aboutForm, photo_secondary_url: url })}
+                              folder="general"
+                              aspect="landscape"
+                            />
+                          </div>
+                        </div>
+
+                        {/* 5 Pillars */}
+                        <div className="pt-4 border-t border-slate-100 space-y-3">
+                          <Text.Label className="text-blue-600 block">5 Pilar Keunggulan Eksekusi WSM</Text.Label>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {(aboutForm.pillars || []).map((pillar, pIdx) => (
+                              <div key={pillar.code || pIdx} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+                                <span className="text-[11px] font-extrabold text-blue-700">Pilar {pillar.code}</span>
+                                <input
+                                  type="text"
+                                  value={pillar.title}
+                                  onChange={(e) => {
+                                    const next = [...aboutForm.pillars];
+                                    next[pIdx] = { ...next[pIdx], title: e.target.value };
+                                    setAboutForm({ ...aboutForm, pillars: next });
+                                  }}
+                                  placeholder="Judul Pilar"
+                                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900"
+                                />
+                                <input
+                                  type="text"
+                                  value={pillar.subtitle}
+                                  onChange={(e) => {
+                                    const next = [...aboutForm.pillars];
+                                    next[pIdx] = { ...next[pIdx], subtitle: e.target.value };
+                                    setAboutForm({ ...aboutForm, pillars: next });
+                                  }}
+                                  placeholder="Subjudul"
+                                  className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-700"
+                                />
+                                <textarea
+                                  rows={2}
+                                  value={pillar.description}
+                                  onChange={(e) => {
+                                    const next = [...aboutForm.pillars];
+                                    next[pIdx] = { ...next[pIdx], description: e.target.value };
+                                    setAboutForm({ ...aboutForm, pillars: next });
+                                  }}
+                                  placeholder="Deskripsi"
+                                  className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-700"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* 3 Certifications */}
+                        <div className="pt-4 border-t border-slate-100 space-y-3">
+                          <Text.Label className="text-emerald-700 block">3 Kartu Sertifikasi & Legalitas</Text.Label>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            {(aboutForm.certifications || []).map((cert, cIdx) => (
+                              <div key={cIdx} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+                                <input
+                                  type="text"
+                                  value={cert.code}
+                                  onChange={(e) => {
+                                    const next = [...aboutForm.certifications];
+                                    next[cIdx] = { ...next[cIdx], code: e.target.value };
+                                    setAboutForm({ ...aboutForm, certifications: next });
+                                  }}
+                                  placeholder="Kode Sertifikasi"
+                                  className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-blue-700"
+                                />
+                                <input
+                                  type="text"
+                                  value={cert.title}
+                                  onChange={(e) => {
+                                    const next = [...aboutForm.certifications];
+                                    next[cIdx] = { ...next[cIdx], title: e.target.value };
+                                    setAboutForm({ ...aboutForm, certifications: next });
+                                  }}
+                                  placeholder="Nama Sertifikasi"
+                                  className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900"
+                                />
+                                <input
+                                  type="text"
+                                  value={cert.badgeText}
+                                  onChange={(e) => {
+                                    const next = [...aboutForm.certifications];
+                                    next[cIdx] = { ...next[cIdx], badgeText: e.target.value };
+                                    setAboutForm({ ...aboutForm, certifications: next });
+                                  }}
+                                  placeholder="Badge Status"
+                                  className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-medium text-emerald-700"
+                                />
+                                <textarea
+                                  rows={2}
+                                  value={cert.desc}
+                                  onChange={(e) => {
+                                    const next = [...aboutForm.certifications];
+                                    next[cIdx] = { ...next[cIdx], desc: e.target.value };
+                                    setAboutForm({ ...aboutForm, certifications: next });
+                                  }}
+                                  placeholder="Keterangan"
+                                  className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-700"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* 5 Client Sectors */}
+                        <div className="pt-4 border-t border-slate-100 space-y-3">
+                          <Text.Label className="text-slate-700 block">5 Sektor Industri & Pemberi Tugas</Text.Label>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {(aboutForm.client_sectors || []).map((sec, idx) => (
+                              <div key={idx} className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 grid grid-cols-1 gap-2">
+                                <input
+                                  type="text"
+                                  value={sec.name}
+                                  onChange={(e) => {
+                                    const next = [...aboutForm.client_sectors];
+                                    next[idx] = { ...next[idx], name: e.target.value };
+                                    setAboutForm({ ...aboutForm, client_sectors: next });
+                                  }}
+                                  placeholder="Nama Sektor"
+                                  className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900"
+                                />
+                                <input
+                                  type="text"
+                                  value={sec.region}
+                                  onChange={(e) => {
+                                    const next = [...aboutForm.client_sectors];
+                                    next[idx] = { ...next[idx], region: e.target.value };
+                                    setAboutForm({ ...aboutForm, client_sectors: next });
+                                  }}
+                                  placeholder="Wilayah Operasional"
+                                  className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-600"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="pt-4 flex justify-end">
+                          <button
+                            type="submit"
+                            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/20 cursor-pointer"
+                          >
+                            <Save className="w-4 h-4" />
+                            <span>Simpan Konten Tentang Kami</span>
                           </button>
                         </div>
                       </form>
@@ -1349,14 +1742,17 @@ export default function Dashboard({
                     {[
                       {
                         key: 'hero',
-                        title: 'Hero Banner Utama',
-                        description: 'Seksi sambutan paling atas dengan judul, subjudul, dan tombol call-to-action.',
+                        title: 'Hero Banner & 4-Slide Foto',
+                        description: 'Seksi sambutan paling atas dengan 4 slide foto proyek, judul, dan tombol call-to-action.',
                         icon: Sparkles,
                         editorKey: 'hero',
-                        extraToggle: {
-                          key: 'hero_3d',
-                          label: 'Motion 3D Interaktif',
-                        },
+                      },
+                      {
+                        key: 'about',
+                        title: 'Tentang Kami & Kredibilitas',
+                        description: 'Profil perusahaan, 5 pilar keunggulan, sertifikasi ISO/SMK3/GAPENSI, & sektor klien.',
+                        icon: Award,
+                        editorKey: 'about_data',
                       },
                       {
                         key: 'services',
@@ -2737,6 +3133,19 @@ export default function Dashboard({
                           className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900"
                         />
                       </div>
+                    </div>
+
+                    <div className="mt-4">
+                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                        Jam Operasional (Top Bar Header)
+                      </label>
+                      <input
+                        type="text"
+                        value={settingsForm.company_operating_hours}
+                        onChange={(e) => setSettingsForm({ ...settingsForm, company_operating_hours: e.target.value })}
+                        placeholder="Senin – Sabtu: 08.00 – 17.00 WIB"
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                      />
                     </div>
 
                     <div className="mt-4">

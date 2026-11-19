@@ -33,6 +33,7 @@ class AdminDashboardController extends Controller
             'company_phone' => CompanySetting::get('company_phone', '+62 812-3456-7890'),
             'company_email' => CompanySetting::get('company_email', 'info@wahanasinergimitra.id'),
             'company_address' => CompanySetting::get('company_address', 'Jl. Sinergi Raya No. 88, Kawasan Niaga Terpadu, Jawa Barat, Indonesia'),
+            'company_operating_hours' => CompanySetting::get('company_operating_hours', 'Senin – Sabtu: 08.00 – 17.00 WIB'),
             'company_about' => CompanySetting::get('company_about', 'Perusahaan penyedia jasa pelaksana konstruksi terpercaya...'),
         ];
 
@@ -49,6 +50,7 @@ class AdminDashboardController extends Controller
         $visibility = CompanySetting::getSectionVisibility();
         $sectionData = [
             'hero' => CompanySetting::getSectionData('hero'),
+            'about_data' => CompanySetting::getSectionData('about_data'),
             'services_meta' => CompanySetting::getSectionData('services_meta'),
             'estimator_data' => CompanySetting::getSectionData('estimator_data'),
             'portfolio_meta' => CompanySetting::getSectionData('portfolio_meta'),
@@ -277,6 +279,7 @@ class AdminDashboardController extends Controller
             'company_phone',
             'company_email',
             'company_address',
+            'company_operating_hours',
             'company_about',
         ]);
 
@@ -345,6 +348,7 @@ class AdminDashboardController extends Controller
     {
         $allowedSections = [
             'hero',
+            'about_data',
             'services_meta',
             'estimator_data',
             'portfolio_meta',

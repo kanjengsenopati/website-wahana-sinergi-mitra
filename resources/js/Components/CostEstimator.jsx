@@ -107,7 +107,7 @@ export function CostEstimator({ data = {}, onApplyToForm }) {
       <div className="max-w-7xl mx-auto px-5">
         
         {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-12">
+        <div className="text-center max-w-5xl lg:max-w-6xl mx-auto mb-12">
           {badge && (
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 mb-3">
               <Calculator className="w-3.5 h-3.5 text-emerald-600" />
@@ -116,14 +116,14 @@ export function CostEstimator({ data = {}, onApplyToForm }) {
           )}
           <Text.AccentTitle text={title} className="text-[28px] sm:text-[38px] mb-3" />
           {subtitle && (
-            <Text.Body>
+            <Text.Body className="text-slate-700 max-w-5xl mx-auto">
               {subtitle}
             </Text.Body>
           )}
         </div>
 
-        {/* Main Card Container */}
-        <div className="bg-[#f8fafc] rounded-[24px] p-6 sm:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
+        {/* Main Card Container (Rule 1: rounded-[24px], shadow-[0_8px_30px_rgb(0,0,0,0.04)], no solid border on white cards) */}
+        <div className="bg-[#f8fafc] rounded-[24px] p-6 sm:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
             
             {/* Left Controls: Form Inputs */}
@@ -256,8 +256,8 @@ export function CostEstimator({ data = {}, onApplyToForm }) {
 
             </div>
 
-            {/* Right Summary: Live Result & Actions */}
-            <div className="lg:col-span-5 flex flex-col justify-between bg-white rounded-2xl p-6 sm:p-7 border border-slate-200/80 shadow-sm">
+            {/* Right Summary: Live Result & Actions (Rule 1: rounded-[24px], shadow-[0_8px_30px_rgb(0,0,0,0.04)], no solid border on white card) */}
+            <div className="lg:col-span-5 flex flex-col justify-between bg-white rounded-[24px] p-6 sm:p-7 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
               <div className="space-y-5">
                 
                 {/* Result Header */}
