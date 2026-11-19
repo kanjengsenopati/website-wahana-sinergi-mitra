@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { Link, router } from '@inertiajs/react';
 import { 
   MapPin, 
   ExternalLink, 
@@ -7,7 +8,8 @@ import {
   LayoutGrid, 
   Table2, 
   CheckCircle2,
-  FileSpreadsheet
+  FileSpreadsheet,
+  ArrowRight
 } from 'lucide-react';
 import Text from './Typography';
 
@@ -142,9 +144,9 @@ export function PortfolioSection({ projects = [], company = {}, meta = {} }) {
           /* MODE 1: VISUAL PHOTO CARDS GRID (Rule 1: rounded-[24px], shadow-[0_8px_30px_rgb(0,0,0,0.04)], no solid border on white cards) */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProjects.map((item, idx) => (
-              <div
+              <Link
                 key={item.id || idx}
-                onClick={() => setSelectedProject(item)}
+                href={`/proyek/${item.id}`}
                 className="group bg-white rounded-[24px] overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_14px_40px_rgb(0,0,0,0.08)] transition-all duration-300 flex flex-col justify-between cursor-pointer"
               >
                 {/* Image Container with Badges */}
@@ -233,7 +235,7 @@ export function PortfolioSection({ projects = [], company = {}, meta = {} }) {
                     </span>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         ) : (
@@ -277,7 +279,7 @@ export function PortfolioSection({ projects = [], company = {}, meta = {} }) {
                   {filteredProjects.map((item, idx) => (
                     <tr
                       key={item.id || idx}
-                      onClick={() => setSelectedProject(item)}
+                      onClick={() => router.visit(`/proyek/${item.id}`)}
                       className="hover:bg-blue-50/50 transition-colors cursor-pointer group"
                     >
                       <td className="py-3 px-3 text-center font-bold text-slate-600 tabular-nums">
@@ -350,10 +352,13 @@ export function PortfolioSection({ projects = [], company = {}, meta = {} }) {
               <X className="w-5 h-5" />
             </button>
 
-            <div className="h-64 rounded-2xl overflow-hidden bg-slate-100">
+            <div className="h-64 sm:h-72 rounded-2xl overflow-hidden bg-slate-100 relative">
               <img
-                src={selectedProject.thumbnail_url || 'https://images.unsplash.com/photo-1541888946425-d0fbb186c5f7?auto=format&fit=crop&w=800&q=80'}
+                src={selectedProject.thumbnail_url || 'https://images.unsplash.com/photo-1541888946425-d0fbb186c5f7?auto=format&fit=crop&w=1200&q=80'}
                 alt={selectedProject.title}
+                onError={(e) => {
+                  e.currentTarget.src = 'https://images.unsplash.com/photo-1541888946425-d0fbb186c5f7?auto=format&fit=crop&w=1200&q=80';
+                }}
                 className="w-full h-full object-cover"
               />
             </div>
@@ -367,9 +372,9 @@ export function PortfolioSection({ projects = [], company = {}, meta = {} }) {
                   Tahun Pengerjaan {selectedProject.year}
                 </span>
               </div>
-              <Text.H1 className="text-[22px] sm:text-[26px] mb-2">
+              <h3 className="text-lg sm:text-xl font-bold text-slate-900 tracking-[-0.025em] leading-snug mb-2">
                 {selectedProject.title}
-              </Text.H1>
+              </h3>
               <div className="flex flex-wrap items-center gap-4 text-[13px] text-slate-700 mb-4 font-medium">
                 <span className="flex items-center gap-1.5">
                   <MapPin className="w-4 h-4 text-emerald-600" />
@@ -389,14 +394,23 @@ export function PortfolioSection({ projects = [], company = {}, meta = {} }) {
                   <Text.Label className="block text-slate-600">NILAI KONTRAK TERVERIFIKASI</Text.Label>
                   <Text.Amount value={selectedProject.project_value || 0} className="text-[20px]" />
                 </div>
-                <a
-                  href={`https://wa.me/${cleanPhone}?text=Halo%20CV.%20Wahana%20Sinergi%20Mitra,%20saya%20tertarik%20dengan%20referensi%20proyek%20${encodeURIComponent(selectedProject.title)}.`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[13px] transition-all"
-                >
-                  Tanyakan Spek Proyek Ini
-                </a>
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/proyek/${selectedProject.id}`}
+                    className="px-4 py-2.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-[12px] inline-flex items-center gap-1.5 transition-all shadow-sm"
+                  >
+                    <span>Halaman Lengkap</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </Link>
+                  <a
+                    href={`https://wa.me/${cleanPhone}?text=Halo%20CV.%20Wahana%20Sinergi%20Mitra,%20saya%20tertarik%20dengan%20referensi%20proyek%20${encodeURIComponent(selectedProject.title)}.`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[13px] transition-all"
+                  >
+                    Tanyakan Spek Ini
+                  </a>
+                </div>
               </div>
             </div>
           </div>

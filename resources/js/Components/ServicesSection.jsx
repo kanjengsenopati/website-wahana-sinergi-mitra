@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from '@inertiajs/react';
 import { 
   Building2, 
   HardHat, 
@@ -9,7 +10,8 @@ import {
   ArrowUpRight, 
   CheckCircle2,
   ShieldCheck,
-  Sparkles
+  Sparkles,
+  ExternalLink
 } from 'lucide-react';
 import Text from './Typography';
 
@@ -104,6 +106,9 @@ export function ServicesSection({ services = [], meta = {} }) {
                   <img
                     src={photoUrl}
                     alt={service.title}
+                    onError={(e) => {
+                      e.currentTarget.src = servicePhotos[idx % servicePhotos.length];
+                    }}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/45 to-slate-950/30" />
@@ -136,10 +141,14 @@ export function ServicesSection({ services = [], meta = {} }) {
                     <p className="text-[13px] font-medium text-slate-200 tracking-[-0.015em] line-clamp-2 leading-snug">
                       {service.short_description}
                     </p>
-                    <div className="pt-2 flex items-center justify-between text-[12px] font-bold text-sky-300 tracking-[-0.015em]">
-                      <span>Lihat Spesifikasi Teknis</span>
+                    <Link
+                      href={`/layanan/${service.id}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="pt-2 flex items-center justify-between text-[12px] font-bold text-sky-300 hover:text-white transition-colors tracking-[-0.015em]"
+                    >
+                      <span>Lihat Spesifikasi &amp; Detail Divisi ➔</span>
                       <ArrowUpRight className="w-4 h-4" />
-                    </div>
+                    </Link>
                   </div>
                 </div>
 
@@ -193,14 +202,14 @@ export function ServicesSection({ services = [], meta = {} }) {
 
                   {/* Bottom Card Area */}
                   <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-2 min-w-0">
-                    <a
-                      href="#inquiry"
+                    <Link
+                      href={`/layanan/${service.id}`}
                       onClick={(e) => e.stopPropagation()}
-                      className="inline-flex items-center gap-1.5 text-[13px] font-bold text-blue-600 hover:text-blue-700 transition-colors tracking-[-0.015em]"
+                      className="inline-flex items-center gap-1.5 text-[12px] font-bold text-blue-600 hover:text-blue-800 transition-colors tracking-[-0.015em]"
                     >
-                      <span>Konsultasikan Pekerjaan Ini</span>
-                      <ArrowUpRight className="w-4 h-4 stroke-[2.5]" />
-                    </a>
+                      <span>Buka Halaman Lengkap</span>
+                      <ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5]" />
+                    </Link>
                     <span className="text-[11px] font-bold text-emerald-600 bg-emerald-600/10 px-2.5 py-1 rounded-full shrink-0">
                       Standar SNI
                     </span>

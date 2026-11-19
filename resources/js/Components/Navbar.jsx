@@ -34,14 +34,14 @@ export function Navbar({ company = {}, visibility = {} }) {
   }, []);
 
   const allNavLinks = [
-    { key: 'hero', name: 'BERANDA', href: '#beranda' },
-    { key: 'about', name: 'TENTANG KAMI', href: '#tentang' },
-    { key: 'services', name: 'LAYANAN', href: '#layanan' },
-    { key: 'portfolio', name: 'PORTOFOLIO', href: '#portofolio' },
-    { key: 'estimator', name: 'SIMULASI RAB', href: '#estimator' },
-    { key: 'proksi', name: 'SISTEM PROKSI', href: '#proksi' },
-    { key: 'workflow', name: 'METODOLOGI', href: '#keunggulan' },
-    { key: 'inquiry', name: 'KONTAK', href: '#inquiry' },
+    { key: 'hero', name: 'BERANDA', href: '/#beranda' },
+    { key: 'about', name: 'TENTANG KAMI', href: '/#tentang' },
+    { key: 'services', name: 'LAYANAN', href: '/#layanan' },
+    { key: 'portfolio', name: 'PORTOFOLIO', href: '/#portofolio' },
+    { key: 'estimator', name: 'SIMULASI RAB', href: '/#estimator' },
+    { key: 'proksi', name: 'SISTEM PROKSI', href: '/#proksi' },
+    { key: 'workflow', name: 'METODOLOGI', href: '/#keunggulan' },
+    { key: 'inquiry', name: 'KONTAK', href: '/#inquiry' },
   ];
 
   const navLinks = allNavLinks.filter((item) => visibility?.[item.key] !== false);

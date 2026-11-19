@@ -108,4 +108,69 @@ class LandingPageController extends Controller
 
         return redirect()->back()->with('success', 'Konsultasi proyek Anda telah berhasil kami terima. Tim engineering CV. Wahana Sinergi Mitra akan segera menghubungi Anda dalam 1x24 jam kerja.');
     }
+
+    /**
+     * Display dedicated full page for a specific project portfolio.
+     */
+    public function showProject(Project $project): Response
+    {
+        $relatedProjects = Project::where('id', '!=', $project->id)
+            ->where(function ($q) use ($project) {
+                if ($project->category) {
+                    $q->where('category', $project->category);
+                }
+            })
+            ->orWhere('id', '!=', $project->id)
+            ->orderBy('order')
+            ->take(3)
+            ->get();
+
+        $company = [
+            'phone' => CompanySetting::get('company_phone', '+62 812-3456-7890'),
+            'email' => CompanySetting::get('company_email', 'info@wahanasinergimitra.id'),
+            'address' => CompanySetting::get('company_address', 'Jl. Sinergi Raya No. 88, Kawasan Niaga Terpadu, Jawa Barat, Indonesia'),
+            'about' => CompanySetting::get('company_about', 'Perusahaan penyedia jasa pelaksana konstruksi terpercaya yang melayani pekerjaan gedung komersial, industri pergudangan, infrastruktur jalan/jembatan, dan rekayasa sipil berstandar mutu tinggi.'),
+        ];
+
+        return Inertia::render('Public/ProjectDetail', [
+            'project' => $project,
+            'relatedProjects' => $relatedProjects,
+            'company' => $company,
+        ]);
+    }
+
+    /**
+     * Display dedicated full page for a specific service division.
+     */
+    public function showService(Service $service): Response
+    {
+        $relatedServices = Service::where('id', '!=', $service->id)
+            ->where('is_active', true)
+            ->orderBy('order')
+            ->take(3)
+            ->get();
+
+        $relevantProjects = Project::where('category', 'like', "%{$service->title}%")
+            ->orWhere('description', 'like', "%{$service->title}%")
+            ->take(3)
+            ->get();
+
+        if ($relevantProjects->isEmpty()) {
+            $relevantProjects = Project::orderBy('order')->take(3)->get();
+        }
+
+        $company = [
+            'phone' => CompanySetting::get('company_phone', '+62 812-3456-7890'),
+            'email' => CompanySetting::get('company_email', 'info@wahanasinergimitra.id'),
+            'address' => CompanySetting::get('company_address', 'Jl. Sinergi Raya No. 88, Kawasan Niaga Terpadu, Jawa Barat, Indonesia'),
+            'about' => CompanySetting::get('company_about', 'Perusahaan penyedia jasa pelaksana konstruksi terpercaya yang melayani pekerjaan gedung komersial, industri pergudangan, infrastruktur jalan/jembatan, dan rekayasa sipil berstandar mutu tinggi.'),
+        ];
+
+        return Inertia::render('Public/ServiceDetail', [
+            'service' => $service,
+            'relatedServices' => $relatedServices,
+            'relevantProjects' => $relevantProjects,
+            'company' => $company,
+        ]);
+    }
 }

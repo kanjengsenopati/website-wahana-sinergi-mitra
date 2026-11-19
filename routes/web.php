@@ -5,8 +5,10 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LandingPageController;
 use Illuminate\Support\Facades\Route;
 
-// Public Landing Page
+// Public Landing Page & Dedicated Detail Pages
 Route::get('/', [LandingPageController::class, 'index'])->name('home');
+Route::get('/proyek/{project}', [LandingPageController::class, 'showProject'])->name('project.detail');
+Route::get('/layanan/{service}', [LandingPageController::class, 'showService'])->name('service.detail');
 Route::post('/inquiry', [LandingPageController::class, 'storeInquiry'])->name('inquiry.store');
 
 // Custom PortOps-Themed Auth

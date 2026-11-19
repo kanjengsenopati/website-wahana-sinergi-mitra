@@ -13,13 +13,13 @@ export function Footer({ company = {}, visibility = {} }) {
   const aboutDisplay = company?.about || 'Perusahaan penyedia jasa pelaksana konstruksi terpercaya yang melayani pekerjaan gedung komersial, industri pergudangan, infrastruktur jalan/jembatan, dan rekayasa sipil berstandar mutu tinggi di seluruh wilayah Indonesia.';
 
   const quickLinks = [
-    { key: 'hero', name: 'Beranda Utama', href: '#beranda' },
-    { key: 'about', name: 'Tentang Kami & Sertifikasi', href: '#tentang' },
-    { key: 'services', name: 'Divisi Layanan Konstruksi', href: '#layanan' },
-    { key: 'portfolio', name: 'Portofolio & Tabel Kontrak', href: '#portofolio' },
-    { key: 'estimator', name: 'Kalkulator Simulasi RAB', href: '#estimator' },
-    { key: 'proksi', name: 'Ekosistem Digital PROKSI', href: '#proksi' },
-    { key: 'workflow', name: 'Metodologi & SOP Kerja', href: '#keunggulan' },
+    { key: 'hero', name: 'Beranda Utama', href: '/#beranda' },
+    { key: 'about', name: 'Tentang Kami & Sertifikasi', href: '/#tentang' },
+    { key: 'services', name: 'Divisi Layanan Konstruksi', href: '/#layanan' },
+    { key: 'portfolio', name: 'Portofolio & Tabel Kontrak', href: '/#portofolio' },
+    { key: 'estimator', name: 'Kalkulator Simulasi RAB', href: '/#estimator' },
+    { key: 'proksi', name: 'Ekosistem Digital PROKSI', href: '/#proksi' },
+    { key: 'workflow', name: 'Metodologi & SOP Kerja', href: '/#keunggulan' },
   ].filter((item) => visibility?.[item.key] !== false);
 
   return (
