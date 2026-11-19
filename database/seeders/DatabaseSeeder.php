@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // 1. Create Default Admin User for Filament (/admin)
-        User::firstOrCreate(
+        User::updateOrCreate(
             ['email' => 'admin@wahanasinergimitra.id'],
             [
                 'name' => 'Administrator WSM',

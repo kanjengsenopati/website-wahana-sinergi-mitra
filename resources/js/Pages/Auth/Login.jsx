@@ -5,7 +5,6 @@ import {
   Mail, 
   Lock, 
   ArrowRight, 
-  Zap, 
   FolderKanban, 
   SlidersHorizontal, 
   MessageSquareText, 
@@ -14,27 +13,17 @@ import {
   ArrowLeft 
 } from 'lucide-react';
 
-export default function Login({ demoUser = {} }) {
+export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
 
   const { data, setData, post, processing, errors, reset } = useForm({
-    email: 'admin@wahanasinergimitra.id',
-    password: 'password123',
+    email: '',
+    password: '',
     remember: true,
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    post('/login');
-  };
-
-  const handleQuickDemoLogin = () => {
-    setData({
-      email: demoUser.email || 'admin@wahanasinergimitra.id',
-      password: demoUser.password || 'password123',
-      remember: true,
-    });
-    // Auto-submit
     post('/login');
   };
 
@@ -128,7 +117,7 @@ export default function Login({ demoUser = {} }) {
                     Masuk ke Panel Admin Website
                   </h3>
                   <p className="text-sm text-slate-600 mt-0.5 tracking-[-0.015em]">
-                    Silakan masuk dengan akun pengelola website atau gunakan Demo Login
+                    Silakan masukkan kredensial resmi akun pengelola website
                   </p>
                 </div>
                 <span className="px-2.5 py-1 text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200 rounded-lg shrink-0 whitespace-nowrap">
@@ -215,58 +204,6 @@ export default function Login({ demoUser = {} }) {
                 </button>
 
               </form>
-
-              {/* Quick Demo Login Section */}
-              <div className="mt-8 pt-6 border-t border-slate-200">
-                <div className="flex items-center justify-between gap-2 mb-3 min-w-0">
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <Zap className="w-4 h-4 text-sky-600 shrink-0" />
-                    <span
-                      title="Quick Demo Login (1-Klik)"
-                      className="text-xs font-bold text-slate-800 uppercase tracking-[-0.015em] whitespace-nowrap truncate"
-                    >
-                      Quick Demo Login (1-Klik)
-                    </span>
-                  </div>
-                  <span className="text-xs font-semibold text-sky-700 bg-sky-50 px-2 py-0.5 rounded border border-sky-200 shrink-0 whitespace-nowrap">
-                    CMS Manager
-                  </span>
-                </div>
-
-                {/* Demo User Card */}
-                <div className="bg-gradient-to-r from-sky-50/80 via-blue-50/50 to-indigo-50/80 p-3.5 rounded-[24px] border border-sky-300 shadow-sm flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-sky-600 to-blue-700 text-white flex items-center justify-center font-black text-base shadow-md shadow-sky-600/30 shrink-0">
-                      A
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span
-                          title={demoUser.name || 'Admin Website WSM'}
-                          className="font-bold text-sm text-slate-900 whitespace-nowrap truncate tracking-[-0.025em]"
-                        >
-                          {demoUser.name || 'Admin Website WSM'}
-                        </span>
-                        <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-300 shrink-0 whitespace-nowrap">
-                          {demoUser.role || 'CMS Manager'}
-                        </span>
-                      </div>
-                      <span className="text-xs text-slate-600 font-mono block mt-0.5 truncate tracking-[-0.015em]">
-                        {demoUser.email || 'admin@wahanasinergimitra.id'}
-                      </span>
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    disabled={processing}
-                    onClick={handleQuickDemoLogin}
-                    className="px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-sky-600 to-blue-700 hover:from-sky-700 hover:to-blue-800 rounded-xl shadow-md shadow-sky-600/25 shrink-0 whitespace-nowrap transition-all cursor-pointer disabled:opacity-50 tracking-[-0.015em]"
-                  >
-                    1-Klik Masuk
-                  </button>
-                </div>
-              </div>
 
             </div>
 

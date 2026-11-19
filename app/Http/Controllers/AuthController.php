@@ -18,14 +18,7 @@ class AuthController extends Controller
             return redirect('/admin');
         }
 
-        return Inertia::render('Auth/Login', [
-            'demoUser' => [
-                'name' => 'Admin Website WSM',
-                'email' => 'admin@wahanasinergimitra.id',
-                'role' => 'CMS Manager',
-                'password' => 'password123',
-            ],
-        ]);
+        return Inertia::render('Auth/Login');
     }
 
     /**
