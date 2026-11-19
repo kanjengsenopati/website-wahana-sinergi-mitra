@@ -651,12 +651,12 @@ export default function Dashboard({
                     : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
                 }`}
               >
-                <div className="flex items-center gap-2.5">
-                  <Layers className="w-4 h-4 text-emerald-400" />
-                  <span>Konten Landing Page (SSOT)</span>
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Layers className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span className="truncate">Seksi Landing Page</span>
                 </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                  Toggle
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 shrink-0">
+                  10
                 </span>
               </button>
 
@@ -1000,26 +1000,26 @@ export default function Dashboard({
             {activeTab === 'sections' && (
               <div className="space-y-6">
                 {/* Header Banner */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-[24px] border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
                   <div>
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200/80 mb-2 shadow-xs">
-                      <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
-                      <Text.Label className="text-blue-700">Centralized SSOT Manager</Text.Label>
+                    <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-extrabold mb-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
+                      <span>Centralized SSOT Manager</span>
                     </div>
-                    <Text.H1 className="text-[20px] sm:text-[24px] text-slate-900 font-bold">
-                      Konten & Tampilan Landing Page Publik
-                    </Text.H1>
-                    <Text.Body className="text-[13px] text-slate-600 max-w-2xl mt-1">
+                    <h2 className="text-lg font-bold text-slate-900 tracking-[-0.025em]">
+                      Konten &amp; Tampilan Landing Page Publik
+                    </h2>
+                    <p className="text-xs text-slate-500 mt-0.5">
                       Kendalikan visibilitas (ON/OFF) seluruh seksi secara instan dan sesuaikan teks, tarif dasar RAB, metrik teknologi PROKSI, serta alur metodologi kerja tanpa hardcoded.
-                    </Text.Body>
+                    </p>
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 shrink-0">
                     <a
                       href="/"
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-colors shrink-0"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-colors shrink-0"
                     >
                       <ExternalLink className="w-4 h-4 text-slate-600" />
                       <span>Buka Web Publik</span>
@@ -3401,29 +3401,29 @@ export default function Dashboard({
             {activeTab === 'users' && (
               <div className="space-y-6 max-w-5xl">
                 {/* Header Section */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-[24px] bg-white border border-slate-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="px-2.5 py-0.5 rounded-full text-[10.5px] font-extrabold bg-blue-100 text-blue-800">
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-700">
                         AKSES KONTROL CMS
                       </span>
-                      <span className="text-xs text-slate-500 font-semibold">
+                      <span className="text-xs text-slate-500 font-medium">
                         • {users.length} Total Akun
                       </span>
                     </div>
-                    <Text.H1 className="text-xl sm:text-2xl font-bold text-slate-900">
-                      Manajemen Pengguna & Peran
-                    </Text.H1>
-                    <Text.Caption className="text-slate-600 block mt-1">
+                    <h2 className="text-lg font-bold text-slate-900 tracking-[-0.025em]">
+                      Manajemen Pengguna &amp; Peran
+                    </h2>
+                    <p className="text-xs text-slate-500 mt-0.5">
                       Kelola hak akses pengelola website: Super Admin (Akses Penuh) dan Editor (Kelola Konten).
-                    </Text.Caption>
+                    </p>
                   </div>
 
                   {currentUser?.role === 'Super Admin' && (
                     <button
                       type="button"
                       onClick={openCreateUserModal}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-600/20 transition-all cursor-pointer shrink-0"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-600/20 transition-all cursor-pointer shrink-0"
                     >
                       <UserPlus className="w-4 h-4" />
                       <span>Tambah Pengguna Baru</span>
