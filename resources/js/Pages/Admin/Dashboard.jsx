@@ -511,6 +511,7 @@ export default function Dashboard({
   const [serviceForm, setServiceForm] = useState({
     title: '',
     icon: 'Building2',
+    image_url: '',
     short_description: '',
     full_description: '',
     order: 0,
@@ -611,6 +612,7 @@ export default function Dashboard({
     setServiceForm({
       title: '',
       icon: 'Building2',
+      image_url: '/images/project-placeholder.jpg',
       short_description: '',
       full_description: '',
       order: services.length + 1,
@@ -624,6 +626,7 @@ export default function Dashboard({
     setServiceForm({
       title: item.title,
       icon: item.icon,
+      image_url: item.image_url || '/images/project-placeholder.jpg',
       short_description: item.short_description,
       full_description: item.full_description || '',
       order: item.order || 0,
@@ -2821,53 +2824,85 @@ export default function Dashboard({
                       )}
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {filteredServices.map((srv, idx) => (
-                        <div key={srv.id} className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm flex flex-col justify-between">
-                          <div>
-                            <div className="flex items-center justify-between gap-2 min-w-0 mb-3">
-                              <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700 shrink-0">
-                                <HardHat className="w-4 h-4" />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                      {filteredServices.map((srv, idx) => {
+                        const IconComp = iconMap[srv.icon] || Building2;
+                        const cardImg = srv.image_url || '/images/project-placeholder.jpg';
+
+                        return (
+                          <div key={srv.id} className="bg-white rounded-3xl border border-slate-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden flex flex-col justify-between hover:shadow-[0_14px_40px_rgb(0,0,0,0.08)] transition-all group">
+                            {/* Card Image Banner */}
+                            <div className="relative h-40 w-full bg-slate-900 overflow-hidden">
+                              <img
+                                src={cardImg}
+                                alt={srv.title}
+                                onError={(e) => {
+                                  e.currentTarget.onerror = null;
+                                  e.currentTarget.src = '/images/project-placeholder.jpg';
+                                }}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/30 to-transparent" />
+                              
+                              <div className="absolute top-3.5 left-3.5 flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-xl bg-white/20 backdrop-blur-md text-white flex items-center justify-center border border-white/20 shadow-xs">
+                                  <IconComp className="w-4 h-4" />
+                                </div>
+                                <span className="text-[10px] font-extrabold text-sky-300 uppercase tracking-[-0.015em] bg-slate-900/60 backdrop-blur-sm px-2 py-0.5 rounded-full border border-white/10">
+                                  Divisi 0{srv.order || idx + 1}
+                                </span>
                               </div>
-                              <span className="text-[11px] font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded-full">
-                                Urutan: {srv.order || idx + 1}
-                              </span>
+
+                              <div className="absolute top-3.5 right-3.5">
+                                <span className="text-[10px] font-bold text-white bg-slate-900/80 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10">
+                                  Urutan: {srv.order || idx + 1}
+                                </span>
+                              </div>
+
+                              <div className="absolute bottom-3 left-3.5 right-3.5">
+                                <h3 className="font-bold text-white text-[14.5px] truncate drop-shadow-sm" title={srv.title}>
+                                  {srv.title}
+                                </h3>
+                              </div>
                             </div>
 
-                            <Text.H2 title={srv.title} singleLine className="text-[15px] mb-1.5">
-                              {srv.title}
-                            </Text.H2>
-                            <Text.Body className="text-xs text-slate-500 line-clamp-3 mb-4">
-                              {srv.short_description}
-                            </Text.Body>
-                          </div>
+                            {/* Card Body */}
+                            <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3">
+                              <Text.Body className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                                {srv.short_description}
+                              </Text.Body>
 
-                          <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                              srv.is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'
-                            }`}>
-                              {srv.is_active ? 'Aktif' : 'Non-Aktif'}
-                            </span>
+                              <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                                <span className={`px-2.5 py-0.5 rounded-full text-[10.5px] font-bold ${
+                                  srv.is_active ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500'
+                                }`}>
+                                  {srv.is_active ? 'Aktif' : 'Non-Aktif'}
+                                </span>
 
-                            <div className="flex items-center gap-1">
-                              <button
-                                type="button"
-                                onClick={() => openEditService(srv)}
-                                className="p-1.5 rounded-lg text-slate-600 hover:text-sky-600 hover:bg-sky-50"
-                              >
-                                <Edit3 className="w-4 h-4" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => deleteService(srv.id)}
-                                className="p-1.5 rounded-lg text-slate-600 hover:text-rose-600 hover:bg-rose-50"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
+                                <div className="flex items-center gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => openEditService(srv)}
+                                    className="p-1.5 rounded-xl text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+                                    title="Edit Layanan"
+                                  >
+                                    <Edit3 className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => deleteService(srv.id)}
+                                    className="p-1.5 rounded-xl text-slate-600 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                                    title="Hapus Layanan"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </div>
                             </div>
+
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -2906,83 +2941,176 @@ export default function Dashboard({
                   </button>
                 </div>
 
-                <form onSubmit={submitService} className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-sm space-y-4 max-w-2xl">
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
-                      Nama Layanan <span className="text-rose-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={serviceForm.title}
-                      onChange={(e) => setServiceForm({ ...serviceForm, title: e.target.value })}
-                      placeholder="Contoh: Civil & Structural Engineering"
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
+                {/* Form Body Split: Inputs on Left (8 Cols), Realtime Card Preview on Right (4 Cols) */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  
+                  {/* Left Form (8 Cols) */}
+                  <form onSubmit={submitService} className="lg:col-span-8 bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-sm space-y-4">
                     <div>
                       <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
-                        Icon Representatif
-                      </label>
-                      <select
-                        value={serviceForm.icon}
-                        onChange={(e) => setServiceForm({ ...serviceForm, icon: e.target.value })}
-                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900"
-                      >
-                        <option value="Building2">Building2 (Gedung)</option>
-                        <option value="HardHat">HardHat (K3 / Kontraktor)</option>
-                        <option value="Warehouse">Warehouse (Pergudangan)</option>
-                        <option value="Briefcase">Briefcase (Komersial)</option>
-                        <option value="Wrench">Wrench (MEP / Utilitas)</option>
-                        <option value="Hammer">Hammer (Renovasi)</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
-                        Urutan Tampil
+                        Nama Layanan <span className="text-rose-500">*</span>
                       </label>
                       <input
-                        type="number"
-                        value={serviceForm.order}
-                        onChange={(e) => setServiceForm({ ...serviceForm, order: parseInt(e.target.value, 10) || 0 })}
-                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900"
+                        type="text"
+                        required
+                        value={serviceForm.title}
+                        onChange={(e) => setServiceForm({ ...serviceForm, title: e.target.value })}
+                        placeholder="Contoh: Civil & Structural Engineering"
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
                       />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                          Icon Representatif
+                        </label>
+                        <select
+                          value={serviceForm.icon}
+                          onChange={(e) => setServiceForm({ ...serviceForm, icon: e.target.value })}
+                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                        >
+                          <option value="Building2">Building2 (Gedung)</option>
+                          <option value="HardHat">HardHat (K3 / Kontraktor)</option>
+                          <option value="Warehouse">Warehouse (Pergudangan)</option>
+                          <option value="Briefcase">Briefcase (Komersial)</option>
+                          <option value="Wrench">Wrench (MEP / Utilitas)</option>
+                          <option value="Hammer">Hammer (Renovasi)</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                          Urutan Tampil
+                        </label>
+                        <input
+                          type="number"
+                          value={serviceForm.order}
+                          onChange={(e) => setServiceForm({ ...serviceForm, order: parseInt(e.target.value, 10) || 0 })}
+                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                        Deskripsi Singkat (Tampil di Kartu) <span className="text-rose-500">*</span>
+                      </label>
+                      <textarea
+                        rows={3}
+                        required
+                        value={serviceForm.short_description}
+                        onChange={(e) => setServiceForm({ ...serviceForm, short_description: e.target.value })}
+                        placeholder="Jelaskan ruang lingkup pekerjaan layanan ini secara padat..."
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      />
+                    </div>
+
+                    {/* Upload Foto Layanan (Image / Banner) */}
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                        Foto Layanan Konstruksi (Image / Banner) <span className="text-rose-500">*</span>
+                      </label>
+                      <ImageUploader
+                        value={serviceForm.image_url}
+                        onChange={(url) => setServiceForm({ ...serviceForm, image_url: url })}
+                        folder="services"
+                        aspect="landscape"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                        Deskripsi Lengkap Spesifikasi Teknis Divisi (Opsional)
+                      </label>
+                      <textarea
+                        rows={4}
+                        value={serviceForm.full_description}
+                        onChange={(e) => setServiceForm({ ...serviceForm, full_description: e.target.value })}
+                        placeholder="Rincian lengkap ruang lingkup, standar material, dan sertifikasi keahlian divisi..."
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      />
+                    </div>
+
+                    <div className="pt-2 flex items-center justify-between border-t border-slate-100">
+                      <button
+                        type="button"
+                        onClick={() => setEditorMode(null)}
+                        className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl cursor-pointer"
+                      >
+                        Batal
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-md shadow-sky-600/20 cursor-pointer"
+                      >
+                        {editingItem ? 'Simpan Pembaruan' : 'Tambahkan Layanan'}
+                      </button>
+                    </div>
+                  </form>
+
+                  {/* Right Live Preview Card (4 Cols - Mirroring Landing Page Vibe) */}
+                  <div className="lg:col-span-4 space-y-3">
+                    <Text.Label className="text-slate-500 block">Live Preview Tampilan Landing Page</Text.Label>
+
+                    <div className="relative h-[320px] rounded-3xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-800 bg-[#0B2447] text-white">
+                      <img
+                        src={
+                          serviceForm.image_url && !serviceForm.image_url.includes('1541888946425')
+                            ? serviceForm.image_url
+                            : '/images/project-placeholder.jpg'
+                        }
+                        alt="Preview"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = '/images/project-placeholder.jpg';
+                        }}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/45 to-slate-950/30" />
+
+                      <div className="absolute top-4 left-4 right-4 flex items-center justify-between gap-2">
+                        <div className="w-9 h-9 rounded-xl bg-white/15 backdrop-blur-md text-white flex items-center justify-center border border-white/20">
+                          {(() => {
+                            const IconComp = iconMap[serviceForm.icon] || Building2;
+                            return <IconComp className="w-4 h-4 stroke-[2]" />;
+                          })()}
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-bold shadow-xs">
+                            STANDAR MUTU &amp; K3
+                          </span>
+                          <span className="px-2 py-0.5 rounded-full bg-white/90 text-slate-900 text-[10px] font-black">
+                            0{serviceForm.order || 1}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="absolute bottom-4 left-4 right-4 space-y-1.5">
+                        <h3 className="text-[16px] font-bold text-white tracking-[-0.025em] leading-snug line-clamp-1" title={serviceForm.title}>
+                          {serviceForm.title || 'Nama Layanan Baru'}
+                        </h3>
+                        <p className="text-[12px] text-slate-200 font-medium line-clamp-2 leading-relaxed">
+                          {serviceForm.short_description || 'Deskripsi singkat layanan akan tampil di sini...'}
+                        </p>
+                        <div className="pt-1 flex items-center gap-1 text-[11px] font-bold text-sky-300">
+                          <span>Lihat Spesifikasi &amp; Detail Divisi ➔</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-3.5 rounded-2xl bg-blue-50/70 border border-blue-100 text-xs text-blue-900 space-y-1">
+                      <span className="font-bold flex items-center gap-1 text-blue-800">
+                        <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                        Sinkronisasi Otomatis
+                      </span>
+                      <p className="text-blue-800 text-[11.5px] leading-relaxed">
+                        Foto layanan yang Anda unggah di sini akan langsung tampil pada kartu seksi Layanan di landing page publik dan hero banner halaman khusus detail (/layanan/{'{id}'}).
+                      </p>
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
-                      Deskripsi Singkat (Tampil di Kartu)
-                    </label>
-                    <textarea
-                      rows={3}
-                      required
-                      value={serviceForm.short_description}
-                      onChange={(e) => setServiceForm({ ...serviceForm, short_description: e.target.value })}
-                      placeholder="Jelaskan ruang lingkup pekerjaan layanan ini secara padat..."
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
-                    />
-                  </div>
-
-                  <div className="pt-2 flex justify-end gap-2 border-t border-slate-100">
-                    <button
-                      type="button"
-                      onClick={() => setEditorMode(null)}
-                      className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl"
-                    >
-                      Batal
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs"
-                    >
-                      Simpan Layanan
-                    </button>
-                  </div>
-                </form>
+                </div>
               </div>
             )}
 

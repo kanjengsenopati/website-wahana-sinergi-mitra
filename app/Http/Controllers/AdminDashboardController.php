@@ -152,6 +152,7 @@ class AdminDashboardController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'icon' => 'required|string|max:50',
+            'image_url' => 'nullable|string',
             'short_description' => 'required|string',
             'full_description' => 'nullable|string',
             'order' => 'integer',
@@ -175,6 +176,7 @@ class AdminDashboardController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'icon' => 'required|string|max:50',
+            'image_url' => 'nullable|string',
             'short_description' => 'required|string',
             'full_description' => 'nullable|string',
             'order' => 'integer',
@@ -308,7 +310,7 @@ class AdminDashboardController extends Controller
     {
         $request->validate([
             'image' => 'required|file|image|mimes:jpeg,png,jpg,webp,avif|max:5120',
-            'folder' => 'nullable|string|in:projects,testimonials,general',
+            'folder' => 'nullable|string|in:projects,services,testimonials,general',
         ]);
 
         $folder = $request->input('folder', 'general');
