@@ -107,7 +107,8 @@ export function ServicesSection({ services = [], meta = {} }) {
                     src={photoUrl}
                     alt={service.title}
                     onError={(e) => {
-                      e.currentTarget.src = servicePhotos[idx % servicePhotos.length];
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = '/images/project-placeholder.jpg';
                     }}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />

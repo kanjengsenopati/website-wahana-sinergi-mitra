@@ -30,7 +30,9 @@ export default function ProjectDetail({
 
   const waUrl = `https://wa.me/${cleanPhone}?text=Halo%20CV.%20Wahana%20Sinergi%20Mitra,%20saya%20tertarik%20dengan%20proyek%20${encodeURIComponent(project.title || '')}.%20Bisa%20konsultasi%20mengenai%20spesifikasi%20dan%20anggarannya?`;
 
-  const fallbackImage = 'https://images.unsplash.com/photo-1541888946425-d0fbb186c5f7?auto=format&fit=crop&w=1200&q=80';
+  const fallbackImage = '/images/project-placeholder.jpg';
+  const isBrokenDefault = !project.thumbnail_url || project.thumbnail_url.includes('1541888946425');
+  const validImageUrl = isBrokenDefault ? fallbackImage : project.thumbnail_url;
 
   const handleShare = () => {
     if (navigator.share) {
@@ -105,9 +107,10 @@ export default function ProjectDetail({
               {/* Hero Image Banner with Gradient & Overlay Badges */}
               <div className="relative h-72 sm:h-96 md:h-[420px] w-full bg-slate-900 overflow-hidden">
                 <img
-                  src={project.thumbnail_url || fallbackImage}
+                  src={validImageUrl}
                   alt={project.title}
                   onError={(e) => {
+                    e.currentTarget.onerror = null;
                     e.currentTarget.src = fallbackImage;
                   }}
                   className="w-full h-full object-cover"
@@ -129,13 +132,13 @@ export default function ProjectDetail({
                   </span>
                 </div>
 
-                {/* Bottom Overlay Title & Location */}
-                <div className="absolute bottom-5 left-5 right-5 text-white space-y-2">
+                {/* Bottom Overlay Title & Location (Scaled 70/100) */}
+                <div className="absolute bottom-5 left-5 right-5 text-white space-y-1.5">
                   <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400">
-                    <CheckCircle2 className="w-4 h-4 shrink-0" />
+                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
                     <span>Diverifikasi Tim Pengawas Rekayasa Sipil WSM</span>
                   </div>
-                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.025em] leading-snug drop-shadow-md">
+                  <h1 className="text-[15px] sm:text-[18px] md:text-[21px] font-bold tracking-[-0.025em] leading-snug drop-shadow-md">
                     {project.title}
                   </h1>
                 </div>
@@ -288,9 +291,14 @@ export default function ProjectDetail({
                     >
                       <div className="relative h-48 w-full overflow-hidden bg-slate-100">
                         <img
-                          src={rel.thumbnail_url || fallbackImage}
+                          src={
+                            rel.thumbnail_url && !rel.thumbnail_url.includes('1541888946425')
+                              ? rel.thumbnail_url
+                              : fallbackImage
+                          }
                           alt={rel.title}
                           onError={(e) => {
+                            e.currentTarget.onerror = null;
                             e.currentTarget.src = fallbackImage;
                           }}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"

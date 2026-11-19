@@ -155,11 +155,12 @@ export function PortfolioSection({ projects = [], company = {}, meta = {} }) {
                     src={
                       item.thumbnail_url && !item.thumbnail_url.includes('1541888946425')
                         ? item.thumbnail_url
-                        : 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=800&q=80'
+                        : '/images/project-placeholder.jpg'
                     }
                     alt={item.title}
                     onError={(e) => {
-                      e.currentTarget.src = 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=800&q=80';
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = '/images/project-placeholder.jpg';
                     }}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
@@ -354,10 +355,15 @@ export function PortfolioSection({ projects = [], company = {}, meta = {} }) {
 
             <div className="h-64 sm:h-72 rounded-2xl overflow-hidden bg-slate-100 relative">
               <img
-                src={selectedProject.thumbnail_url || 'https://images.unsplash.com/photo-1541888946425-d0fbb186c5f7?auto=format&fit=crop&w=1200&q=80'}
+                src={
+                  selectedProject.thumbnail_url && !selectedProject.thumbnail_url.includes('1541888946425')
+                    ? selectedProject.thumbnail_url
+                    : '/images/project-placeholder.jpg'
+                }
                 alt={selectedProject.title}
                 onError={(e) => {
-                  e.currentTarget.src = 'https://images.unsplash.com/photo-1541888946425-d0fbb186c5f7?auto=format&fit=crop&w=1200&q=80';
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = '/images/project-placeholder.jpg';
                 }}
                 className="w-full h-full object-cover"
               />
@@ -372,7 +378,7 @@ export function PortfolioSection({ projects = [], company = {}, meta = {} }) {
                   Tahun Pengerjaan {selectedProject.year}
                 </span>
               </div>
-              <h3 className="text-lg sm:text-xl font-bold text-slate-900 tracking-[-0.025em] leading-snug mb-2">
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 tracking-[-0.025em] leading-snug mb-2">
                 {selectedProject.title}
               </h3>
               <div className="flex flex-wrap items-center gap-4 text-[13px] text-slate-700 mb-4 font-medium">

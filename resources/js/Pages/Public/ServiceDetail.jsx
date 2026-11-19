@@ -44,7 +44,7 @@ export default function ServiceDetail({
 
   const waUrl = `https://wa.me/${cleanPhone}?text=Halo%20CV.%20Wahana%20Sinergi%20Mitra,%20saya%20tertarik%20dengan%20layanan%20${encodeURIComponent(service.title || '')}.%20Bisa%20jadwalkan%20survei%20dan%20konsultasi%20RAB?`;
 
-  const fallbackImage = 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1200&q=80';
+  const fallbackImage = '/images/project-placeholder.jpg';
 
   const defaultStandards = [
     { title: 'Kepatuhan Spesifikasi Teknis SNI', desc: 'Penggunaan material bersertifikat uji laboratorium (SNI 1729 & SNI 2847) untuk kekuatan struktural maksimal.' },
@@ -103,9 +103,14 @@ export default function ServiceDetail({
               {/* Service Hero Banner */}
               <div className="relative h-64 sm:h-80 md:h-96 w-full bg-slate-900 overflow-hidden">
                 <img
-                  src={service.image_url || fallbackImage}
+                  src={
+                    service.image_url && !service.image_url.includes('1541888946425')
+                      ? service.image_url
+                      : fallbackImage
+                  }
                   alt={service.title}
                   onError={(e) => {
+                    e.currentTarget.onerror = null;
                     e.currentTarget.src = fallbackImage;
                   }}
                   className="w-full h-full object-cover"
@@ -121,7 +126,7 @@ export default function ServiceDetail({
                       <span className="text-[11px] font-extrabold uppercase tracking-[-0.015em] text-sky-300 block">
                         Divisi Rekayasa Konstruksi Terpadu WSM
                       </span>
-                      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.025em] leading-snug">
+                      <h1 className="text-[15px] sm:text-[18px] md:text-[21px] font-bold tracking-[-0.025em] leading-snug">
                         {service.title}
                       </h1>
                     </div>
@@ -226,9 +231,14 @@ export default function ServiceDetail({
                     >
                       <div className="relative h-48 w-full overflow-hidden bg-slate-100">
                         <img
-                          src={proj.thumbnail_url || fallbackImage}
+                          src={
+                            proj.thumbnail_url && !proj.thumbnail_url.includes('1541888946425')
+                              ? proj.thumbnail_url
+                              : fallbackImage
+                          }
                           alt={proj.title}
                           onError={(e) => {
+                            e.currentTarget.onerror = null;
                             e.currentTarget.src = fallbackImage;
                           }}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
