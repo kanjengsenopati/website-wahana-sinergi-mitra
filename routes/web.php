@@ -58,3 +58,14 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     // Local Storage Image Upload Handler
     Route::post('/upload', [AdminDashboardController::class, 'uploadImage'])->name('upload');
 });
+
+// Fallback direct storage file serving (guarantees local storage access even if symlink breaks on VPS)
+Route::get('/storage/{path}', function (string $path) {
+    $fullPath = storage_path('app/public/' . $path);
+    if (!file_exists($fullPath)) {
+        abort(404);
+    }
+    return response()->file($fullPath, [
+        'Cache-Control' => 'public, max-age=86400',
+    ]);
+})->where('path', '.*');

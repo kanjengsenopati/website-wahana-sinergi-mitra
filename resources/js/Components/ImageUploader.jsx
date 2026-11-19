@@ -127,12 +127,12 @@ export default function ImageUploader({
                 : 'w-full sm:w-36 h-28 sm:h-22 rounded-xl'
             }`}>
               <img
-                src={value}
+                src={(value && !value.includes('1541888946425')) ? value : '/images/project-placeholder.jpg'}
                 alt="Uploaded Preview"
                 className="w-full h-full object-cover"
                 onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = 'https://images.unsplash.com/photo-1541888946425-d0fbb186c5f7?auto=format&fit=crop&w=300&q=80';
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = '/images/project-placeholder.jpg';
                 }}
               />
               {isUploading && (

@@ -557,7 +557,7 @@ export default function Dashboard({
       location: '',
       project_value: '',
       year: new Date().getFullYear(),
-      thumbnail_url: 'https://images.unsplash.com/photo-1541888946425-d0fbb186c5f7?auto=format&fit=crop&w=1200&q=80',
+      thumbnail_url: '/images/project-placeholder.jpg',
       status: 'Selesai',
       description: '',
       is_featured: true,
@@ -2429,8 +2429,16 @@ export default function Dashboard({
                                 <td className="py-3.5 px-4 sm:px-5">
                                   <div className="flex items-center gap-3">
                                     <img
-                                      src={proj.thumbnail_url || 'https://images.unsplash.com/photo-1541888946425-d0fbb186c5f7?auto=format&fit=crop&w=120&q=80'}
+                                      src={
+                                        proj.thumbnail_url && !proj.thumbnail_url.includes('1541888946425')
+                                          ? proj.thumbnail_url
+                                          : '/images/project-placeholder.jpg'
+                                      }
                                       alt={proj.title}
+                                      onError={(e) => {
+                                        e.currentTarget.onerror = null;
+                                        e.currentTarget.src = '/images/project-placeholder.jpg';
+                                      }}
                                       className="w-12 h-10 rounded-lg object-cover bg-slate-100 shrink-0 border border-slate-200/60 shadow-xs"
                                     />
                                     <div className="min-w-0 flex-1">
@@ -2576,57 +2584,60 @@ export default function Dashboard({
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <div>
+                    {/* Nama Klien (1 Kolom Penuh) */}
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                        Nama Klien / Perusahaan
+                      </label>
+                      <input
+                        type="text"
+                        value={projectForm.client_name}
+                        onChange={(e) => setProjectForm({ ...projectForm, client_name: e.target.value })}
+                        placeholder="Contoh: Yayasan Wahid Hasyim Semarang / PT. Sinergi Logistik Nasional"
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      />
+                    </div>
+
+                    {/* Alamat / Lokasi Proyek (1 Kolom Penuh - Textarea) */}
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                        Alamat / Lokasi Proyek <span className="text-rose-500">*</span>
+                      </label>
+                      <textarea
+                        rows={3}
+                        required
+                        value={projectForm.location}
+                        onChange={(e) => setProjectForm({ ...projectForm, location: e.target.value })}
+                        placeholder="Contoh: Jl. Raya Gunungpati Km. 15, Kel. Nongkosawit, Kec. Gunungpati, Kota Semarang, Jawa Tengah"
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      />
+                    </div>
+
+                    {/* Nominal Proyek & Tahun Pengerjaan (Berdampingan) */}
+                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
+                      <div className="sm:col-span-8">
                         <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
-                          Nama Klien / Perusahaan
+                          Nilai Kontrak Proyek (Rupiah)
                         </label>
-                        <input
-                          type="text"
-                          value={projectForm.client_name}
-                          onChange={(e) => setProjectForm({ ...projectForm, client_name: e.target.value })}
-                          placeholder="PT. Sinergi Logistik"
-                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                        <CurrencyInput
+                          value={projectForm.project_value}
+                          onChange={(val) => setProjectForm({ ...projectForm, project_value: val })}
+                          placeholder="14.500.000.000"
                         />
                       </div>
 
-                      <div>
+                      <div className="sm:col-span-4">
                         <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
-                          Lokasi Proyek
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={projectForm.location}
-                          onChange={(e) => setProjectForm({ ...projectForm, location: e.target.value })}
-                          placeholder="Indramayu, Jawa Barat"
-                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
-                          Tahun Pengerjaan
+                          Tahun Pengerjaan <span className="text-rose-500">*</span>
                         </label>
                         <input
                           type="number"
                           required
                           value={projectForm.year}
                           onChange={(e) => setProjectForm({ ...projectForm, year: parseInt(e.target.value, 10) || 2025 })}
-                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
                         />
                       </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
-                        Nilai Kontrak Proyek (Rupiah)
-                      </label>
-                      <CurrencyInput
-                        value={projectForm.project_value}
-                        onChange={(val) => setProjectForm({ ...projectForm, project_value: val })}
-                        placeholder="14.500.000.000"
-                      />
                     </div>
 
                     <div>
@@ -2679,8 +2690,16 @@ export default function Dashboard({
                     <div className="bg-white rounded-3xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200">
                       <div className="h-44 bg-slate-100 relative overflow-hidden">
                         <img
-                          src={projectForm.thumbnail_url || 'https://images.unsplash.com/photo-1541888946425-d0fbb186c5f7?auto=format&fit=crop&w=800&q=80'}
+                          src={
+                            projectForm.thumbnail_url && !projectForm.thumbnail_url.includes('1541888946425')
+                              ? projectForm.thumbnail_url
+                              : '/images/project-placeholder.jpg'
+                          }
                           alt="Preview"
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = '/images/project-placeholder.jpg';
+                          }}
                           className="w-full h-full object-cover"
                         />
                         <div className="absolute top-3 right-3 flex items-center gap-1.5">
