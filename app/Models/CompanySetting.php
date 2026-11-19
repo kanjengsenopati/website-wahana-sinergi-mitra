@@ -231,6 +231,7 @@ class CompanySetting extends Model
                 'badge' => 'Portofolio Terpercaya',
                 'title' => 'Karya Konstruksi Terbukti {Kokoh & Bernilai Tinggi}',
                 'subtitle' => 'Jelajahi portofolio proyek selesai dan sedang berjalan yang telah kami kerjakan dengan komitmen mutu tinggi dan ketepatan waktu.',
+                'show_project_value' => true,
             ],
             'workflow_data' => [
                 'badge' => 'Metodologi Kerja',

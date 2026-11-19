@@ -308,6 +308,7 @@ export default function Dashboard({
       badge: sectionData?.portfolio_meta?.badge || 'Portofolio Terpercaya',
       title: sectionData?.portfolio_meta?.title || 'Rekam Jejak Karya Konstruksi & Rekayasa Sipil',
       subtitle: sectionData?.portfolio_meta?.subtitle || 'Jelajahi portofolio proyek selesai dan sedang berjalan yang telah kami kerjakan dengan komitmen mutu tinggi dan ketepatan waktu.',
+      show_project_value: sectionData?.portfolio_meta?.show_project_value ?? true,
     },
     testimonials_meta: {
       badge: sectionData?.testimonials_meta?.badge || 'Testimoni Klien',
@@ -1995,6 +1996,53 @@ export default function Dashboard({
                             className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
                           />
                         </div>
+
+                        {/* Dedicated Toggle for Portfolio Project Value (Visible / Invisible) */}
+                        {activeSectionEditor === 'portfolio_meta' && (
+                          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <label className="text-[13px] font-bold text-slate-800">
+                                  Tampilkan Kolom Nilai Kontrak (Rp) di Publik &amp; Tabel
+                                </label>
+                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                  metaForms.portfolio_meta?.show_project_value !== false
+                                    ? 'bg-emerald-100 text-emerald-700 border border-emerald-300'
+                                    : 'bg-amber-100 text-amber-700 border border-amber-300'
+                                }`}>
+                                  {metaForms.portfolio_meta?.show_project_value !== false ? 'VISIBLE' : 'INVISIBLE'}
+                                </span>
+                              </div>
+                              <p className="text-[12px] text-slate-500 max-w-xl">
+                                Jika aktif (Visible), nominal nilai kontrak dan akumulasi total akan tampil di tabel publik &amp; portofolio. Jika nonaktif (Invisible), kolom nilai proyek disembunyikan untuk menjaga privasi anggaran klien.
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const currentVal = metaForms.portfolio_meta?.show_project_value !== false;
+                                setMetaForms({
+                                  ...metaForms,
+                                  portfolio_meta: {
+                                    ...metaForms.portfolio_meta,
+                                    show_project_value: !currentVal,
+                                  },
+                                });
+                              }}
+                              className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                                metaForms.portfolio_meta?.show_project_value !== false ? 'bg-emerald-600' : 'bg-slate-300'
+                              }`}
+                              role="switch"
+                              aria-checked={metaForms.portfolio_meta?.show_project_value !== false}
+                            >
+                              <span
+                                className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                                  metaForms.portfolio_meta?.show_project_value !== false ? 'translate-x-5' : 'translate-x-0'
+                                }`}
+                              />
+                            </button>
+                          </div>
+                        )}
 
                         <div className="pt-4 flex justify-end">
                           <button

@@ -22,8 +22,10 @@ import Text from '../../Components/Typography';
 export default function ProjectDetail({ 
   project = {}, 
   relatedProjects = [], 
-  company = {} 
+  company = {},
+  portfolioMeta = {} 
 }) {
+  const showValue = portfolioMeta?.show_project_value !== false;
   const cleanPhone = (company?.phone || '+62 812-3456-7890')
     .replace(/\D/g, '')
     .replace(/^0/, '62');
@@ -195,16 +197,22 @@ export default function ProjectDetail({
                     </div>
                   </div>
 
-                  {/* Metric 4: Nilai Kontrak Terverifikasi */}
+                  {/* Metric 4: Nilai Kontrak / Kualifikasi Mutu */}
                   <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-100 flex items-start gap-3.5">
                     <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-sm">
                       <Award className="w-5 h-5" />
                     </div>
                     <div className="min-w-0">
                       <span className="text-[10px] font-bold uppercase tracking-[-0.015em] text-emerald-700 block mb-0.5">
-                        Nilai Kontrak Terverifikasi
+                        {showValue ? 'Nilai Kontrak Terverifikasi' : 'Standar Kualifikasi & Mutu'}
                       </span>
-                      <Text.Amount value={project.project_value || 0} className="text-[16px] sm:text-[18px]" />
+                      {showValue ? (
+                        <Text.Amount value={project.project_value || 0} className="text-[16px] sm:text-[18px]" />
+                      ) : (
+                        <p className="text-xs sm:text-[13px] font-bold text-slate-900">
+                          SNI &amp; ISO 45001 Terverifikasi
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -322,8 +330,14 @@ export default function ProjectDetail({
                         </div>
 
                         <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
-                          <span className="text-[10px] font-bold text-slate-500 uppercase">Nilai Kontrak</span>
-                          <Text.Amount value={rel.project_value || 0} className="text-xs font-bold" />
+                          <span className="text-[10px] font-bold text-slate-500 uppercase">
+                            {showValue ? 'Nilai Kontrak' : 'Status'}
+                          </span>
+                          {showValue ? (
+                            <Text.Amount value={rel.project_value || 0} className="text-xs font-bold" />
+                          ) : (
+                            <span className="text-[11px] font-bold text-emerald-600">Terverifikasi</span>
+                          )}
                         </div>
                       </div>
                     </Link>

@@ -136,6 +136,7 @@ class LandingPageController extends Controller
             'project' => $project,
             'relatedProjects' => $relatedProjects,
             'company' => $company,
+            'portfolioMeta' => CompanySetting::getSectionData('portfolio_meta'),
         ]);
     }
 
