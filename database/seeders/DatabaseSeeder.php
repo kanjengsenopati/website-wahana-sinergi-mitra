@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'admin@wahanasinergimitra.id'],
             [
                 'name' => 'Administrator WSM',
+                'role' => 'Super Admin',
                 'password' => Hash::make('password123'),
                 'email_verified_at' => now(),
             ]

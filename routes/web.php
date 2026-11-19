@@ -45,6 +45,14 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::post('/sections/visibility', [AdminDashboardController::class, 'updateSectionVisibility'])->name('sections.visibility');
     Route::post('/sections/{section}', [AdminDashboardController::class, 'updateSectionContent'])->name('sections.content');
 
+    // Self User Profile Update
+    Route::post('/profile', [AdminDashboardController::class, 'updateProfile'])->name('profile.update');
+
+    // User Management CRUD (Super Admin)
+    Route::post('/users', [AdminDashboardController::class, 'storeUser'])->name('users.store');
+    Route::put('/users/{user}', [AdminDashboardController::class, 'updateUser'])->name('users.update');
+    Route::delete('/users/{user}', [AdminDashboardController::class, 'deleteUser'])->name('users.destroy');
+
     // Local Storage Image Upload Handler
     Route::post('/upload', [AdminDashboardController::class, 'uploadImage'])->name('upload');
 });

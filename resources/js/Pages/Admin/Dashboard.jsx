@@ -36,7 +36,16 @@ import {
   FileSpreadsheet,
   ClipboardCheck,
   Check,
-  Award
+  Award,
+  Users,
+  UserCheck,
+  UserPlus,
+  KeyRound,
+  ChevronDown,
+  ChevronUp,
+  X,
+  ShieldAlert,
+  User
 } from 'lucide-react';
 import Text, { formatRupiah, formatThousands } from '../../Components/Typography';
 import CurrencyInput from '../../Components/CurrencyInput';
@@ -50,10 +59,36 @@ export default function Dashboard({
   settings = {}, 
   metrics = {},
   visibility = {},
-  sectionData = {}
+  sectionData = {},
+  auth_user = {},
+  users = []
 }) {
   const { flash, auth } = usePage().props;
-  const [activeTab, setActiveTab] = useState('overview'); // overview, sections, projects, services, inquiries, testimonials, settings
+  const currentUser = auth_user?.id ? auth_user : (auth?.user || {});
+  const [activeTab, setActiveTab] = useState('overview'); // overview, sections, projects, services, inquiries, testimonials, settings, users
+
+  // Profile Modal State
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [profileForm, setProfileForm] = useState({
+    name: currentUser?.name || '',
+    email: currentUser?.email || '',
+    current_password: '',
+    password: '',
+    password_confirmation: '',
+  });
+
+  // User Management State (Super Admin)
+  const [userModalOpen, setUserModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+  const [userForm, setUserForm] = useState({
+    name: '',
+    email: '',
+    role: 'Editor',
+    password: '',
+  });
+
+  // Vertical Carousel Accordion State (first item auto-expanded by default)
+  const [expandedSection, setExpandedSection] = useState('hero');
 
   // Dedicated Section Manager & Visibility State
   const [sectionVisibility, setSectionVisibility] = useState(visibility || {});
@@ -248,6 +283,67 @@ export default function Dashboard({
 
   const handleSaveMetaSection = (metaKey) => {
     router.post(`/admin/sections/${metaKey}`, { data: metaForms[metaKey] }, { preserveScroll: true });
+  };
+
+  // Profile Update Handler
+  const handleSaveProfile = (e) => {
+    e.preventDefault();
+    router.post('/admin/profile', profileForm, {
+      preserveScroll: true,
+      onSuccess: () => {
+        setProfileModalOpen(false);
+        setProfileForm((prev) => ({
+          ...prev,
+          current_password: '',
+          password: '',
+          password_confirmation: '',
+        }));
+      },
+    });
+  };
+
+  // User Management Handlers (Super Admin)
+  const openCreateUserModal = () => {
+    setEditingUser(null);
+    setUserForm({
+      name: '',
+      email: '',
+      role: 'Editor',
+      password: '',
+    });
+    setUserModalOpen(true);
+  };
+
+  const openEditUserModal = (u) => {
+    setEditingUser(u);
+    setUserForm({
+      name: u.name,
+      email: u.email,
+      role: u.role || 'Editor',
+      password: '',
+    });
+    setUserModalOpen(true);
+  };
+
+  const handleSaveUser = (e) => {
+    e.preventDefault();
+    if (editingUser) {
+      router.put(`/admin/users/${editingUser.id}`, userForm, {
+        preserveScroll: true,
+        onSuccess: () => setUserModalOpen(false),
+      });
+    } else {
+      router.post('/admin/users', userForm, {
+        preserveScroll: true,
+        onSuccess: () => setUserModalOpen(false),
+      });
+    }
+  };
+
+  const handleDeleteUser = (u) => {
+    if (confirm(`Apakah Anda yakin ingin menghapus akun pengguna "${u.name}"?`)) {
+      router.delete(`/admin/users/${u.id}`, { preserveScroll: true });
+    }
   };
 
   // Dedicated Workspace State for Forms (NO MODAL)
@@ -656,6 +752,25 @@ export default function Dashboard({
                   <span>Pengaturan Depan & Kontak</span>
                 </div>
               </button>
+
+              {/* User Management Tab (Super Admin / Management) */}
+              <button
+                type="button"
+                onClick={() => { setActiveTab('users'); setEditorMode(null); }}
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold tracking-[-0.015em] transition-all cursor-pointer ${
+                  activeTab === 'users' && !editorMode
+                    ? 'bg-sky-600 text-white shadow-md shadow-sky-600/30'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Users className="w-4 h-4" />
+                  <span>Manajemen Pengguna</span>
+                </div>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">
+                  {users.length || 1}
+                </span>
+              </button>
             </nav>
           </div>
 
@@ -674,21 +789,30 @@ export default function Dashboard({
             </a>
 
             <div className="p-3 rounded-2xl bg-slate-800/70 border border-slate-700/60 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-600 to-blue-700 text-white flex items-center justify-center font-bold text-xs shrink-0">
-                  A
+              <button
+                type="button"
+                onClick={() => setProfileModalOpen(true)}
+                title="Kelola Profil & Kata Sandi Saya"
+                className="flex items-center gap-2.5 min-w-0 text-left hover:opacity-90 transition-opacity cursor-pointer group flex-1"
+              >
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-600 to-blue-700 text-white flex items-center justify-center font-bold text-xs shrink-0 group-hover:scale-105 transition-transform">
+                  {(currentUser?.name || 'A').charAt(0).toUpperCase()}
                 </div>
-                <div className="min-w-0">
-                  <div className="text-xs font-bold text-white truncate">Administrator WSM</div>
-                  <div className="text-[10px] text-sky-300 truncate">Super Admin</div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs font-bold text-white truncate group-hover:text-sky-300 transition-colors">
+                    {currentUser?.name || 'Administrator WSM'}
+                  </div>
+                  <div className="text-[10px] text-sky-300 truncate">
+                    {currentUser?.role || 'Super Admin'} • Edit Profil
+                  </div>
                 </div>
-              </div>
+              </button>
 
               <button
                 type="button"
                 onClick={handleLogout}
                 title="Keluar dari Panel Admin"
-                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer shrink-0"
               >
                 <LogOut className="w-4 h-4" />
               </button>
@@ -708,15 +832,29 @@ export default function Dashboard({
               <div className="text-xs font-semibold text-slate-500">
                 WSM Admin <span className="mx-1 text-slate-300">/</span>{' '}
                 <span className="text-slate-900 font-bold capitalize">
-                  {editorMode ? `Editor ${editorMode}` : activeTab}
+                  {editorMode ? `Editor ${editorMode}` : (activeTab === 'users' ? 'Manajemen Pengguna' : activeTab)}
                 </span>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 text-[11px] font-semibold text-slate-600 border border-slate-200">
+              <button
+                type="button"
+                onClick={() => setProfileModalOpen(true)}
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 hover:bg-blue-50 text-[11px] font-bold text-slate-700 hover:text-blue-700 border border-slate-200 transition-colors cursor-pointer"
+              >
+                <div className="w-5 h-5 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center font-extrabold">
+                  {(currentUser?.name || 'A').charAt(0).toUpperCase()}
+                </div>
+                <span>{currentUser?.name || 'Profil Saya'}</span>
+                <span className="px-1.5 py-0.5 rounded text-[9.5px] font-extrabold bg-blue-100 text-blue-800">
+                  {currentUser?.role || 'Admin'}
+                </span>
+              </button>
+
+              <div className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 text-[11px] font-semibold text-slate-600 border border-slate-200">
                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span>SQLite Multi-Write Ready</span>
+                <span>Production Mode</span>
               </div>
             </div>
           </header>
@@ -1737,185 +1875,268 @@ export default function Dashboard({
                     )}
                   </div>
                 ) : (
-                  /* Section Cards Grid */
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {[
-                      {
-                        key: 'hero',
-                        title: 'Hero Banner & 4-Slide Foto',
-                        description: 'Seksi sambutan paling atas dengan 4 slide foto proyek, judul, dan tombol call-to-action.',
-                        icon: Sparkles,
-                        editorKey: 'hero',
-                      },
-                      {
-                        key: 'about',
-                        title: 'Tentang Kami & Kredibilitas',
-                        description: 'Profil perusahaan, 5 pilar keunggulan, sertifikasi ISO/SMK3/GAPENSI, & sektor klien.',
-                        icon: Award,
-                        editorKey: 'about_data',
-                      },
-                      {
-                        key: 'services',
-                        title: 'Layanan Konstruksi',
-                        description: 'Daftar layanan spesialisasi sipil, baja, dan rekayasa struktur.',
-                        icon: HardHat,
-                        editorKey: 'services_meta',
-                      },
-                      {
-                        key: 'estimator',
-                        title: 'Kalkulator Simulasi RAB',
-                        description: 'Perhitungan estimasi biaya otomatis per m2 untuk calon klien.',
-                        icon: Calculator,
-                        editorKey: 'estimator',
-                      },
-                      {
-                        key: 'portfolio',
-                        title: 'Portofolio & Rekam Jejak',
-                        description: 'Galeri proyek komersial, pergudangan, dan perumahan.',
-                        icon: Building2,
-                        editorKey: 'portfolio_meta',
-                      },
-                      {
-                        key: 'workflow',
-                        title: 'Metodologi Kerja',
-                        description: 'Tahapan eksekusi proyek 01 s/d 04 berstandar mutu dan K3.',
-                        icon: Layers,
-                        editorKey: 'workflow',
-                      },
-                      {
-                        key: 'proksi',
-                        title: 'Ekosistem Aplikasi PROKSI',
-                        description: 'Simulator Kurva-S real-time, Portal Klien 24/7, dan K3 digital.',
-                        icon: Laptop,
-                        editorKey: 'proksi',
-                      },
-                      {
-                        key: 'testimonials',
-                        title: 'Testimoni Klien',
-                        description: 'Ulasan dan tingkat kepuasan dari para pemilik proyek.',
-                        icon: Star,
-                        editorKey: 'testimonials_meta',
-                      },
-                      {
-                        key: 'inquiry',
-                        title: 'Formulir Konsultasi & Leads',
-                        description: 'Formulir pesan konsultasi dan kontak hotline resmi.',
-                        icon: MessageSquareText,
-                        editorKey: 'inquiry_meta',
-                      },
-                      {
-                        key: 'footer',
-                        title: 'Footer Publik & Legalitas',
-                        description: 'Informasi legalitas PT/CV, alamat, peta, dan navigasi cepat.',
-                        icon: ShieldCheck,
-                        editorKey: null,
-                      },
-                    ].map((sec) => {
-                      const IconComp = sec.icon;
-                      const isVis = sectionVisibility[sec.key] !== false;
+                  /* Vertical Accordion Carousel Deck for Section Manager */
+                  <div className="space-y-4 max-w-5xl">
+                    {/* Header Controls for Carousel */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs">
+                          10
+                        </div>
+                        <div>
+                          <Text.Label className="text-blue-600 block">Vertical Section Carousel</Text.Label>
+                          <span className="text-xs font-bold text-slate-800">
+                            Struktur Seksi Publik Landing Page (SSOT)
+                          </span>
+                        </div>
+                      </div>
 
-                      return (
-                        <div
-                          key={sec.key}
-                          className="bg-white rounded-[24px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col justify-between transition-all hover:border-slate-200"
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setExpandedSection(expandedSection ? null : 'hero')}
+                          className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
                         >
-                          <div>
-                            {/* Top row: Icon, Title & Live Status */}
-                            <div className="flex items-center justify-between gap-3 mb-4">
-                              <div className="flex items-center gap-3 min-w-0">
-                                <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 shadow-xs">
+                          {expandedSection ? 'Tutup Semua' : 'Buka Seksi #1 (Hero)'}
+                        </button>
+                        <a
+                          href="/"
+                          target="_blank"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition-colors"
+                        >
+                          <span>Lihat Web Live</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      </div>
+                    </div>
+
+                    {/* Vertical Cards Deck */}
+                    <div className="space-y-3">
+                      {[
+                        {
+                          key: 'hero',
+                          title: 'Hero Banner & 4-Slide Foto',
+                          subtitle: 'Seksi sambutan paling atas dengan slider 4 foto proyek dan tombol CTA.',
+                          description: 'Menampilkan headline utama, narasi keunggulan, 4 foto dokumentasi konstruksi beresolusi tinggi, metrik pencapaian (50+ proyek, Rp 85+ M, 1.25M jam aman), serta tombol WhatsApp konsultasi.',
+                          icon: Sparkles,
+                          editorKey: 'hero',
+                          badge: 'SLIDE DOKUMENTASI & KPI',
+                        },
+                        {
+                          key: 'about',
+                          title: 'Tentang Kami & Kredibilitas',
+                          subtitle: 'Profil perusahaan, narasi dedikasi, 5 pilar keunggulan, & sertifikasi.',
+                          description: 'Seksi kredibilitas korporat: narasi legalitas kontraktor, jam terbang tim engineer SKA/SKT, 5 Pilar Keunggulan, sertifikasi ISO 9001/45001/GAPENSI, dan 5 sektor klien.',
+                          icon: Award,
+                          editorKey: 'about_data',
+                          badge: 'PROFIL & 5 PILAR',
+                        },
+                        {
+                          key: 'services',
+                          title: 'Layanan Konstruksi',
+                          subtitle: 'Daftar layanan spesialisasi sipil, baja WF, dan rekayasa struktur.',
+                          description: 'Showcase layanan berlatar foto proyek royal-blue yang menampilkan standar SNI, sertifikasi material, dan kartu spesifikasi teknis mendalam.',
+                          icon: HardHat,
+                          editorKey: 'services_meta',
+                          badge: 'LAYANAN TERPADU',
+                        },
+                        {
+                          key: 'estimator',
+                          title: 'Kalkulator Simulasi RAB',
+                          subtitle: 'Perhitungan estimasi biaya otomatis per m2 untuk calon klien.',
+                          description: 'Simulator transparan estimasi rencana anggaran biaya (RAB) berdasarkan 4 tipe bangunan (Gudang, Komersial, Residensial, Renovasi) dan 3 tier spesifikasi mutu material.',
+                          icon: Calculator,
+                          editorKey: 'estimator',
+                          badge: 'SIMULATOR INTERAKTIF',
+                        },
+                        {
+                          key: 'portfolio',
+                          title: 'Portofolio & Rekam Jejak',
+                          subtitle: 'Galeri proyek komersial, pergudangan, perumahan, & tabel kontrak resmi.',
+                          description: 'Seksi portofolio dual-mode: galeri visual foto proyek berfilter kategori serta tabel data pengalaman kerja (official contract ledger).',
+                          icon: Building2,
+                          editorKey: 'portfolio_meta',
+                          badge: 'DUAL-MODE PORTOFOLIO',
+                        },
+                        {
+                          key: 'workflow',
+                          title: 'Metodologi Kerja',
+                          subtitle: 'Tahapan eksekusi proyek 01 s/d 04 berstandar mutu dan K3.',
+                          description: 'Menampilkan alur SOP rancang bangun terukur: Survei & Analisis Struktur, DED & Transparansi RAB, Konstruksi K3, hingga Handover & BAST 1-2.',
+                          icon: Layers,
+                          editorKey: 'workflow',
+                          badge: 'METODOLOGI K3',
+                        },
+                        {
+                          key: 'proksi',
+                          title: 'Ekosistem Aplikasi PROKSI',
+                          subtitle: 'Simulator Kurva-S real-time, Portal Klien 24/7, dan K3 digital.',
+                          description: 'Fitur pemantauan proyek digital eksklusif WSM dengan visualisasi deviasi kurva-S, log jam aman K3, dan akuntabilitas pekerjaan lapangan.',
+                          icon: Laptop,
+                          editorKey: 'proksi',
+                          badge: 'DIGITAL ECOSYSTEM',
+                        },
+                        {
+                          key: 'testimonials',
+                          title: 'Testimoni Klien',
+                          subtitle: 'Ulasan dan tingkat kepuasan dari para pemilik proyek (owner).',
+                          description: 'Ulasan nyata dan rekomendasi dari para pimpinan perusahaan mitra yang telah menyelesaikan proyek pembangunan bersama CV. Wahana Sinergi Mitra.',
+                          icon: Star,
+                          editorKey: 'testimonials_meta',
+                          badge: 'KEPUASAN KLIEN',
+                        },
+                        {
+                          key: 'inquiry',
+                          title: 'Formulir Konsultasi & Leads',
+                          subtitle: 'Formulir pesan konsultasi dan kontak hotline resmi.',
+                          description: 'Pintu masuk calon klien mengirimkan brief proyek atau hasil kalkulasi RAB langsung ke tim engineer dan database admin internal.',
+                          icon: MessageSquareText,
+                          editorKey: 'inquiry_meta',
+                          badge: 'LEADS INQUIRY',
+                        },
+                        {
+                          key: 'footer',
+                          title: 'Footer Publik & Legalitas',
+                          subtitle: 'Informasi legalitas PT/CV, alamat, peta, dan navigasi cepat.',
+                          description: 'Blok penutup website resmi yang memuat hak cipta legalitas, kontak hotline, tautan cepat, dan kredit web design.',
+                          icon: ShieldCheck,
+                          editorKey: null,
+                          badge: 'LEGALITAS RESMI',
+                        },
+                      ].map((sec, sIdx) => {
+                        const IconComp = sec.icon;
+                        const isVis = sectionVisibility[sec.key] !== false;
+                        const isExpanded = expandedSection === sec.key;
+                        const num = String(sIdx + 1).padStart(2, '0');
+
+                        return (
+                          <div
+                            key={sec.key}
+                            className={`bg-white rounded-[24px] transition-all duration-300 overflow-hidden ${
+                              isExpanded
+                                ? 'border-2 border-blue-500/80 shadow-[0_12px_36px_rgb(37,99,235,0.08)] ring-4 ring-blue-500/5'
+                                : 'border border-slate-200/70 shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:border-slate-300'
+                            }`}
+                          >
+                            {/* Card Accordion Header (Always Visible) */}
+                            <div
+                              onClick={() => setExpandedSection(isExpanded ? null : sec.key)}
+                              className="p-4 sm:p-5 flex items-center justify-between gap-3 cursor-pointer select-none"
+                            >
+                              <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                                <span
+                                  className={`w-8 h-8 rounded-xl font-mono font-black text-xs flex items-center justify-center shrink-0 transition-colors ${
+                                    isExpanded
+                                      ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/30'
+                                      : 'bg-slate-100 text-slate-600'
+                                  }`}
+                                >
+                                  {num}
+                                </span>
+
+                                <div
+                                  className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 transition-colors ${
+                                    isExpanded
+                                      ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25'
+                                      : 'bg-blue-50 text-blue-600'
+                                  }`}
+                                >
                                   <IconComp className="w-5 h-5" />
                                 </div>
-                                <div className="min-w-0">
-                                  <Text.H2 title={sec.title} singleLine className="text-[15px]">
-                                    {sec.title}
-                                  </Text.H2>
-                                  <span className="text-[11px] text-slate-500 font-mono">
-                                    ID: #{sec.key}
-                                  </span>
+
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <Text.H2 title={sec.title} singleLine className="text-[15px] font-extrabold text-slate-900">
+                                      {sec.title}
+                                    </Text.H2>
+                                    <span className="hidden sm:inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200 shrink-0">
+                                      #{sec.key}
+                                    </span>
+                                    <span className="hidden md:inline-flex px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-700 shrink-0">
+                                      {sec.badge}
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-slate-600 truncate mt-0.5">
+                                    {sec.subtitle}
+                                  </p>
                                 </div>
                               </div>
 
-                              <span
-                                className={`px-2.5 py-1 rounded-full text-[11px] font-bold border shrink-0 ${
-                                  isVis
-                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                    : 'bg-slate-100 text-slate-600 border-slate-200'
-                                }`}
-                              >
-                                {isVis ? 'Live' : 'Invisible'}
-                              </span>
-                            </div>
-
-                            <Text.Body className="text-[13px] text-slate-600 leading-relaxed mb-5">
-                              {sec.description}
-                            </Text.Body>
-
-                            {/* Main Toggle Switch Row */}
-                            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between gap-3 mb-3">
-                              <div className="flex items-center gap-2">
-                                {isVis ? (
-                                  <Eye className="w-4 h-4 text-emerald-600 shrink-0" />
-                                ) : (
-                                  <EyeOff className="w-4 h-4 text-slate-400 shrink-0" />
-                                )}
-                                <span className="text-xs font-bold text-slate-700">
-                                  Tampilkan di Web
-                                </span>
-                              </div>
-
-                              <button
-                                type="button"
-                                onClick={() => handleToggleSection(sec.key)}
-                                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
-                                  isVis ? 'bg-emerald-600' : 'bg-slate-300'
-                                }`}
-                              >
+                              {/* Right Action Cluster: Live Pill, Toggle Switch & Chevron */}
+                              <div className="flex items-center gap-3 shrink-0" onClick={(e) => e.stopPropagation()}>
                                 <span
-                                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                                    isVis ? 'translate-x-5' : 'translate-x-0'
+                                  className={`px-2.5 py-1 rounded-full text-[11px] font-bold border shrink-0 ${
+                                    isVis
+                                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                      : 'bg-slate-100 text-slate-600 border-slate-200'
                                   }`}
-                                />
-                              </button>
-                            </div>
-
-                            {/* Extra Toggle (e.g. 3D motion for Hero) */}
-                            {sec.extraToggle && (
-                              <div className="p-3 rounded-2xl bg-sky-50/60 border border-sky-100 flex items-center justify-between gap-3 mb-3">
-                                <span className="text-[11px] font-semibold text-sky-900">
-                                  {sec.extraToggle.label}
+                                >
+                                  {isVis ? 'Live di Web' : 'Disembunyikan'}
                                 </span>
+
                                 <button
                                   type="button"
-                                  onClick={() => handleToggleSection(sec.extraToggle.key)}
-                                  className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
-                                    sectionVisibility[sec.extraToggle.key] !== false ? 'bg-sky-600' : 'bg-slate-300'
+                                  onClick={() => handleToggleSection(sec.key)}
+                                  title={isVis ? 'Sembunyikan seksi ini' : 'Tampilkan seksi ini'}
+                                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
+                                    isVis ? 'bg-emerald-600' : 'bg-slate-300'
                                   }`}
                                 >
                                   <span
-                                    className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                                      sectionVisibility[sec.extraToggle.key] !== false ? 'translate-x-4' : 'translate-x-0'
+                                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                                      isVis ? 'translate-x-5' : 'translate-x-0'
                                     }`}
                                   />
                                 </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => setExpandedSection(isExpanded ? null : sec.key)}
+                                  className={`p-1.5 rounded-xl transition-transform duration-300 cursor-pointer ${
+                                    isExpanded ? 'text-blue-600 bg-blue-50 rotate-180' : 'text-slate-400 hover:text-slate-600'
+                                  }`}
+                                >
+                                  <ChevronDown className="w-5 h-5" />
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Card Body (Smooth Expanded Drawer) */}
+                            {isExpanded && (
+                              <div className="border-t border-slate-100 p-5 sm:p-6 bg-slate-50/60 space-y-4 animate-in fade-in duration-300">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                  <Text.Body className="text-[13.5px] text-slate-700 leading-relaxed max-w-2xl">
+                                    {sec.description}
+                                  </Text.Body>
+
+                                  <div className="flex items-center gap-2 shrink-0">
+                                    <a
+                                      href={`/#${sec.key}`}
+                                      target="_blank"
+                                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-bold transition-colors"
+                                    >
+                                      <span>Pratinjau Seksi</span>
+                                      <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
+                                    </a>
+
+                                    {sec.editorKey && (
+                                      <button
+                                        type="button"
+                                        onClick={() => setActiveSectionEditor(sec.editorKey)}
+                                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/20 transition-all cursor-pointer"
+                                      >
+                                        <Edit3 className="w-3.5 h-3.5" />
+                                        <span>Buka Editor Konten</span>
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
                               </div>
                             )}
                           </div>
-
-                          {/* Footer Action */}
-                          {sec.editorKey && (
-                            <button
-                              type="button"
-                              onClick={() => setActiveSectionEditor(sec.editorKey)}
-                              className="w-full mt-2 py-2 px-4 rounded-xl bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
-                            >
-                              <Edit3 className="w-3.5 h-3.5" />
-                              <span>Kelola Konten & Data</span>
-                            </button>
-                          )}
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
               </div>
@@ -3171,6 +3392,395 @@ export default function Dashboard({
                     </button>
                   </div>
                 </form>
+              </div>
+            )}
+
+            {/* ==================================================== */}
+            {/* TAB 8: USER MANAGEMENT (SUPER ADMIN & EDITORS)       */}
+            {/* ==================================================== */}
+            {activeTab === 'users' && (
+              <div className="space-y-6 max-w-5xl">
+                {/* Header Section */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-[24px] bg-white border border-slate-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="px-2.5 py-0.5 rounded-full text-[10.5px] font-extrabold bg-blue-100 text-blue-800">
+                        AKSES KONTROL CMS
+                      </span>
+                      <span className="text-xs text-slate-500 font-semibold">
+                        • {users.length} Total Akun
+                      </span>
+                    </div>
+                    <Text.H1 className="text-xl sm:text-2xl font-bold text-slate-900">
+                      Manajemen Pengguna & Peran
+                    </Text.H1>
+                    <Text.Caption className="text-slate-600 block mt-1">
+                      Kelola hak akses pengelola website: Super Admin (Akses Penuh) dan Editor (Kelola Konten).
+                    </Text.Caption>
+                  </div>
+
+                  {currentUser?.role === 'Super Admin' && (
+                    <button
+                      type="button"
+                      onClick={openCreateUserModal}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-600/20 transition-all cursor-pointer shrink-0"
+                    >
+                      <UserPlus className="w-4 h-4" />
+                      <span>Tambah Pengguna Baru</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* Non-Super Admin Warning Notice */}
+                {currentUser?.role !== 'Super Admin' && (
+                  <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex items-start gap-3">
+                    <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                    <div className="text-xs">
+                      <strong className="font-bold">Mode Baca (Editor):</strong> Akun Anda berstatus Editor. Hanya akun <strong>Super Admin</strong> yang memiliki izin menambah, mengubah peran, atau menghapus pengguna. Anda tetap dapat mengedit profil dan kata sandi mandiri Anda melalui menu <strong>Profil Saya</strong>.
+                    </div>
+                  </div>
+                )}
+
+                {/* Users List Table */}
+                <div className="bg-white rounded-[24px] border border-slate-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="border-b border-slate-100 bg-slate-50/70 text-[11px] font-bold text-slate-600 uppercase tracking-[-0.015em]">
+                          <th className="py-3.5 px-5">Nama Pengguna & Email</th>
+                          <th className="py-3.5 px-4">Peran (Role)</th>
+                          <th className="py-3.5 px-4">Status Akun</th>
+                          <th className="py-3.5 px-4">Tanggal Dibuat</th>
+                          <th className="py-3.5 px-5 text-right">Aksi</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 text-xs">
+                        {users.map((u) => {
+                          const isSelf = u.id === currentUser?.id;
+                          const isSuper = u.role === 'Super Admin';
+
+                          return (
+                            <tr key={u.id} className="hover:bg-slate-50/60 transition-colors">
+                              <td className="py-4 px-5">
+                                <div className="flex items-center gap-3">
+                                  <div
+                                    className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white text-xs shrink-0 shadow-xs ${
+                                      isSuper
+                                        ? 'bg-gradient-to-tr from-emerald-600 to-teal-700 shadow-emerald-600/20'
+                                        : 'bg-gradient-to-tr from-sky-600 to-blue-700 shadow-blue-600/20'
+                                    }`}
+                                  >
+                                    {(u.name || 'A').charAt(0).toUpperCase()}
+                                  </div>
+                                  <div className="min-w-0">
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-extrabold text-slate-900 truncate">
+                                        {u.name}
+                                      </span>
+                                      {isSelf && (
+                                        <span className="px-2 py-0.2 rounded-full text-[9.5px] font-bold bg-blue-100 text-blue-800">
+                                          Anda
+                                        </span>
+                                      )}
+                                    </div>
+                                    <span className="text-slate-600 text-[11px] font-mono block truncate">
+                                      {u.email}
+                                    </span>
+                                  </div>
+                                </div>
+                              </td>
+
+                              <td className="py-4 px-4">
+                                <span
+                                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10.5px] font-extrabold border ${
+                                    isSuper
+                                      ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                      : 'bg-sky-50 text-sky-800 border-sky-200'
+                                  }`}
+                                >
+                                  {isSuper ? <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> : <Edit3 className="w-3.5 h-3.5 text-sky-600" />}
+                                  <span>{u.role || 'Editor'}</span>
+                                </span>
+                              </td>
+
+                              <td className="py-4 px-4">
+                                <span className="inline-flex items-center gap-1.5 text-emerald-700 font-semibold text-[11px]">
+                                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                                  <span>Aktif</span>
+                                </span>
+                              </td>
+
+                              <td className="py-4 px-4 text-slate-600 font-mono text-[11px]">
+                                {u.created_at ? new Date(u.created_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' }) : '-'}
+                              </td>
+
+                              <td className="py-4 px-5 text-right">
+                                {currentUser?.role === 'Super Admin' ? (
+                                  <div className="flex items-center justify-end gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => openEditUserModal(u)}
+                                      className="p-1.5 rounded-lg text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+                                      title="Edit Pengguna"
+                                    >
+                                      <Edit3 className="w-4 h-4" />
+                                    </button>
+
+                                    {!isSelf ? (
+                                      <button
+                                        type="button"
+                                        onClick={() => handleDeleteUser(u)}
+                                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                                        title="Hapus Pengguna"
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </button>
+                                    ) : (
+                                      <span className="text-[10px] text-slate-400 font-medium px-2 py-1">
+                                        (Akun Anda)
+                                      </span>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <span className="text-[11px] text-slate-400">-</span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ==================================================== */}
+            {/* MODAL: PROFIL SAYA (MANDIRI)                         */}
+            {/* ==================================================== */}
+            {profileModalOpen && (
+              <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in">
+                <div className="bg-white rounded-[24px] max-w-md w-full p-6 sm:p-7 shadow-2xl border border-slate-100 space-y-5 animate-in zoom-in-95">
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                        <UserCheck className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <Text.H2 className="text-base font-extrabold text-slate-900">Profil Saya</Text.H2>
+                        <Text.Caption className="text-slate-600">Kelola informasi nama, email, dan kata sandi Anda</Text.Caption>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setProfileModalOpen(false)}
+                      className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleSaveProfile} className="space-y-4">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                        Nama Lengkap
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={profileForm.name}
+                        onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-blue-600"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                        Alamat Email
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        value={profileForm.email}
+                        onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-blue-600"
+                      />
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-100 space-y-3">
+                      <div>
+                        <Text.Label className="text-blue-600 block mb-0.5">Ubah Kata Sandi (Opsional)</Text.Label>
+                        <Text.Caption className="text-slate-500">Kosongkan jika tidak ingin mengubah kata sandi.</Text.Caption>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                          Kata Sandi Saat Ini
+                        </label>
+                        <input
+                          type="password"
+                          value={profileForm.current_password}
+                          onChange={(e) => setProfileForm({ ...profileForm, current_password: e.target.value })}
+                          placeholder="Masukkan kata sandi lama Anda"
+                          className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                          Kata Sandi Baru (Min. 8 karakter)
+                        </label>
+                        <input
+                          type="password"
+                          value={profileForm.password}
+                          onChange={(e) => setProfileForm({ ...profileForm, password: e.target.value })}
+                          placeholder="Minimal 8 karakter baru"
+                          className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                          Konfirmasi Kata Sandi Baru
+                        </label>
+                        <input
+                          type="password"
+                          value={profileForm.password_confirmation}
+                          onChange={(e) => setProfileForm({ ...profileForm, password_confirmation: e.target.value })}
+                          placeholder="Ulangi kata sandi baru"
+                          className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="pt-4 flex items-center justify-end gap-2 border-t border-slate-100">
+                      <button
+                        type="button"
+                        onClick={() => setProfileModalOpen(false)}
+                        className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+                      >
+                        Batal
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-600/20 transition-all cursor-pointer"
+                      >
+                        Simpan Profil
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+
+            {/* ==================================================== */}
+            {/* MODAL: TAMBAH / EDIT PENGGUNA (SUPER ADMIN)          */}
+            {/* ==================================================== */}
+            {userModalOpen && (
+              <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in">
+                <div className="bg-white rounded-[24px] max-w-md w-full p-6 sm:p-7 shadow-2xl border border-slate-100 space-y-5 animate-in zoom-in-95">
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                        <Users className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <Text.H2 className="text-base font-extrabold text-slate-900">
+                          {editingUser ? 'Edit Data Pengguna' : 'Tambah Pengguna Baru'}
+                        </Text.H2>
+                        <Text.Caption className="text-slate-600">
+                          {editingUser ? `Perbarui profil atau kata sandi ${editingUser.name}` : 'Buat akun pengelola website resmi baru'}
+                        </Text.Caption>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setUserModalOpen(false)}
+                      className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleSaveUser} className="space-y-4">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                        Nama Lengkap
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={userForm.name}
+                        onChange={(e) => setUserForm({ ...userForm, name: e.target.value })}
+                        placeholder="misal: Engineer Bagian Sipil"
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-blue-600"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                        Alamat Email
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        value={userForm.email}
+                        onChange={(e) => setUserForm({ ...userForm, email: e.target.value })}
+                        placeholder="misal: editor@wahanasinergimitra.id"
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-blue-600"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                        Peran (Hak Akses)
+                      </label>
+                      <select
+                        value={userForm.role}
+                        onChange={(e) => setUserForm({ ...userForm, role: e.target.value })}
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-blue-600"
+                      >
+                        <option value="Editor">Editor (Kelola Konten & Portofolio)</option>
+                        <option value="Super Admin">Super Admin (Akses Penuh + Kelola User)</option>
+                      </select>
+                      <p className="text-[11px] text-slate-500 mt-1">
+                        {userForm.role === 'Super Admin'
+                          ? 'Dapat mengelola konten, konfigurasi sistem, dan manajemen user lain.'
+                          : 'Hanya dapat memperbarui konten landing page, layanan, proyek, dan testimoni.'}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                        Kata Sandi {editingUser ? '(Opsional - Isi jika ingin reset)' : '(Wajib - Min. 8 karakter)'}
+                      </label>
+                      <input
+                        type="password"
+                        required={!editingUser}
+                        value={userForm.password}
+                        onChange={(e) => setUserForm({ ...userForm, password: e.target.value })}
+                        placeholder={editingUser ? 'Kosongkan jika tidak diubah' : 'Minimal 8 karakter'}
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-blue-600"
+                      />
+                    </div>
+
+                    <div className="pt-4 flex items-center justify-end gap-2 border-t border-slate-100">
+                      <button
+                        type="button"
+                        onClick={() => setUserModalOpen(false)}
+                        className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+                      >
+                        Batal
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-600/20 transition-all cursor-pointer"
+                      >
+                        {editingUser ? 'Simpan Perubahan' : 'Buat Pengguna'}
+                      </button>
+                    </div>
+                  </form>
+                </div>
               </div>
             )}
 

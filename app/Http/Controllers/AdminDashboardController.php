@@ -7,9 +7,13 @@ use App\Models\Inquiry;
 use App\Models\Project;
 use App\Models\Service;
 use App\Models\Testimonial;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -24,6 +28,8 @@ class AdminDashboardController extends Controller
         $services = Service::orderBy('order')->get();
         $inquiries = Inquiry::orderByDesc('id')->get();
         $testimonials = Testimonial::orderBy('order')->get();
+        $users = User::orderByDesc('id')->get();
+        $authUser = Auth::user();
 
         $settings = [
             'hero_stat_projects' => CompanySetting::get('hero_stat_projects', '50+'),
@@ -69,6 +75,8 @@ class AdminDashboardController extends Controller
             'metrics' => $metrics,
             'visibility' => $visibility,
             'sectionData' => $sectionData,
+            'auth_user' => $authUser,
+            'users' => $users,
         ]);
     }
 
@@ -370,5 +378,118 @@ class AdminDashboardController extends Controller
         CompanySetting::setJson("section_{$section}", $merged);
 
         return redirect()->back()->with('success', "Konten seksi {$section} berhasil disimpan.");
+    }
+
+    /**
+     * SELF USER PROFILE UPDATE
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'current_password' => 'nullable|string',
+            'password' => 'nullable|string|min:8|confirmed',
+        ]);
+
+        if (!empty($validated['password'])) {
+            if (empty($validated['current_password']) || !Hash::check($validated['current_password'], $user->password)) {
+                return back()->withErrors(['current_password' => 'Kata sandi saat ini tidak cocok.']);
+            }
+            $user->password = Hash::make($validated['password']);
+        }
+
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+        $user->save();
+
+        return redirect()->back()->with('success', 'Profil dan informasi akun Anda berhasil diperbarui.');
+    }
+
+    /**
+     * USER MANAGEMENT CRUD (SUPER ADMIN ONLY)
+     */
+    public function storeUser(Request $request)
+    {
+        $currentUser = Auth::user();
+        if ($currentUser->role !== 'Super Admin') {
+            return redirect()->back()->withErrors(['user' => 'Hanya Super Admin yang diizinkan menambahkan pengguna baru.']);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email',
+            'role' => 'required|string|in:Super Admin,Editor',
+            'password' => 'required|string|min:8',
+        ]);
+
+        User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'role' => $validated['role'],
+            'password' => Hash::make($validated['password']),
+            'email_verified_at' => now(),
+        ]);
+
+        return redirect()->back()->with('success', "Pengguna {$validated['name']} ({$validated['role']}) berhasil ditambahkan.");
+    }
+
+    public function updateUser(Request $request, User $user)
+    {
+        $currentUser = Auth::user();
+        if ($currentUser->role !== 'Super Admin') {
+            return redirect()->back()->withErrors(['user' => 'Hanya Super Admin yang diizinkan memperbarui pengguna.']);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'role' => 'required|string|in:Super Admin,Editor',
+            'password' => 'nullable|string|min:8',
+        ]);
+
+        // If demoting from Super Admin to Editor, ensure at least one other Super Admin exists
+        if ($user->role === 'Super Admin' && $validated['role'] !== 'Super Admin') {
+            $otherSuperAdmins = User::where('role', 'Super Admin')->where('id', '!=', $user->id)->count();
+            if ($otherSuperAdmins === 0) {
+                return redirect()->back()->withErrors(['role' => 'Minimal harus ada 1 Super Admin di sistem.']);
+            }
+        }
+
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+        $user->role = $validated['role'];
+        if (!empty($validated['password'])) {
+            $user->password = Hash::make($validated['password']);
+        }
+        $user->save();
+
+        return redirect()->back()->with('success', "Data pengguna {$user->name} berhasil diperbarui.");
+    }
+
+    public function deleteUser(User $user)
+    {
+        $currentUser = Auth::user();
+        if ($currentUser->role !== 'Super Admin') {
+            return redirect()->back()->withErrors(['user' => 'Hanya Super Admin yang diizinkan menghapus pengguna.']);
+        }
+
+        if ($user->id === $currentUser->id) {
+            return redirect()->back()->withErrors(['user' => 'Anda tidak dapat menghapus akun Anda sendiri.']);
+        }
+
+        if ($user->role === 'Super Admin') {
+            $otherSuperAdmins = User::where('role', 'Super Admin')->where('id', '!=', $user->id)->count();
+            if ($otherSuperAdmins === 0) {
+                return redirect()->back()->withErrors(['user' => 'Tidak dapat menghapus Super Admin terakhir.']);
+            }
+        }
+
+        $userName = $user->name;
+        $user->delete();
+
+        return redirect()->back()->with('success', "Akun pengguna {$userName} telah berhasil dihapus.");
     }
 }
