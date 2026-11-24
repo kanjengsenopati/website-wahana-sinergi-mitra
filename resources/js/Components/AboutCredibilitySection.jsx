@@ -13,6 +13,7 @@ import {
   FileCheck2
 } from 'lucide-react';
 import Text from './Typography';
+import { DEFAULT_PROJECT_PLACEHOLDER, resolveImageUrl } from '../utils/imageUtils';
 
 const iconMap = {
   Target,
@@ -105,12 +106,14 @@ export function AboutCredibilitySection({ company = {}, stats = {}, data = {} })
     data?.subtitle ||
     'Dengan dukungan tim insinyur sipil bersertifikat SKA/SKT, peralatan konstruksi modern, serta sistem pemantauan digital PROKSI, kami memastikan setiap tahapan proyek berjalan sesuai spesifikasi teknis SNI, tepat anggaran, dan tepat jadwal.';
   const experienceYears = data?.experience_years || `${stats?.years_experience || 12}+ Tahun`;
-  const photoMainUrl =
-    data?.photo_main_url ||
-    'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=900&q=80';
-  const photoSecondaryUrl =
-    data?.photo_secondary_url ||
-    'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=600&q=80';
+  const photoMainUrl = resolveImageUrl(
+    data?.photo_main_url,
+    'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=900&q=80'
+  );
+  const photoSecondaryUrl = resolveImageUrl(
+    data?.photo_secondary_url,
+    'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=600&q=80'
+  );
 
   const pillars =
     Array.isArray(data?.pillars) && data.pillars.length > 0 ? data.pillars : defaultPillars;
@@ -208,11 +211,12 @@ export function AboutCredibilitySection({ company = {}, stats = {}, data = {} })
               {/* Primary Tall Aerial Site Image */}
               <div className="col-span-7 rounded-[24px] overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative min-h-[340px] group">
                 <img
+                  key={photoMainUrl}
                   src={photoMainUrl}
                   alt="Aerial Proyek Konstruksi CV. Wahana Sinergi Mitra"
                   onError={(e) => {
                     e.currentTarget.onerror = null;
-                    e.currentTarget.src = 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=900&q=80';
+                    e.currentTarget.src = DEFAULT_PROJECT_PLACEHOLDER;
                   }}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
@@ -236,11 +240,12 @@ export function AboutCredibilitySection({ company = {}, stats = {}, data = {} })
               <div className="col-span-5 flex flex-col justify-between gap-4">
                 <div className="rounded-[24px] overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative h-48 group">
                   <img
+                    key={photoSecondaryUrl}
                     src={photoSecondaryUrl}
                     alt="Tim Engineer & HSE K3 WSM"
                     onError={(e) => {
                       e.currentTarget.onerror = null;
-                      e.currentTarget.src = 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=600&q=80';
+                      e.currentTarget.src = DEFAULT_PROJECT_PLACEHOLDER;
                     }}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />

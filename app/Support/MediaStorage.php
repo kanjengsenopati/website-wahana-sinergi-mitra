@@ -1,0 +1,299 @@
+<?php
+
+namespace App\Support;
+
+use App\Models\CompanySetting;
+use App\Models\Project;
+use App\Models\Service;
+use App\Models\Testimonial;
+use Illuminate\Support\Facades\Storage;
+
+class MediaStorage
+{
+    /**
+     * Normalize stored image URLs so React (/admin) and Filament (/filament)
+     * always persist a consistent format.
+     */
+    public static function normalizeUrl(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $trimmed = trim($value);
+        if ($trimmed === '') {
+            return null;
+        }
+
+        // Convert relative disk paths (e.g. "uploads/projects/abc.webp") to "/storage/uploads/..."
+        if (str_starts_with($trimmed, 'uploads/')) {
+            return '/storage/' . ltrim($trimmed, '/');
+        }
+
+        if (str_starts_with($trimmed, 'storage/uploads/')) {
+            return '/' . ltrim($trimmed, '/');
+        }
+
+        return $trimmed;
+    }
+
+    /**
+     * Extract the public-disk relative path ONLY for managed local uploads under "uploads/...".
+     * Returns null for external URLs or static public assets like "/images/*".
+     */
+    public static function toPublicDiskPath(?string $url): ?string
+    {
+        if ($url === null) {
+            return null;
+        }
+
+        $trimmed = trim($url);
+        if ($trimmed === '' || str_contains($trimmed, "\0") || str_contains($trimmed, '..')) {
+            return null;
+        }
+
+        $normalized = str_replace('\\', '/', $trimmed);
+
+        if (str_starts_with($normalized, '/storage/uploads/')) {
+            return ltrim(substr($normalized, strlen('/storage/')), '/');
+        }
+
+        if (str_starts_with($normalized, 'storage/uploads/')) {
+            return ltrim(substr($normalized, strlen('storage/')), '/');
+        }
+
+        if (str_starts_with($normalized, 'uploads/')) {
+            return ltrim($normalized, '/');
+        }
+
+        return null;
+    }
+
+    /**
+     * Format a stored image URL for Filament ImageColumn display
+     * (disk-relative path for local uploads, full URL for /images/* or external URLs).
+     */
+    public static function toFilamentImageState(?string $url): ?string
+    {
+        $diskPath = self::toPublicDiskPath($url);
+        if ($diskPath !== null) {
+            return $diskPath;
+        }
+
+        if ($url === null || trim($url) === '') {
+            return null;
+        }
+
+        $trimmed = trim($url);
+        if (str_starts_with($trimmed, '/')) {
+            return url($trimmed);
+        }
+
+        return $trimmed;
+    }
+
+    /**
+     * Check whether a managed upload URL is still referenced by any database record.
+     */
+    public static function isReferencedAnywhere(string $normalizedUrl, string $diskPath): bool
+    {
+        $candidates = array_values(array_unique([$normalizedUrl, $diskPath, ltrim($normalizedUrl, '/')]));
+
+        if (Project::whereIn('thumbnail_url', $candidates)->exists()) {
+            return true;
+        }
+
+        if (Service::whereIn('image_url', $candidates)->exists()) {
+            return true;
+        }
+
+        if (Testimonial::whereIn('avatar_url', $candidates)->exists()) {
+            return true;
+        }
+
+        $sectionSettings = CompanySetting::whereIn('key', ['section_hero', 'section_about_data'])->get();
+        foreach ($sectionSettings as $setting) {
+            $decoded = json_decode((string) $setting->value, true);
+            if (!is_array($decoded)) {
+                continue;
+            }
+
+            $sectionKey = str_replace('section_', '', $setting->key);
+            $urls = self::extractSectionImageUrls($sectionKey, $decoded);
+            foreach ($urls as $url) {
+                $norm = self::normalizeUrl($url);
+                $path = self::toPublicDiskPath($url);
+                if (in_array($norm, $candidates, true) || ($path !== null && in_array($path, $candidates, true))) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Safely delete a managed upload from the public disk if no record still references it.
+     */
+    public static function deleteIfUnused(?string $url): bool
+    {
+        $diskPath = self::toPublicDiskPath($url);
+        if ($diskPath === null) {
+            return false;
+        }
+
+        $normalized = '/storage/' . $diskPath;
+
+        if (self::isReferencedAnywhere($normalized, $diskPath)) {
+            return false;
+        }
+
+        if (Storage::disk('public')->exists($diskPath)) {
+            return Storage::disk('public')->delete($diskPath);
+        }
+
+        return false;
+    }
+
+    /**
+     * Extract image URLs from JSON section payloads (hero / about_data).
+     *
+     * @return array<int, string>
+     */
+    public static function extractSectionImageUrls(string $section, array $data): array
+    {
+        $urls = [];
+
+        if ($section === 'hero' && isset($data['slides']) && is_array($data['slides'])) {
+            foreach ($data['slides'] as $slide) {
+                if (is_array($slide) && !empty($slide['image']) && is_string($slide['image'])) {
+                    $urls[] = $slide['image'];
+                }
+            }
+        }
+
+        if ($section === 'about_data') {
+            foreach (['photo_main_url', 'photo_secondary_url'] as $key) {
+                if (!empty($data[$key]) && is_string($data[$key])) {
+                    $urls[] = $data[$key];
+                }
+            }
+        }
+
+        return $urls;
+    }
+
+    /**
+     * Normalize image URLs inside a section payload before persisting.
+     */
+    public static function normalizeSectionImages(string $section, array $data): array
+    {
+        if ($section === 'hero' && isset($data['slides']) && is_array($data['slides'])) {
+            foreach ($data['slides'] as $index => $slide) {
+                if (is_array($slide) && array_key_exists('image', $slide)) {
+                    $data['slides'][$index]['image'] = self::normalizeUrl(is_string($slide['image']) ? $slide['image'] : null) ?? '';
+                }
+            }
+        }
+
+        if ($section === 'about_data') {
+            foreach (['photo_main_url', 'photo_secondary_url'] as $key) {
+                if (array_key_exists($key, $data)) {
+                    $data[$key] = self::normalizeUrl(is_string($data[$key]) ? $data[$key] : null) ?? '';
+                }
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * Delete any previously managed files that were removed or replaced in a URL list.
+     *
+     * @param array<int, string> $oldUrls
+     * @param array<int, string> $newUrls
+     */
+    public static function deleteUnusedDiff(array $oldUrls, array $newUrls): void
+    {
+        $normalizedOld = array_filter(array_map([self::class, 'normalizeUrl'], $oldUrls));
+        $normalizedNew = array_filter(array_map([self::class, 'normalizeUrl'], $newUrls));
+
+        $removed = array_diff(array_unique($normalizedOld), array_unique($normalizedNew));
+
+        foreach ($removed as $url) {
+            self::deleteIfUnused($url);
+        }
+    }
+
+    /**
+     * Safely resolve a requested path inside storage/app/public preventing path traversal.
+     */
+    public static function resolveSafeStoragePath(string $path): ?string
+    {
+        if ($path === '' || str_contains($path, "\0") || str_contains($path, '..')) {
+            return null;
+        }
+
+        $publicRoot = realpath(storage_path('app/public'));
+        if ($publicRoot === false) {
+            return null;
+        }
+
+        $cleanRelative = ltrim(str_replace(['\\', '/'], DIRECTORY_SEPARATOR, $path), DIRECTORY_SEPARATOR);
+        $candidate = realpath($publicRoot . DIRECTORY_SEPARATOR . $cleanRelative);
+
+        if ($candidate === false || !is_file($candidate)) {
+            return null;
+        }
+
+        $rootPrefix = rtrim($publicRoot, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+
+        if (DIRECTORY_SEPARATOR === '\\') {
+            if (!str_starts_with(strtolower($candidate), strtolower($rootPrefix))) {
+                return null;
+            }
+        } else {
+            if (!str_starts_with($candidate, $rootPrefix)) {
+                return null;
+            }
+        }
+
+        return $candidate;
+    }
+
+    /**
+     * Return the effective PHP upload limit in bytes (minimum of upload_max_filesize and post_max_size).
+     */
+    public static function phpMaxUploadBytes(): int
+    {
+        $uploadMax = self::parseIniSize((string) ini_get('upload_max_filesize'));
+        $postMax = self::parseIniSize((string) ini_get('post_max_size'));
+
+        if ($uploadMax > 0 && $postMax > 0) {
+            return min($uploadMax, $postMax);
+        }
+
+        return max($uploadMax, $postMax, 2 * 1024 * 1024);
+    }
+
+    /**
+     * Parse PHP shorthand ini byte values (e.g. "2M", "8M", "512K").
+     */
+    public static function parseIniSize(string $value): int
+    {
+        $trimmed = trim($value);
+        if ($trimmed === '' || $trimmed === '0') {
+            return 0;
+        }
+
+        $unit = strtolower(substr($trimmed, -1));
+        $number = (float) $trimmed;
+
+        return match ($unit) {
+            'g' => (int) ($number * 1024 * 1024 * 1024),
+            'm' => (int) ($number * 1024 * 1024),
+            'k' => (int) ($number * 1024),
+            default => (int) $number,
+        };
+    }
+}

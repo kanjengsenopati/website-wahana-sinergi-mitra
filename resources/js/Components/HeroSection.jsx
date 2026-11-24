@@ -12,6 +12,7 @@ import {
   MapPin
 } from 'lucide-react';
 import Text from './Typography';
+import { DEFAULT_PROJECT_PLACEHOLDER, resolveImageUrl } from '../utils/imageUtils';
 
 const defaultHeroSlides = [
   {
@@ -131,11 +132,12 @@ export function HeroSection({ stats = {}, data = {} }) {
             style={{ transitionProperty: 'opacity, transform' }}
           >
             <img
-              src={slide.image || defaultHeroSlides[index % defaultHeroSlides.length].image}
+              key={slide.image || slide.id || index}
+              src={resolveImageUrl(slide.image, defaultHeroSlides[index % defaultHeroSlides.length].image)}
               alt={slide.caption || 'Proyek Konstruksi CV. Wahana Sinergi Mitra'}
               onError={(e) => {
                 e.currentTarget.onerror = null;
-                e.currentTarget.src = defaultHeroSlides[index % defaultHeroSlides.length].image;
+                e.currentTarget.src = DEFAULT_PROJECT_PLACEHOLDER;
               }}
               className="w-full h-full object-cover object-center"
             />

@@ -1,0 +1,222 @@
+export const DEFAULT_PROJECT_PLACEHOLDER = '/images/project-placeholder.jpg';
+export const DEFAULT_AVATAR_PLACEHOLDER = '/images/logo-wsm.jpg';
+
+const VALID_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
+const VALID_EXT_REGEX = /\.(jpe?g|png|webp|avif)$/i;
+
+/**
+ * Resolve any image URL format (React /storage/uploads/..., Filament uploads/..., external URLs)
+ * into a browser-safe src with graceful legacy/empty fallback.
+ */
+export function resolveImageUrl(url, fallback = DEFAULT_PROJECT_PLACEHOLDER) {
+  if (!url || typeof url !== 'string') {
+    return fallback;
+  }
+
+  const trimmed = url.trim();
+  if (!trimmed || trimmed.includes('1541888946425')) {
+    return fallback;
+  }
+
+  if (trimmed.startsWith('uploads/')) {
+    return `/storage/${trimmed}`;
+  }
+
+  if (trimmed.startsWith('storage/uploads/')) {
+    return `/${trimmed}`;
+  }
+
+  return trimmed;
+}
+
+/**
+ * Check whether a selected File is a supported image by MIME type or filename extension.
+ */
+export function isSupportedImageFile(file) {
+  if (!file) return false;
+  if (file.type && VALID_MIME_TYPES.includes(file.type.toLowerCase())) {
+    return true;
+  }
+  return VALID_EXT_REGEX.test(file.name || '');
+}
+
+/**
+ * Read a cookie value from document.cookie.
+ */
+function getCookieValue(name) {
+  if (typeof document === 'undefined' || !document.cookie) {
+    return '';
+  }
+  const cookies = document.cookie.split(';');
+  for (const part of cookies) {
+    const [key, ...rest] = part.trim().split('=');
+    if (key === name) {
+      return rest.join('=');
+    }
+  }
+  return '';
+}
+
+/**
+ * Build fresh CSRF headers for fetch() requests in an Inertia SPA.
+ * Important: Laravel checks X-CSRF-TOKEN before X-XSRF-TOKEN, so never send a stale meta token
+ * alongside a fresh XSRF-TOKEN cookie.
+ */
+export function getFreshCsrfHeaders(pageCsrfToken = '') {
+  if (pageCsrfToken && typeof pageCsrfToken === 'string') {
+    return { 'X-CSRF-TOKEN': pageCsrfToken };
+  }
+
+  const xsrfCookie = getCookieValue('XSRF-TOKEN');
+  if (xsrfCookie) {
+    try {
+      return { 'X-XSRF-TOKEN': decodeURIComponent(xsrfCookie) };
+    } catch {
+      return { 'X-XSRF-TOKEN': xsrfCookie };
+    }
+  }
+
+  const metaToken =
+    typeof document !== 'undefined'
+      ? document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+      : '';
+
+  return metaToken ? { 'X-CSRF-TOKEN': metaToken } : {};
+}
+
+/**
+ * Format byte sizes into human-readable Indonesian labels (KB / MB).
+ */
+export function formatFileSize(bytes) {
+  if (!bytes || bytes <= 0) return '0 KB';
+  if (bytes < 1024 * 1024) {
+    return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  }
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+}
+
+/**
+ * Load an HTMLImageElement from a File using an Object URL.
+ */
+function loadImageFromFile(file) {
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(img);
+    };
+    img.onerror = (err) => {
+      URL.revokeObjectURL(objectUrl);
+      reject(err);
+    };
+    img.src = objectUrl;
+  });
+}
+
+/**
+ * Convert a Canvas to a Blob asynchronously.
+ */
+function canvasToBlob(canvas, mimeType, quality) {
+  return new Promise((resolve) => {
+    canvas.toBlob((blob) => resolve(blob), mimeType, quality);
+  });
+}
+
+/**
+ * Automatically resize & compress large images on the client via HTML5 Canvas
+ * so smartphone/DSLR photos reliably pass PHP's default 2MB upload_max_filesize
+ * and load fast for website visitors.
+ */
+export async function compressImageIfNeeded(
+  file,
+  {
+    maxDimension = 1920,
+    targetMaxBytes = 1.5 * 1024 * 1024,
+  } = {}
+) {
+  if (!file || typeof window === 'undefined' || typeof document === 'undefined') {
+    return { file, wasCompressed: false };
+  }
+
+  try {
+    const img = await loadImageFromFile(file);
+    const { naturalWidth: origW, naturalHeight: origH } = img;
+    const needsResize = origW > maxDimension || origH > maxDimension;
+    const needsCompress = file.size > targetMaxBytes;
+
+    if (!needsResize && !needsCompress) {
+      return { file, wasCompressed: false };
+    }
+
+    let targetW = origW;
+    let targetH = origH;
+    if (needsResize) {
+      const ratio = Math.min(maxDimension / origW, maxDimension / origH);
+      targetW = Math.max(1, Math.round(origW * ratio));
+      targetH = Math.max(1, Math.round(origH * ratio));
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = targetW;
+    canvas.height = targetH;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      return { file, wasCompressed: false };
+    }
+
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(img, 0, 0, targetW, targetH);
+
+    // Prefer WebP; fall back to JPEG if the browser doesn't support WebP encoding
+    const preferredTypes = ['image/webp', 'image/jpeg'];
+    const qualities = [0.85, 0.76, 0.66, 0.56];
+    let bestBlob = null;
+
+    for (const mimeType of preferredTypes) {
+      let supported = true;
+      for (const quality of qualities) {
+        const blob = await canvasToBlob(canvas, mimeType, quality);
+        if (!blob || (mimeType === 'image/webp' && blob.type !== 'image/webp')) {
+          supported = false;
+          break;
+        }
+        bestBlob = blob;
+        if (blob.size <= targetMaxBytes) {
+          break;
+        }
+      }
+      if (supported && bestBlob) {
+        break;
+      }
+    }
+
+    if (!bestBlob) {
+      return { file, wasCompressed: false };
+    }
+
+    // If somehow the re-encoded file is larger than original and original is already under target, keep original
+    if (bestBlob.size >= file.size && file.size <= targetMaxBytes) {
+      return { file, wasCompressed: false };
+    }
+
+    const ext = bestBlob.type === 'image/webp' ? 'webp' : 'jpg';
+    const baseName = (file.name || 'image').replace(/\.[^.]+$/, '');
+    const optimizedFile = new File([bestBlob], `${baseName}.${ext}`, {
+      type: bestBlob.type,
+      lastModified: Date.now(),
+    });
+
+    return {
+      file: optimizedFile,
+      wasCompressed: true,
+      originalSize: file.size,
+      compressedSize: optimizedFile.size,
+    };
+  } catch {
+    // Fallback gracefully to original file if canvas decode is unsupported
+    return { file, wasCompressed: false };
+  }
+}

@@ -12,6 +12,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import Text from './Typography';
+import { DEFAULT_PROJECT_PLACEHOLDER, resolveImageUrl } from '../utils/imageUtils';
 
 export function PortfolioSection({ projects = [], company = {}, meta = {} }) {
   const [activeTab, setActiveTab] = useState('All');
@@ -162,15 +163,12 @@ export function PortfolioSection({ projects = [], company = {}, meta = {} }) {
                 {/* Image Container with Badges */}
                 <div className="relative h-56 w-full overflow-hidden bg-slate-100">
                   <img
-                    src={
-                      item.thumbnail_url && !item.thumbnail_url.includes('1541888946425')
-                        ? item.thumbnail_url
-                        : '/images/project-placeholder.jpg'
-                    }
+                    key={item.thumbnail_url || item.id}
+                    src={resolveImageUrl(item.thumbnail_url)}
                     alt={item.title}
                     onError={(e) => {
                       e.currentTarget.onerror = null;
-                      e.currentTarget.src = '/images/project-placeholder.jpg';
+                      e.currentTarget.src = DEFAULT_PROJECT_PLACEHOLDER;
                     }}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
@@ -392,15 +390,12 @@ export function PortfolioSection({ projects = [], company = {}, meta = {} }) {
 
             <div className="h-64 sm:h-72 rounded-2xl overflow-hidden bg-slate-100 relative">
               <img
-                src={
-                  selectedProject.thumbnail_url && !selectedProject.thumbnail_url.includes('1541888946425')
-                    ? selectedProject.thumbnail_url
-                    : '/images/project-placeholder.jpg'
-                }
+                key={selectedProject.thumbnail_url || selectedProject.id}
+                src={resolveImageUrl(selectedProject.thumbnail_url)}
                 alt={selectedProject.title}
                 onError={(e) => {
                   e.currentTarget.onerror = null;
-                  e.currentTarget.src = '/images/project-placeholder.jpg';
+                  e.currentTarget.src = DEFAULT_PROJECT_PLACEHOLDER;
                 }}
                 className="w-full h-full object-cover"
               />

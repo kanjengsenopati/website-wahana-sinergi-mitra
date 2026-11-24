@@ -49,11 +49,18 @@ import {
   Warehouse,
   Briefcase,
   Wrench,
-  Hammer
+  Hammer,
+  AlertCircle,
+  Loader2
 } from 'lucide-react';
 import Text, { formatRupiah, formatThousands } from '../../Components/Typography';
 import CurrencyInput from '../../Components/CurrencyInput';
 import ImageUploader from '../../Components/ImageUploader';
+import {
+  DEFAULT_PROJECT_PLACEHOLDER,
+  DEFAULT_AVATAR_PLACEHOLDER,
+  resolveImageUrl,
+} from '../../utils/imageUtils';
 
 const iconMap = {
   Building2,
@@ -76,9 +83,15 @@ export default function Dashboard({
   auth_user = {},
   users = []
 }) {
-  const { flash, auth } = usePage().props;
+  const { flash, auth, errors = {} } = usePage().props;
   const currentUser = auth_user?.id ? auth_user : (auth?.user || {});
   const [activeTab, setActiveTab] = useState('overview'); // overview, sections, projects, services, inquiries, testimonials, settings, users
+  const [activeUploadsCount, setActiveUploadsCount] = useState(0);
+  const isAnyImageUploading = activeUploadsCount > 0;
+  const handleUploaderBusyChange = React.useCallback((busy) => {
+    setActiveUploadsCount((prev) => Math.max(0, prev + (busy ? 1 : -1)));
+  }, []);
+  const errorMessages = Object.values(errors || {}).filter(Boolean);
 
   // Profile Modal State
   const [profileModalOpen, setProfileModalOpen] = useState(false);
@@ -200,6 +213,25 @@ export default function Dashboard({
       setSectionVisibility(visibility);
     }
   }, [visibility]);
+
+  // Keep Hero & About forms synced when Inertia refreshes sectionData props after saving
+  React.useEffect(() => {
+    if (sectionData?.hero) {
+      setHeroForm((prev) => ({
+        ...prev,
+        ...sectionData.hero,
+        slides: Array.isArray(sectionData.hero.slides) && sectionData.hero.slides.length > 0
+          ? sectionData.hero.slides
+          : prev.slides,
+      }));
+    }
+    if (sectionData?.about_data) {
+      setAboutForm((prev) => ({
+        ...prev,
+        ...sectionData.about_data,
+      }));
+    }
+  }, [sectionData]);
 
   // Section Content Forms
   const [heroForm, setHeroForm] = useState({
@@ -347,11 +379,13 @@ export default function Dashboard({
 
   const handleSaveHeroSection = (e) => {
     e.preventDefault();
+    if (isAnyImageUploading) return;
     router.post('/admin/sections/hero', { data: heroForm }, { preserveScroll: true });
   };
 
   const handleSaveAboutSection = (e) => {
     e.preventDefault();
+    if (isAnyImageUploading) return;
     router.post('/admin/sections/about_data', { data: aboutForm }, { preserveScroll: true });
   };
 
@@ -571,7 +605,7 @@ export default function Dashboard({
       location: '',
       project_value: '',
       year: new Date().getFullYear(),
-      thumbnail_url: '/images/project-placeholder.jpg',
+      thumbnail_url: '',
       status: 'Selesai',
       description: '',
       is_featured: true,
@@ -601,6 +635,7 @@ export default function Dashboard({
 
   const submitProject = (e) => {
     e.preventDefault();
+    if (isAnyImageUploading) return;
     if (editingItem) {
       router.put(`/admin/projects/${editingItem.id}`, projectForm, {
         preserveScroll: true,
@@ -625,7 +660,7 @@ export default function Dashboard({
     setServiceForm({
       title: '',
       icon: 'Building2',
-      image_url: '/images/project-placeholder.jpg',
+      image_url: '',
       short_description: '',
       full_description: '',
       order: services.length + 1,
@@ -639,7 +674,7 @@ export default function Dashboard({
     setServiceForm({
       title: item.title,
       icon: item.icon,
-      image_url: item.image_url || '/images/project-placeholder.jpg',
+      image_url: item.image_url || '',
       short_description: item.short_description,
       full_description: item.full_description || '',
       order: item.order || 0,
@@ -651,6 +686,7 @@ export default function Dashboard({
 
   const submitService = (e) => {
     e.preventDefault();
+    if (isAnyImageUploading) return;
     if (editingItem) {
       router.put(`/admin/services/${editingItem.id}`, serviceForm, {
         preserveScroll: true,
@@ -687,7 +723,7 @@ export default function Dashboard({
       client_name: '',
       client_role: '',
       company_name: '',
-      avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
+      avatar_url: '',
       content: '',
       rating: 5,
       project_name: '',
@@ -716,6 +752,7 @@ export default function Dashboard({
 
   const submitTestimonial = (e) => {
     e.preventDefault();
+    if (isAnyImageUploading) return;
     if (editingItem) {
       router.put(`/admin/testimonials/${editingItem.id}`, testimonialForm, {
         preserveScroll: true,
@@ -1010,13 +1047,32 @@ export default function Dashboard({
             </div>
           </header>
 
-          {/* Flash Feedback Alert */}
+          {/* Flash & Validation Error Feedback Alerts */}
           {flash?.success && (
             <div className="mx-6 mt-4 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center justify-between shadow-sm animate-in fade-in">
               <div className="flex items-center gap-2.5">
                 <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-                <span className="text-xs font-semibold">{flash.success}</span>
+                <span className="text-xs font-semibold tracking-[-0.015em]">{flash.success}</span>
               </div>
+            </div>
+          )}
+
+          {(flash?.error || errorMessages.length > 0) && (
+            <div className="mx-6 mt-4 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 shadow-sm animate-in fade-in space-y-1.5">
+              <div className="flex items-center gap-2 text-xs font-bold text-rose-800 tracking-[-0.015em]">
+                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                <span>Gagal Menyimpan Perubahan</span>
+              </div>
+              {flash?.error && (
+                <p className="text-xs font-medium text-rose-700 pl-6 tracking-[-0.015em]">{flash.error}</p>
+              )}
+              {errorMessages.length > 0 && (
+                <ul className="list-disc pl-10 text-xs font-medium text-rose-700 space-y-0.5 tracking-[-0.015em]">
+                  {errorMessages.map((msg, idx) => (
+                    <li key={idx}>{msg}</li>
+                  ))}
+                </ul>
+              )}
             </div>
           )}
 
@@ -1377,10 +1433,14 @@ export default function Dashboard({
                                 <ImageUploader
                                   value={slide.image}
                                   onChange={(url) => {
-                                    const next = [...heroForm.slides];
-                                    next[sIdx] = { ...next[sIdx], image: url };
-                                    setHeroForm({ ...heroForm, slides: next });
+                                    setHeroForm((prev) => ({
+                                      ...prev,
+                                      slides: (prev.slides || []).map((item, idx) =>
+                                        idx === sIdx ? { ...item, image: url } : item
+                                      ),
+                                    }));
                                   }}
+                                  onUploadingChange={handleUploaderBusyChange}
                                   folder="general"
                                   aspect="landscape"
                                 />
@@ -1455,10 +1515,11 @@ export default function Dashboard({
                         <div className="pt-4 flex justify-end">
                           <button
                             type="submit"
-                            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/20 cursor-pointer"
+                            disabled={isAnyImageUploading}
+                            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs shadow-md shadow-blue-600/20 cursor-pointer"
                           >
-                            <Save className="w-4 h-4" />
-                            <span>Simpan Konten Hero</span>
+                            {isAnyImageUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                            <span>{isAnyImageUploading ? 'Menunggu Upload Selesai...' : 'Simpan Konten Hero'}</span>
                           </button>
                         </div>
                       </form>
@@ -1523,7 +1584,8 @@ export default function Dashboard({
                             </label>
                             <ImageUploader
                               value={aboutForm.photo_main_url}
-                              onChange={(url) => setAboutForm({ ...aboutForm, photo_main_url: url })}
+                              onChange={(url) => setAboutForm((prev) => ({ ...prev, photo_main_url: url }))}
+                              onUploadingChange={handleUploaderBusyChange}
                               folder="general"
                               aspect="landscape"
                             />
@@ -1534,7 +1596,8 @@ export default function Dashboard({
                             </label>
                             <ImageUploader
                               value={aboutForm.photo_secondary_url}
-                              onChange={(url) => setAboutForm({ ...aboutForm, photo_secondary_url: url })}
+                              onChange={(url) => setAboutForm((prev) => ({ ...prev, photo_secondary_url: url }))}
+                              onUploadingChange={handleUploaderBusyChange}
                               folder="general"
                               aspect="landscape"
                             />
@@ -1677,10 +1740,11 @@ export default function Dashboard({
                         <div className="pt-4 flex justify-end">
                           <button
                             type="submit"
-                            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/20 cursor-pointer"
+                            disabled={isAnyImageUploading}
+                            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs shadow-md shadow-blue-600/20 cursor-pointer"
                           >
-                            <Save className="w-4 h-4" />
-                            <span>Simpan Konten Tentang Kami</span>
+                            {isAnyImageUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                            <span>{isAnyImageUploading ? 'Menunggu Upload Selesai...' : 'Simpan Konten Tentang Kami'}</span>
                           </button>
                         </div>
                       </form>
@@ -2487,15 +2551,12 @@ export default function Dashboard({
                                 <td className="py-3.5 px-4 sm:px-5">
                                   <div className="flex items-center gap-3">
                                     <img
-                                      src={
-                                        proj.thumbnail_url && !proj.thumbnail_url.includes('1541888946425')
-                                          ? proj.thumbnail_url
-                                          : '/images/project-placeholder.jpg'
-                                      }
+                                      key={proj.thumbnail_url || proj.id}
+                                      src={resolveImageUrl(proj.thumbnail_url)}
                                       alt={proj.title}
                                       onError={(e) => {
                                         e.currentTarget.onerror = null;
-                                        e.currentTarget.src = '/images/project-placeholder.jpg';
+                                        e.currentTarget.src = DEFAULT_PROJECT_PLACEHOLDER;
                                       }}
                                       className="w-12 h-10 rounded-lg object-cover bg-slate-100 shrink-0 border border-slate-200/60 shadow-xs"
                                     />
@@ -2581,12 +2642,13 @@ export default function Dashboard({
                   </div>
 
                   <button
-                    type="button"
-                    onClick={submitProject}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-md shadow-sky-600/20 transition-all cursor-pointer"
+                    type="submit"
+                    form="project-editor-form"
+                    disabled={isAnyImageUploading}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs shadow-md shadow-sky-600/20 transition-all cursor-pointer"
                   >
-                    <Save className="w-4 h-4" />
-                    <span>Simpan Perubahan</span>
+                    {isAnyImageUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                    <span>{isAnyImageUploading ? 'Menunggu Upload...' : 'Simpan Perubahan'}</span>
                   </button>
                 </div>
 
@@ -2594,7 +2656,7 @@ export default function Dashboard({
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                   
                   {/* Left Form (8 Cols) */}
-                  <form onSubmit={submitProject} className="lg:col-span-8 bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-sm space-y-4">
+                  <form id="project-editor-form" onSubmit={submitProject} className="lg:col-span-8 bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-sm space-y-4">
                     
                     <div>
                       <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
@@ -2704,7 +2766,8 @@ export default function Dashboard({
                       </label>
                       <ImageUploader
                         value={projectForm.thumbnail_url}
-                        onChange={(url) => setProjectForm({ ...projectForm, thumbnail_url: url })}
+                        onChange={(url) => setProjectForm((prev) => ({ ...prev, thumbnail_url: url }))}
+                        onUploadingChange={handleUploaderBusyChange}
                         folder="projects"
                         aspect="landscape"
                       />
@@ -2733,9 +2796,12 @@ export default function Dashboard({
                       </button>
                       <button
                         type="submit"
-                        className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-md shadow-sky-600/20"
+                        disabled={isAnyImageUploading}
+                        className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs shadow-md shadow-sky-600/20 cursor-pointer"
                       >
-                        {editingItem ? 'Simpan Pembaruan' : 'Tambahkan ke Database'}
+                        {isAnyImageUploading
+                          ? 'Menunggu Upload Selesai...'
+                          : (editingItem ? 'Simpan Pembaruan' : 'Tambahkan ke Database')}
                       </button>
                     </div>
 
@@ -2743,20 +2809,17 @@ export default function Dashboard({
 
                   {/* Right Live Preview Card (4 Cols) */}
                   <div className="lg:col-span-4 space-y-3">
-                    <Text.Label className="text-slate-500 block">Live Preview Tampilan Landing Page</Text.Label>
+                    <Text.Label className="text-slate-600 block">Live Preview Tampilan Landing Page</Text.Label>
                     
                     <div className="bg-white rounded-3xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200">
                       <div className="h-44 bg-slate-100 relative overflow-hidden">
                         <img
-                          src={
-                            projectForm.thumbnail_url && !projectForm.thumbnail_url.includes('1541888946425')
-                              ? projectForm.thumbnail_url
-                              : '/images/project-placeholder.jpg'
-                          }
+                          key={projectForm.thumbnail_url || 'project-preview'}
+                          src={resolveImageUrl(projectForm.thumbnail_url)}
                           alt="Preview"
                           onError={(e) => {
                             e.currentTarget.onerror = null;
-                            e.currentTarget.src = '/images/project-placeholder.jpg';
+                            e.currentTarget.src = DEFAULT_PROJECT_PLACEHOLDER;
                           }}
                           className="w-full h-full object-cover"
                         />
@@ -2882,18 +2945,19 @@ export default function Dashboard({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                       {filteredServices.map((srv, idx) => {
                         const IconComp = iconMap[srv.icon] || Building2;
-                        const cardImg = srv.image_url || '/images/project-placeholder.jpg';
+                        const cardImg = resolveImageUrl(srv.image_url);
 
                         return (
                           <div key={srv.id} className="bg-white rounded-3xl border border-slate-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden flex flex-col justify-between hover:shadow-[0_14px_40px_rgb(0,0,0,0.08)] transition-all group">
                             {/* Card Image Banner */}
                             <div className="relative h-40 w-full bg-slate-900 overflow-hidden">
                               <img
+                                key={cardImg}
                                 src={cardImg}
                                 alt={srv.title}
                                 onError={(e) => {
                                   e.currentTarget.onerror = null;
-                                  e.currentTarget.src = '/images/project-placeholder.jpg';
+                                  e.currentTarget.src = DEFAULT_PROJECT_PLACEHOLDER;
                                 }}
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                               />
@@ -2987,12 +3051,13 @@ export default function Dashboard({
                   </div>
 
                   <button
-                    type="button"
-                    onClick={submitService}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-md shadow-sky-600/20"
+                    type="submit"
+                    form="service-editor-form"
+                    disabled={isAnyImageUploading}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs shadow-md shadow-sky-600/20 cursor-pointer"
                   >
-                    <Save className="w-4 h-4" />
-                    <span>Simpan Layanan</span>
+                    {isAnyImageUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                    <span>{isAnyImageUploading ? 'Menunggu Upload...' : 'Simpan Layanan'}</span>
                   </button>
                 </div>
 
@@ -3000,7 +3065,7 @@ export default function Dashboard({
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                   
                   {/* Left Form (8 Cols) */}
-                  <form onSubmit={submitService} className="lg:col-span-8 bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-sm space-y-4">
+                  <form id="service-editor-form" onSubmit={submitService} className="lg:col-span-8 bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-sm space-y-4">
                     <div>
                       <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
                         Nama Layanan <span className="text-rose-500">*</span>
@@ -3068,7 +3133,8 @@ export default function Dashboard({
                       </label>
                       <ImageUploader
                         value={serviceForm.image_url}
-                        onChange={(url) => setServiceForm({ ...serviceForm, image_url: url })}
+                        onChange={(url) => setServiceForm((prev) => ({ ...prev, image_url: url }))}
+                        onUploadingChange={handleUploaderBusyChange}
                         folder="services"
                         aspect="landscape"
                       />
@@ -3097,28 +3163,28 @@ export default function Dashboard({
                       </button>
                       <button
                         type="submit"
-                        className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-md shadow-sky-600/20 cursor-pointer"
+                        disabled={isAnyImageUploading}
+                        className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs shadow-md shadow-sky-600/20 cursor-pointer"
                       >
-                        {editingItem ? 'Simpan Pembaruan' : 'Tambahkan Layanan'}
+                        {isAnyImageUploading
+                          ? 'Menunggu Upload Selesai...'
+                          : (editingItem ? 'Simpan Pembaruan' : 'Tambahkan Layanan')}
                       </button>
                     </div>
                   </form>
 
                   {/* Right Live Preview Card (4 Cols - Mirroring Landing Page Vibe) */}
                   <div className="lg:col-span-4 space-y-3">
-                    <Text.Label className="text-slate-500 block">Live Preview Tampilan Landing Page</Text.Label>
+                    <Text.Label className="text-slate-600 block">Live Preview Tampilan Landing Page</Text.Label>
 
                     <div className="relative h-[320px] rounded-3xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-800 bg-[#0B2447] text-white">
                       <img
-                        src={
-                          serviceForm.image_url && !serviceForm.image_url.includes('1541888946425')
-                            ? serviceForm.image_url
-                            : '/images/project-placeholder.jpg'
-                        }
+                        key={serviceForm.image_url || 'service-preview'}
+                        src={resolveImageUrl(serviceForm.image_url)}
                         alt="Preview"
                         onError={(e) => {
                           e.currentTarget.onerror = null;
-                          e.currentTarget.src = '/images/project-placeholder.jpg';
+                          e.currentTarget.src = DEFAULT_PROJECT_PLACEHOLDER;
                         }}
                         className="w-full h-full object-cover"
                       />
@@ -3455,8 +3521,13 @@ export default function Dashboard({
                           <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
                             <div className="flex items-center gap-2 min-w-0">
                               <img
-                                src={t.avatar_url || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80'}
+                                key={t.avatar_url || t.id}
+                                src={resolveImageUrl(t.avatar_url, DEFAULT_AVATAR_PLACEHOLDER)}
                                 alt={t.client_name}
+                                onError={(e) => {
+                                  e.currentTarget.onerror = null;
+                                  e.currentTarget.src = DEFAULT_AVATAR_PLACEHOLDER;
+                                }}
                                 className="w-8 h-8 rounded-full object-cover shrink-0"
                               />
                               <div className="min-w-0">
@@ -3510,16 +3581,17 @@ export default function Dashboard({
                   </div>
 
                   <button
-                    type="button"
-                    onClick={submitTestimonial}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs"
+                    type="submit"
+                    form="testimonial-editor-form"
+                    disabled={isAnyImageUploading}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs cursor-pointer"
                   >
-                    <Save className="w-4 h-4" />
-                    <span>Simpan Testimoni</span>
+                    {isAnyImageUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                    <span>{isAnyImageUploading ? 'Menunggu Upload...' : 'Simpan Testimoni'}</span>
                   </button>
                 </div>
 
-                <form onSubmit={submitTestimonial} className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-sm space-y-4 max-w-2xl">
+                <form id="testimonial-editor-form" onSubmit={submitTestimonial} className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-sm space-y-4 max-w-2xl">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
@@ -3585,7 +3657,8 @@ export default function Dashboard({
                     </label>
                     <ImageUploader
                       value={testimonialForm.avatar_url}
-                      onChange={(url) => setTestimonialForm({ ...testimonialForm, avatar_url: url })}
+                      onChange={(url) => setTestimonialForm((prev) => ({ ...prev, avatar_url: url }))}
+                      onUploadingChange={handleUploaderBusyChange}
                       folder="testimonials"
                       aspect="avatar"
                     />
@@ -3615,9 +3688,10 @@ export default function Dashboard({
                     </button>
                     <button
                       type="submit"
-                      className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs"
+                      disabled={isAnyImageUploading}
+                      className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs cursor-pointer"
                     >
-                      Simpan Testimoni
+                      {isAnyImageUploading ? 'Menunggu Upload Selesai...' : 'Simpan Testimoni'}
                     </button>
                   </div>
                 </form>

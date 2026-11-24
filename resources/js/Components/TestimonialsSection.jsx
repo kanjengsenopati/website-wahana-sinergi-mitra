@@ -1,6 +1,7 @@
 import React from 'react';
 import { Star, CheckCircle2 } from 'lucide-react';
 import Text from './Typography';
+import { DEFAULT_AVATAR_PLACEHOLDER, resolveImageUrl } from '../utils/imageUtils';
 
 export function TestimonialsSection({ testimonials = [], meta = {} }) {
   const badge = meta?.badge || '• TESTIMONI & APRESIASI PEMBERI TUGAS';
@@ -57,8 +58,13 @@ export function TestimonialsSection({ testimonials = [], meta = {} }) {
               {/* Client Info */}
               <div className="pt-4 border-t border-slate-100 flex items-center gap-3 min-w-0">
                 <img
-                  src={t.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80'}
+                  key={t.avatar_url || t.id || idx}
+                  src={resolveImageUrl(t.avatar_url, DEFAULT_AVATAR_PLACEHOLDER)}
                   alt={t.client_name}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = DEFAULT_AVATAR_PLACEHOLDER;
+                  }}
                   className="w-11 h-11 rounded-full object-cover shrink-0 shadow-xs"
                 />
                 <div className="min-w-0 flex-1">

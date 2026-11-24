@@ -38,6 +38,11 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'appName' => config('app.name'),
+            'csrf_token' => fn () => $request->session()->token(),
+            'upload_limits' => fn () => [
+                'max_kb' => 5120,
+                'php_max_bytes' => \App\Support\MediaStorage::phpMaxUploadBytes(),
+            ],
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),

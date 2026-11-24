@@ -18,6 +18,7 @@ import {
 import { Navbar } from '../../Components/Navbar';
 import { Footer } from '../../Components/Footer';
 import Text from '../../Components/Typography';
+import { DEFAULT_PROJECT_PLACEHOLDER, resolveImageUrl } from '../../utils/imageUtils';
 
 export default function ProjectDetail({ 
   project = {}, 
@@ -32,9 +33,8 @@ export default function ProjectDetail({
 
   const waUrl = `https://wa.me/${cleanPhone}?text=Halo%20CV.%20Wahana%20Sinergi%20Mitra,%20saya%20tertarik%20dengan%20proyek%20${encodeURIComponent(project.title || '')}.%20Bisa%20konsultasi%20mengenai%20spesifikasi%20dan%20anggarannya?`;
 
-  const fallbackImage = '/images/project-placeholder.jpg';
-  const isBrokenDefault = !project.thumbnail_url || project.thumbnail_url.includes('1541888946425');
-  const validImageUrl = isBrokenDefault ? fallbackImage : project.thumbnail_url;
+  const fallbackImage = DEFAULT_PROJECT_PLACEHOLDER;
+  const validImageUrl = resolveImageUrl(project.thumbnail_url, fallbackImage);
 
   const handleShare = () => {
     if (navigator.share) {
@@ -299,11 +299,8 @@ export default function ProjectDetail({
                     >
                       <div className="relative h-48 w-full overflow-hidden bg-slate-100">
                         <img
-                          src={
-                            rel.thumbnail_url && !rel.thumbnail_url.includes('1541888946425')
-                              ? rel.thumbnail_url
-                              : fallbackImage
-                          }
+                          key={rel.thumbnail_url || rel.id}
+                          src={resolveImageUrl(rel.thumbnail_url, fallbackImage)}
                           alt={rel.title}
                           onError={(e) => {
                             e.currentTarget.onerror = null;

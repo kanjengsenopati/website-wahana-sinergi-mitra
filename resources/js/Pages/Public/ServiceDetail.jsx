@@ -20,6 +20,7 @@ import {
 import { Navbar } from '../../Components/Navbar';
 import { Footer } from '../../Components/Footer';
 import Text from '../../Components/Typography';
+import { DEFAULT_PROJECT_PLACEHOLDER, resolveImageUrl } from '../../utils/imageUtils';
 
 const iconMap = {
   Building2,
@@ -44,7 +45,8 @@ export default function ServiceDetail({
 
   const waUrl = `https://wa.me/${cleanPhone}?text=Halo%20CV.%20Wahana%20Sinergi%20Mitra,%20saya%20tertarik%20dengan%20layanan%20${encodeURIComponent(service.title || '')}.%20Bisa%20jadwalkan%20survei%20dan%20konsultasi%20RAB?`;
 
-  const fallbackImage = '/images/project-placeholder.jpg';
+  const fallbackImage = DEFAULT_PROJECT_PLACEHOLDER;
+  const serviceDescription = service.full_description || service.short_description;
 
   const defaultStandards = [
     { title: 'Kepatuhan Spesifikasi Teknis SNI', desc: 'Penggunaan material bersertifikat uji laboratorium (SNI 1729 & SNI 2847) untuk kekuatan struktural maksimal.' },
@@ -59,7 +61,7 @@ export default function ServiceDetail({
         <title>{`${service.title || 'Divisi Layanan'} — CV. Wahana Sinergi Mitra`}</title>
         <meta
           name="description"
-          content={service.description || `Spesifikasi teknis dan ruang lingkup pekerjaan ${service.title} oleh CV. Wahana Sinergi Mitra.`}
+          content={serviceDescription || `Spesifikasi teknis dan ruang lingkup pekerjaan ${service.title} oleh CV. Wahana Sinergi Mitra.`}
         />
       </Head>
 
@@ -103,11 +105,8 @@ export default function ServiceDetail({
               {/* Service Hero Banner */}
               <div className="relative h-64 sm:h-80 md:h-96 w-full bg-slate-900 overflow-hidden">
                 <img
-                  src={
-                    service.image_url && !service.image_url.includes('1541888946425')
-                      ? service.image_url
-                      : fallbackImage
-                  }
+                  key={service.image_url || service.id}
+                  src={resolveImageUrl(service.image_url, fallbackImage)}
                   alt={service.title}
                   onError={(e) => {
                     e.currentTarget.onerror = null;
@@ -147,7 +146,7 @@ export default function ServiceDetail({
                   </div>
 
                   <p className="text-sm sm:text-[15px] font-medium text-slate-700 leading-relaxed tracking-[-0.015em]">
-                    {service.description || 'Divisi layanan ini berfokus pada eksekusi teknis berkualitas tinggi, terintegrasi dengan perencanaan struktur DED presisi, material bersertifikasi mutu SNI, dan kepatuhan penuh terhadap tata kelola keselamatan kerja.'}
+                    {serviceDescription || 'Divisi layanan ini berfokus pada eksekusi teknis berkualitas tinggi, terintegrasi dengan perencanaan struktur DED presisi, material bersertifikasi mutu SNI, dan kepatuhan penuh terhadap tata kelola keselamatan kerja.'}
                   </p>
                 </div>
 
@@ -231,11 +230,8 @@ export default function ServiceDetail({
                     >
                       <div className="relative h-48 w-full overflow-hidden bg-slate-100">
                         <img
-                          src={
-                            proj.thumbnail_url && !proj.thumbnail_url.includes('1541888946425')
-                              ? proj.thumbnail_url
-                              : fallbackImage
-                          }
+                          key={proj.thumbnail_url || proj.id}
+                          src={resolveImageUrl(proj.thumbnail_url, fallbackImage)}
                           alt={proj.title}
                           onError={(e) => {
                             e.currentTarget.onerror = null;

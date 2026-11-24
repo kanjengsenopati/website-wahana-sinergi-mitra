@@ -14,6 +14,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import Text from './Typography';
+import { DEFAULT_PROJECT_PLACEHOLDER, resolveImageUrl } from '../utils/imageUtils';
 
 const iconMap = {
   Building2,
@@ -91,7 +92,7 @@ export function ServicesSection({ services = [], meta = {} }) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {services.map((service, idx) => {
             const IconComponent = iconMap[service.icon] || Building2;
-            const photoUrl = service.image_url || servicePhotos[idx % servicePhotos.length];
+            const photoUrl = resolveImageUrl(service.image_url, servicePhotos[idx % servicePhotos.length]);
             const standardLabel = serviceStandards[idx % serviceStandards.length];
             const isActive = activeCardId === (service.id || idx);
 
@@ -104,11 +105,12 @@ export function ServicesSection({ services = [], meta = {} }) {
                 {/* FRONT FACE: Real Construction Photography + Navy/Dark Gradient + Single-Line Title */}
                 <div className="absolute inset-0 w-full h-full">
                   <img
+                    key={photoUrl}
                     src={photoUrl}
                     alt={service.title}
                     onError={(e) => {
                       e.currentTarget.onerror = null;
-                      e.currentTarget.src = '/images/project-placeholder.jpg';
+                      e.currentTarget.src = DEFAULT_PROJECT_PLACEHOLDER;
                     }}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />

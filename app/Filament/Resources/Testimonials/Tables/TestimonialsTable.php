@@ -2,10 +2,12 @@
 
 namespace App\Filament\Resources\Testimonials\Tables;
 
+use App\Support\MediaStorage;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -15,13 +17,17 @@ class TestimonialsTable
     {
         return $table
             ->columns([
+                ImageColumn::make('avatar_url')
+                    ->label('Avatar')
+                    ->disk('public')
+                    ->getStateUsing(fn ($record): ?string => MediaStorage::toFilamentImageState($record->avatar_url))
+                    ->defaultImageUrl(url('/images/logo-wsm.jpg'))
+                    ->circular(),
                 TextColumn::make('client_name')
                     ->searchable(),
                 TextColumn::make('client_role')
                     ->searchable(),
                 TextColumn::make('company_name')
-                    ->searchable(),
-                TextColumn::make('avatar_url')
                     ->searchable(),
                 TextColumn::make('rating')
                     ->numeric()

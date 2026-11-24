@@ -8,6 +8,7 @@ use App\Models\Project;
 use App\Models\Service;
 use App\Models\Testimonial;
 use App\Models\User;
+use App\Support\MediaStorage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -92,7 +93,7 @@ class AdminDashboardController extends Controller
             'client_name' => 'nullable|string|max:255',
             'location' => 'required|string|max:255',
             'project_value' => 'nullable|numeric|min:0',
-            'year' => 'required|integer|min:2000|max:2030',
+            'year' => 'required|integer|min:1990|max:2050',
             'thumbnail_url' => 'nullable|string',
             'status' => 'required|string|in:Selesai,Berjalan',
             'description' => 'nullable|string',
@@ -120,7 +121,7 @@ class AdminDashboardController extends Controller
             'client_name' => 'nullable|string|max:255',
             'location' => 'required|string|max:255',
             'project_value' => 'nullable|numeric|min:0',
-            'year' => 'required|integer|min:2000|max:2030',
+            'year' => 'required|integer|min:1990|max:2050',
             'thumbnail_url' => 'nullable|string',
             'status' => 'required|string|in:Selesai,Berjalan',
             'description' => 'nullable|string',
@@ -308,19 +309,55 @@ class AdminDashboardController extends Controller
      */
     public function uploadImage(Request $request)
     {
+        // Detect PHP-level upload errors (e.g., upload_max_filesize=2M exceeded) with clear Indonesian feedback
+        if (isset($_FILES['image']['error']) && in_array($_FILES['image']['error'], [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true)) {
+            $limitMb = round(MediaStorage::phpMaxUploadBytes() / (1024 * 1024), 1);
+
+            return response()->json([
+                'success' => false,
+                'message' => "Ukuran file melebihi batas upload PHP server ({$limitMb} MB). Harap gunakan gambar yang lebih kecil atau kompres terlebih dahulu.",
+                'errors' => [
+                    'image' => ["Ukuran file melebihi batas upload PHP server ({$limitMb} MB)."],
+                ],
+            ], 422);
+        }
+
         $request->validate([
             'image' => 'required|file|image|mimes:jpeg,png,jpg,webp,avif|max:5120',
             'folder' => 'nullable|string|in:projects,services,testimonials,general',
+        ], [
+            'image.required' => 'Harap pilih file gambar terlebih dahulu.',
+            'image.image' => 'File yang diunggah harus berupa gambar yang valid.',
+            'image.mimes' => 'Format gambar yang didukung hanya JPG, PNG, WebP, atau AVIF.',
+            'image.max' => 'Ukuran file gambar maksimal 5 MB.',
+            'image.uploaded' => 'File gagal diunggah ke server. Pastikan ukuran file tidak melebihi batas server.',
         ]);
 
         $folder = $request->input('folder', 'general');
         $file = $request->file('image');
 
+        if (!$file || !$file->isValid()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'File gambar gagal diterima oleh server. Silakan coba unggah ulang.',
+            ], 422);
+        }
+
         // Generate sanitized unique filename
-        $extension = $file->getClientOriginalExtension() ?: 'webp';
-        $filename = Str::random(24) . '.' . strtolower($extension);
+        $extension = strtolower($file->guessExtension() ?: $file->getClientOriginalExtension() ?: 'webp');
+        if ($extension === 'jpeg') {
+            $extension = 'jpg';
+        }
+        $filename = Str::random(24) . '.' . $extension;
 
         $path = $file->storeAs("uploads/{$folder}", $filename, 'public');
+
+        if ($path === false) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyimpan file ke direktori storage server. Periksa izin tulis folder storage/app/public.',
+            ], 500);
+        }
 
         return response()->json([
             'success' => true,
@@ -374,11 +411,17 @@ class AdminDashboardController extends Controller
         }
 
         $data = $request->input('data', $request->except(['_token', '_method']));
-        
+
         $current = CompanySetting::getSectionData($section);
+        $oldImageUrls = MediaStorage::extractSectionImageUrls($section, $current);
+
         $merged = is_array($data) ? array_merge($current, $data) : $current;
+        $merged = MediaStorage::normalizeSectionImages($section, $merged);
 
         CompanySetting::setJson("section_{$section}", $merged);
+
+        $newImageUrls = MediaStorage::extractSectionImageUrls($section, $merged);
+        MediaStorage::deleteUnusedDiff($oldImageUrls, $newImageUrls);
 
         return redirect()->back()->with('success', "Konten seksi {$section} berhasil disimpan.");
     }

@@ -61,10 +61,11 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
 // Fallback direct storage file serving (guarantees local storage access even if symlink breaks on VPS)
 Route::get('/storage/{path}', function (string $path) {
-    $fullPath = storage_path('app/public/' . $path);
-    if (!file_exists($fullPath)) {
+    $fullPath = \App\Support\MediaStorage::resolveSafeStoragePath($path);
+    if ($fullPath === null) {
         abort(404);
     }
+
     return response()->file($fullPath, [
         'Cache-Control' => 'public, max-age=86400',
     ]);
