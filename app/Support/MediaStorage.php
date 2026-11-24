@@ -313,22 +313,96 @@ class MediaStorage
             return false;
         }
 
-        try {
-            $disk = Storage::disk('public');
-            if ($disk->exists($diskPath)) {
-                return $disk->delete($diskPath);
-            }
-        } catch (\Throwable $e) {
-            Log::warning('Failed to delete unused media file from public disk', [
-                'disk_path' => $diskPath,
-                'exception' => $e::class,
-                'message' => $e->getMessage(),
-            ]);
+        if (class_exists(\finfo::class)) {
+            try {
+                $disk = Storage::disk('public');
+                if ($disk->exists($diskPath)) {
+                    return $disk->delete($diskPath);
+                }
 
-            return false;
+                return false;
+            } catch (\Throwable $e) {
+                if (!str_contains($e->getMessage(), 'finfo')) {
+                    Log::warning('Failed to delete unused media file from public disk', [
+                        'disk_path' => $diskPath,
+                        'exception' => $e::class,
+                        'message' => $e->getMessage(),
+                    ]);
+
+                    return false;
+                }
+            }
+        }
+
+        // Native filesystem fallback when php-fileinfo (finfo) is not installed on the server
+        $safePath = self::resolveSafeStoragePath($diskPath);
+        if ($safePath !== null && is_file($safePath)) {
+            return @unlink($safePath);
         }
 
         return false;
+    }
+
+    /**
+     * Store an uploaded file directly into storage/app/public/{directory}/{filename}
+     * using native PHP filesystem APIs so uploads succeed even when php-fileinfo (finfo) is disabled.
+     */
+    public static function storeUploadedFileNatively(UploadedFile $file, string $directory, string $filename): string|false
+    {
+        $cleanDir = trim(str_replace('\\', '/', $directory), '/');
+        $cleanName = basename($filename);
+
+        if ($cleanDir === '' || $cleanName === '' || str_contains($cleanDir, '..') || str_contains($cleanName, '..')) {
+            return false;
+        }
+
+        $targetDir = storage_path('app/public/' . $cleanDir);
+
+        if (!is_dir($targetDir) && !@mkdir($targetDir, 0775, true) && !is_dir($targetDir)) {
+            return false;
+        }
+
+        $destination = $targetDir . DIRECTORY_SEPARATOR . $cleanName;
+        $sourcePath = $file->getRealPath();
+        if (!is_string($sourcePath) || $sourcePath === '' || !is_readable($sourcePath)) {
+            $sourcePath = $file->getPathname();
+        }
+
+        if (!is_string($sourcePath) || $sourcePath === '' || !is_readable($sourcePath)) {
+            return false;
+        }
+
+        $contents = @file_get_contents($sourcePath);
+        if ($contents === false) {
+            return false;
+        }
+
+        if (@file_put_contents($destination, $contents) === false) {
+            return false;
+        }
+
+        @chmod($destination, 0644);
+
+        return "{$cleanDir}/{$cleanName}";
+    }
+
+    /**
+     * Guess Content-Type header from file extension without relying on php-fileinfo (finfo).
+     */
+    public static function guessMimeTypeFromExtension(string $path): ?string
+    {
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+        return match ($ext) {
+            'jpg', 'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'webp' => 'image/webp',
+            'avif' => 'image/avif',
+            'gif' => 'image/gif',
+            'svg' => 'image/svg+xml',
+            'ico' => 'image/x-icon',
+            default => null,
+        };
     }
 
     /**

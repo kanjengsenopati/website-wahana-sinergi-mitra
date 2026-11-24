@@ -66,7 +66,14 @@ Route::get('/storage/{path}', function (string $path) {
         abort(404);
     }
 
-    return response()->file($fullPath, [
+    $headers = [
         'Cache-Control' => 'public, max-age=86400',
-    ]);
+    ];
+
+    $mimeType = \App\Support\MediaStorage::guessMimeTypeFromExtension($fullPath);
+    if ($mimeType !== null) {
+        $headers['Content-Type'] = $mimeType;
+    }
+
+    return response()->file($fullPath, $headers);
 })->where('path', '.*');

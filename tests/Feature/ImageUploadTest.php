@@ -572,4 +572,41 @@ class ImageUploadTest extends TestCase
             @unlink($tmpPng);
         }
     }
+
+    public function test_upload_succeeds_via_native_fallback_when_flysystem_throws_missing_finfo_error()
+    {
+        $user = User::factory()->create();
+
+        // Simulate production VPS without php-fileinfo where Storage::disk('public') throws Error('Class "finfo" not found')
+        Storage::shouldReceive('disk')
+            ->with('public')
+            ->andThrow(new \Error('Class "finfo" not found'));
+
+        $file = UploadedFile::fake()->image('no-finfo.png', 200, 200);
+        $uploadedFullPath = null;
+
+        try {
+            $response = $this->actingAs($user)->postJson(route('admin.upload'), [
+                'image' => $file,
+                'folder' => 'projects',
+            ]);
+
+            $response->assertStatus(200)->assertJson(['success' => true]);
+            $url = $response->json('url');
+            $filename = $response->json('filename');
+
+            $this->assertStringStartsWith('/storage/uploads/projects/', $url);
+            $uploadedFullPath = storage_path("app/public/uploads/projects/{$filename}");
+            $this->assertFileExists($uploadedFullPath);
+
+            // Verify fallback /storage/{path} route serves it with explicit Content-Type
+            $serveRes = $this->get($url);
+            $serveRes->assertStatus(200);
+            $this->assertStringContainsString('image/png', (string) $serveRes->headers->get('Content-Type'));
+        } finally {
+            if ($uploadedFullPath && is_file($uploadedFullPath)) {
+                @unlink($uploadedFullPath);
+            }
+        }
+    }
 }

@@ -383,45 +383,71 @@ class AdminDashboardController extends Controller
         $targetPath = "{$directory}/{$filename}";
 
         try {
-            $disk = Storage::disk('public');
-
-            if (!$disk->makeDirectory($directory)) {
-                Log::error('Image upload failed: unable to create storage directory', [
-                    'folder' => $folder,
-                    'directory' => $directory,
-                    'target_dir' => $targetDir,
-                ]);
-
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Gagal menyiapkan direktori penyimpanan gambar di server. Periksa izin tulis folder storage/app/public.',
-                ], 500);
-            }
-
             $storedPath = false;
             $realPath = $file->getRealPath();
+            $useNativeFallback = !class_exists(\finfo::class);
 
-            if (is_string($realPath) && $realPath !== '' && is_readable($realPath)) {
+            if (!$useNativeFallback) {
                 try {
-                    $storedPath = $disk->putFileAs($directory, $file, $filename);
-                } catch (\Throwable $storeException) {
-                    Log::warning('Primary image store failed, attempting stream/contents fallback', [
-                        'exception' => $storeException::class,
-                        'message' => $storeException->getMessage(),
-                        'target_path' => $targetPath,
-                    ]);
-                    $storedPath = false;
+                    $disk = Storage::disk('public');
+
+                    if (!$disk->makeDirectory($directory)) {
+                        Log::error('Image upload failed: unable to create storage directory', [
+                            'folder' => $folder,
+                            'directory' => $directory,
+                            'target_dir' => $targetDir,
+                        ]);
+
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Gagal menyiapkan direktori penyimpanan gambar di server. Periksa izin tulis folder storage/app/public.',
+                        ], 500);
+                    }
+
+                    if (is_string($realPath) && $realPath !== '' && is_readable($realPath)) {
+                        try {
+                            $storedPath = $disk->putFileAs($directory, $file, $filename);
+                        } catch (\Throwable $storeException) {
+                            if (str_contains($storeException->getMessage(), 'finfo')) {
+                                $useNativeFallback = true;
+                            } else {
+                                Log::warning('Primary image store failed, attempting stream/contents fallback', [
+                                    'exception' => $storeException::class,
+                                    'message' => $storeException->getMessage(),
+                                    'target_path' => $targetPath,
+                                ]);
+                            }
+                            $storedPath = false;
+                        }
+                    }
+
+                    if ($storedPath === false && !$useNativeFallback) {
+                        $pathname = $file->getPathname();
+                        if (is_string($pathname) && $pathname !== '' && is_readable($pathname)) {
+                            $contents = @file_get_contents($pathname);
+                            if ($contents !== false && $disk->put($targetPath, $contents)) {
+                                $storedPath = $targetPath;
+                            }
+                        }
+                    }
+                } catch (\Throwable $flysystemException) {
+                    // Fallback to native filesystem when PHP fileinfo (finfo) is missing on server
+                    if (str_contains($flysystemException->getMessage(), 'finfo')) {
+                        Log::warning('Flysystem unavailable due to missing finfo extension, falling back to native write', [
+                            'message' => $flysystemException->getMessage(),
+                            'target_path' => $targetPath,
+                        ]);
+                        $useNativeFallback = true;
+                        $storedPath = false;
+                    } else {
+                        throw $flysystemException;
+                    }
                 }
             }
 
-            if ($storedPath === false) {
-                $pathname = $file->getPathname();
-                if (is_string($pathname) && $pathname !== '' && is_readable($pathname)) {
-                    $contents = @file_get_contents($pathname);
-                    if ($contents !== false && $disk->put($targetPath, $contents)) {
-                        $storedPath = $targetPath;
-                    }
-                }
+            // Native PHP filesystem fallback (works even when php-fileinfo / finfo class is disabled on VPS)
+            if ($storedPath === false && $useNativeFallback) {
+                $storedPath = MediaStorage::storeUploadedFileNatively($file, $directory, $filename);
             }
 
             if ($storedPath === false) {
@@ -431,6 +457,7 @@ class AdminDashboardController extends Controller
                     'target_dir' => $targetDir,
                     'real_path' => $realPath,
                     'pathname' => $file->getPathname(),
+                    'has_finfo' => class_exists(\finfo::class),
                 ]);
 
                 return response()->json([
