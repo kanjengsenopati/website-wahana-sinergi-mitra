@@ -203,7 +203,7 @@ export async function compressImageIfNeeded(
     }
 
     const ext = bestBlob.type === 'image/webp' ? 'webp' : 'jpg';
-    const baseName = (file.name || 'image').replace(/\.[^.]+$/, '');
+    const baseName = (file.name || 'image').replace(/\.[^.]+$/, '') || 'image';
     const optimizedFile = new File([bestBlob], `${baseName}.${ext}`, {
       type: bestBlob.type,
       lastModified: Date.now(),

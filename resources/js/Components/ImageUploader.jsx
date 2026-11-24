@@ -180,6 +180,12 @@ export default function ImageUploader({
         setUploadError('Ukuran file ditolak oleh server (HTTP 413). Harap pilih gambar berukuran lebih kecil.');
       } else if (response.status === 401 || response.status === 403) {
         setUploadError('Sesi login Anda tidak valid atau telah habis. Silakan masuk kembali ke panel admin.');
+      } else if (response.status >= 500) {
+        const backendMessage = data?.message && data.message !== 'Server Error' ? data.message : null;
+        setUploadError(
+          backendMessage ||
+            `Terjadi kesalahan penyimpanan pada server (HTTP ${response.status}). Periksa izin direktori storage/app/public atau log server.`
+        );
       } else {
         const firstValidationError = data?.errors?.image?.[0] || data?.errors?.folder?.[0];
         setUploadError(

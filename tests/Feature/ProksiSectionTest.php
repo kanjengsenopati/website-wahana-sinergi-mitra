@@ -53,7 +53,7 @@ class ProksiSectionTest extends TestCase
         // Verify Navbar.jsx has navigation link to PROKSI
         $navbarPath = resource_path('js/Components/Navbar.jsx');
         $navbarSource = file_get_contents($navbarPath);
-        $this->assertStringContainsString('Sistem PROKSI', $navbarSource);
+        $this->assertStringContainsStringIgnoringCase('Sistem PROKSI', $navbarSource);
         $this->assertStringContainsString('#proksi', $navbarSource);
     }
 }

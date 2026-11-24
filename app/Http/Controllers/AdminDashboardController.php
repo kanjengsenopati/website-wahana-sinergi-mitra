@@ -10,8 +10,10 @@ use App\Models\Testimonial;
 use App\Models\User;
 use App\Support\MediaStorage;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -309,61 +311,153 @@ class AdminDashboardController extends Controller
      */
     public function uploadImage(Request $request)
     {
-        // Detect PHP-level upload errors (e.g., upload_max_filesize=2M exceeded) with clear Indonesian feedback
-        if (isset($_FILES['image']['error']) && in_array($_FILES['image']['error'], [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true)) {
-            $limitMb = round(MediaStorage::phpMaxUploadBytes() / (1024 * 1024), 1);
+        // Detect PHP-level upload errors (e.g., upload_max_filesize=2M exceeded, no tmp dir, cant write) with clear Indonesian feedback
+        if (isset($_FILES['image']['error']) && $_FILES['image']['error'] !== UPLOAD_ERR_OK && $_FILES['image']['error'] !== UPLOAD_ERR_NO_FILE) {
+            $phpError = (int) $_FILES['image']['error'];
+            if (in_array($phpError, [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true)) {
+                $limitMb = round(MediaStorage::phpMaxUploadBytes() / (1024 * 1024), 1);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => "Ukuran file melebihi batas upload PHP server ({$limitMb} MB). Harap gunakan gambar yang lebih kecil atau kompres terlebih dahulu.",
+                    'errors' => [
+                        'image' => ["Ukuran file melebihi batas upload PHP server ({$limitMb} MB)."],
+                    ],
+                ], 422);
+            }
+
+            $phpErrorMessage = match ($phpError) {
+                UPLOAD_ERR_PARTIAL => 'File hanya terunggah sebagian. Silakan coba unggah ulang.',
+                UPLOAD_ERR_NO_TMP_DIR => 'Direktori sementara (tmp) upload PHP tidak tersedia di server.',
+                UPLOAD_ERR_CANT_WRITE => 'Server gagal menulis file upload sementara ke disk.',
+                UPLOAD_ERR_EXTENSION => 'Proses upload dihentikan oleh ekstensi PHP di server.',
+                default => 'File gagal diunggah ke server. Silakan coba unggah ulang.',
+            };
 
             return response()->json([
                 'success' => false,
-                'message' => "Ukuran file melebihi batas upload PHP server ({$limitMb} MB). Harap gunakan gambar yang lebih kecil atau kompres terlebih dahulu.",
+                'message' => $phpErrorMessage,
                 'errors' => [
-                    'image' => ["Ukuran file melebihi batas upload PHP server ({$limitMb} MB)."],
+                    'image' => [$phpErrorMessage],
                 ],
             ], 422);
         }
 
         $request->validate([
-            'image' => 'required|file|image|mimes:jpeg,png,jpg,webp,avif|max:5120',
+            'image' => [
+                'required',
+                'file',
+                'max:5120',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if (!$value instanceof UploadedFile || !MediaStorage::isSupportedUploadedImage($value)) {
+                        $fail('Format gambar yang didukung hanya JPG, PNG, WebP, atau AVIF.');
+                    }
+                },
+            ],
             'folder' => 'nullable|string|in:projects,services,testimonials,general',
         ], [
             'image.required' => 'Harap pilih file gambar terlebih dahulu.',
-            'image.image' => 'File yang diunggah harus berupa gambar yang valid.',
-            'image.mimes' => 'Format gambar yang didukung hanya JPG, PNG, WebP, atau AVIF.',
+            'image.file' => 'File yang diunggah harus berupa gambar yang valid.',
             'image.max' => 'Ukuran file gambar maksimal 5 MB.',
             'image.uploaded' => 'File gagal diunggah ke server. Pastikan ukuran file tidak melebihi batas server.',
+            'folder.in' => 'Folder tujuan upload tidak valid.',
         ]);
 
-        $folder = $request->input('folder', 'general');
+        $folder = $request->input('folder') ?: 'general';
         $file = $request->file('image');
 
         if (!$file || !$file->isValid()) {
             return response()->json([
                 'success' => false,
                 'message' => 'File gambar gagal diterima oleh server. Silakan coba unggah ulang.',
+                'errors' => [
+                    'image' => ['File gambar gagal diterima oleh server.'],
+                ],
             ], 422);
         }
 
-        // Generate sanitized unique filename
-        $extension = strtolower($file->guessExtension() ?: $file->getClientOriginalExtension() ?: 'webp');
-        if ($extension === 'jpeg') {
-            $extension = 'jpg';
-        }
+        $directory = "uploads/{$folder}";
+        $targetDir = storage_path("app/public/{$directory}");
+        $extension = MediaStorage::detectImageExtension($file);
         $filename = Str::random(24) . '.' . $extension;
+        $targetPath = "{$directory}/{$filename}";
 
-        $path = $file->storeAs("uploads/{$folder}", $filename, 'public');
+        try {
+            $disk = Storage::disk('public');
 
-        if ($path === false) {
+            if (!$disk->makeDirectory($directory)) {
+                Log::error('Image upload failed: unable to create storage directory', [
+                    'folder' => $folder,
+                    'directory' => $directory,
+                    'target_dir' => $targetDir,
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal menyiapkan direktori penyimpanan gambar di server. Periksa izin tulis folder storage/app/public.',
+                ], 500);
+            }
+
+            $storedPath = false;
+            $realPath = $file->getRealPath();
+
+            if (is_string($realPath) && $realPath !== '' && is_readable($realPath)) {
+                try {
+                    $storedPath = $disk->putFileAs($directory, $file, $filename);
+                } catch (\Throwable $storeException) {
+                    Log::warning('Primary image store failed, attempting stream/contents fallback', [
+                        'exception' => $storeException::class,
+                        'message' => $storeException->getMessage(),
+                        'target_path' => $targetPath,
+                    ]);
+                    $storedPath = false;
+                }
+            }
+
+            if ($storedPath === false) {
+                $pathname = $file->getPathname();
+                if (is_string($pathname) && $pathname !== '' && is_readable($pathname)) {
+                    $contents = @file_get_contents($pathname);
+                    if ($contents !== false && $disk->put($targetPath, $contents)) {
+                        $storedPath = $targetPath;
+                    }
+                }
+            }
+
+            if ($storedPath === false) {
+                Log::error('Image upload failed: storage write returned false', [
+                    'folder' => $folder,
+                    'filename' => $filename,
+                    'target_dir' => $targetDir,
+                    'real_path' => $realPath,
+                    'pathname' => $file->getPathname(),
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal menyimpan file ke direktori storage server. Periksa izin tulis folder storage/app/public.',
+                ], 500);
+            }
+
+            return response()->json([
+                'success' => true,
+                'url' => "/storage/{$storedPath}",
+                'filename' => $filename,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Image upload failed with unexpected exception', [
+                'exception' => $e::class,
+                'message' => $e->getMessage(),
+                'folder' => $folder,
+                'filename' => $filename,
+                'target_dir' => $targetDir,
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal menyimpan file ke direktori storage server. Periksa izin tulis folder storage/app/public.',
+                'message' => 'Gagal menyimpan gambar ke direktori storage server. Periksa izin tulis folder storage/app/public atau log server.',
             ], 500);
         }
-
-        return response()->json([
-            'success' => true,
-            'url' => "/storage/{$path}",
-            'filename' => $filename,
-        ]);
     }
 
     /**

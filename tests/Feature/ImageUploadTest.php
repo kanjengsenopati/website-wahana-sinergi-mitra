@@ -7,10 +7,15 @@ use App\Models\Service;
 use App\Models\Testimonial;
 use App\Models\User;
 use App\Support\MediaStorage;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use League\Flysystem\UnableToCreateDirectory;
+use Mockery;
+use Symfony\Component\Mime\Exception\LogicException as MimeLogicException;
 use Tests\TestCase;
 
 class ImageUploadTest extends TestCase
@@ -317,5 +322,254 @@ class ImageUploadTest extends TestCase
         $this->actingAs($user)->get("/filament/projects/{$project->id}/edit")->assertStatus(200);
         $this->actingAs($user)->get('/filament/services')->assertStatus(200);
         $this->actingAs($user)->get('/filament/testimonials')->assertStatus(200);
+    }
+
+    public function test_real_disk_project_thumbnail_upload_and_replacement_succeeds_end_to_end()
+    {
+        $user = User::factory()->create();
+        $project = Project::first();
+        $createdDiskPaths = [];
+
+        // Use the real local 'public' disk instead of Storage::fake('public')
+        Storage::forgetDisk('public');
+
+        try {
+            // 1. Upload first project thumbnail to real disk
+            $upload1 = $this->actingAs($user)->postJson(route('admin.upload'), [
+                'image' => UploadedFile::fake()->image('real-proj-1.jpg', 1200, 800),
+                'folder' => 'projects',
+            ]);
+
+            $upload1->assertStatus(200)->assertJson(['success' => true]);
+            $url1 = $upload1->json('url');
+            $diskPath1 = MediaStorage::toPublicDiskPath($url1);
+            $this->assertNotNull($diskPath1);
+            $createdDiskPaths[] = $diskPath1;
+
+            $realFile1 = storage_path('app/public/' . $diskPath1);
+            $this->assertFileExists($realFile1);
+
+            // Verify fallback route /storage/{path} serves the real uploaded file cleanly
+            $this->get($url1)->assertStatus(200);
+
+            // 2. Save project with first thumbnail
+            $this->actingAs($user)->put(route('admin.projects.update', $project), [
+                'title' => $project->title,
+                'category' => $project->category,
+                'client_name' => $project->client_name,
+                'location' => $project->location,
+                'project_value' => $project->project_value,
+                'year' => $project->year,
+                'thumbnail_url' => $url1,
+                'status' => $project->status,
+                'description' => $project->description,
+            ])->assertRedirect(route('admin.dashboard'));
+
+            $this->assertSame($url1, $project->fresh()->thumbnail_url);
+            $this->assertFileExists($realFile1);
+
+            // 3. Upload replacement thumbnail & update project -> first file is cleaned up, second persists
+            $upload2 = $this->actingAs($user)->postJson(route('admin.upload'), [
+                'image' => UploadedFile::fake()->image('real-proj-2.webp', 1200, 800),
+                'folder' => 'projects',
+            ]);
+
+            $upload2->assertStatus(200)->assertJson(['success' => true]);
+            $url2 = $upload2->json('url');
+            $diskPath2 = MediaStorage::toPublicDiskPath($url2);
+            $this->assertNotNull($diskPath2);
+            $createdDiskPaths[] = $diskPath2;
+
+            $realFile2 = storage_path('app/public/' . $diskPath2);
+            $this->assertFileExists($realFile2);
+
+            $this->actingAs($user)->put(route('admin.projects.update', $project), [
+                'title' => $project->title,
+                'category' => $project->category,
+                'client_name' => $project->client_name,
+                'location' => $project->location,
+                'project_value' => $project->project_value,
+                'year' => $project->year,
+                'thumbnail_url' => $url2,
+                'status' => $project->status,
+                'description' => $project->description,
+            ])->assertRedirect(route('admin.dashboard'));
+
+            $this->assertSame($url2, $project->fresh()->thumbnail_url);
+            $this->assertFileDoesNotExist($realFile1);
+            $this->assertFileExists($realFile2);
+        } finally {
+            foreach ($createdDiskPaths as $diskPath) {
+                $absPath = storage_path('app/public/' . $diskPath);
+                if (is_file($absPath)) {
+                    @unlink($absPath);
+                }
+            }
+            Storage::fake('public');
+        }
+    }
+
+    public function test_upload_logs_and_returns_controlled_json_when_directory_creation_throws_under_app_debug_false()
+    {
+        config(['app.debug' => false]);
+        Log::spy();
+
+        $user = User::factory()->create();
+
+        $mockDisk = Mockery::mock(FilesystemAdapter::class);
+        $mockDisk->shouldReceive('makeDirectory')
+            ->once()
+            ->with('uploads/projects')
+            ->andThrow(UnableToCreateDirectory::atLocation(
+                storage_path('app/public/uploads/projects'),
+                'Permission denied'
+            ));
+
+        Storage::set('public', $mockDisk);
+
+        try {
+            $response = $this->actingAs($user)->postJson(route('admin.upload'), [
+                'image' => UploadedFile::fake()->image('thumb.jpg', 800, 600),
+                'folder' => 'projects',
+            ]);
+
+            $response->assertStatus(500);
+            $response->assertJson([
+                'success' => false,
+            ]);
+
+            $message = $response->json('message');
+            $this->assertIsString($message);
+            $this->assertNotSame('', trim($message));
+            $this->assertNotSame('Server Error', $message);
+            $this->assertStringContainsString('storage/app/public', $message);
+
+            Log::shouldHaveReceived('error')->once();
+        } finally {
+            Storage::fake('public');
+        }
+    }
+
+    public function test_project_update_succeeds_even_when_orphan_cleanup_throws_storage_exception()
+    {
+        Log::spy();
+
+        $user = User::factory()->create();
+        $project = Project::first();
+        $project->updateQuietly(['thumbnail_url' => '/storage/uploads/projects/existing-old-thumb.webp']);
+
+        $mockDisk = Mockery::mock(FilesystemAdapter::class);
+        $mockDisk->shouldReceive('exists')
+            ->once()
+            ->with('uploads/projects/existing-old-thumb.webp')
+            ->andThrow(UnableToCreateDirectory::atLocation(
+                storage_path('app/public'),
+                'Permission denied'
+            ));
+
+        Storage::set('public', $mockDisk);
+
+        try {
+            $response = $this->actingAs($user)->put(route('admin.projects.update', $project), [
+                'title' => 'Proyek Tetap Tersimpan Walau Cleanup Gagal',
+                'category' => $project->category,
+                'client_name' => $project->client_name,
+                'location' => $project->location,
+                'project_value' => $project->project_value,
+                'year' => $project->year,
+                'thumbnail_url' => '/storage/uploads/projects/new-replacement-thumb.webp',
+                'status' => $project->status,
+                'description' => $project->description,
+            ]);
+
+            $response->assertRedirect(route('admin.dashboard'));
+
+            $this->assertDatabaseHas('projects', [
+                'id' => $project->id,
+                'title' => 'Proyek Tetap Tersimpan Walau Cleanup Gagal',
+                'thumbnail_url' => '/storage/uploads/projects/new-replacement-thumb.webp',
+            ]);
+
+            Log::shouldHaveReceived('warning')->once();
+        } finally {
+            Storage::fake('public');
+        }
+    }
+
+    public function test_upload_handles_null_mime_and_missing_fileinfo_guesser_with_empty_folder_fallback()
+    {
+        $user = User::factory()->create();
+
+        // Generate a real 1x1 PNG file on temp disk
+        $tmpPng = tempnam(sys_get_temp_dir(), 'wsm_png_');
+        $pngBytes = base64_decode(
+            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII='
+        );
+        file_put_contents($tmpPng, $pngBytes);
+
+        // Subclass UploadedFile simulating missing php-fileinfo (LogicException) and null MIME
+        $fileWithoutGuesser = new class($tmpPng, 'photo.unknown', null, UPLOAD_ERR_OK, true) extends UploadedFile {
+            public function getMimeType(): ?string
+            {
+                return null;
+            }
+
+            public function guessExtension(): ?string
+            {
+                throw new MimeLogicException('Unable to guess the MIME type as no guessers are available.');
+            }
+        };
+
+        try {
+            $this->assertTrue(MediaStorage::isSupportedUploadedImage($fileWithoutGuesser));
+            $this->assertSame('png', MediaStorage::detectImageExtension($fileWithoutGuesser));
+
+            $response = $this->actingAs($user)->postJson(route('admin.upload'), [
+                'image' => $fileWithoutGuesser,
+                'folder' => '',
+            ]);
+
+            $response->assertStatus(200)->assertJson(['success' => true]);
+            $url = $response->json('url');
+            $this->assertStringStartsWith('/storage/uploads/general/', $url);
+            $this->assertStringEndsWith('.png', $url);
+
+            $filename = $response->json('filename');
+            Storage::disk('public')->assertExists("uploads/general/{$filename}");
+        } finally {
+            @unlink($tmpPng);
+        }
+    }
+
+    public function test_upload_falls_back_to_stream_contents_put_when_realpath_is_unavailable()
+    {
+        $user = User::factory()->create();
+
+        $tmpPng = tempnam(sys_get_temp_dir(), 'wsm_real_');
+        $pngBytes = base64_decode(
+            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII='
+        );
+        file_put_contents($tmpPng, $pngBytes);
+
+        // Simulate getRealPath() returning false (e.g., open_basedir on symlinked tmp) while getPathname() is readable
+        $fileWithFalseRealPath = new class($tmpPng, 'fallback.png', 'image/png', UPLOAD_ERR_OK, true) extends UploadedFile {
+            public function getRealPath(): string|false
+            {
+                return false;
+            }
+        };
+
+        try {
+            $response = $this->actingAs($user)->postJson(route('admin.upload'), [
+                'image' => $fileWithFalseRealPath,
+                'folder' => 'projects',
+            ]);
+
+            $response->assertStatus(200)->assertJson(['success' => true]);
+            $filename = $response->json('filename');
+            Storage::disk('public')->assertExists("uploads/projects/{$filename}");
+        } finally {
+            @unlink($tmpPng);
+        }
     }
 }

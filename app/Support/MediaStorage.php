@@ -6,10 +6,175 @@ use App\Models\CompanySetting;
 use App\Models\Project;
 use App\Models\Service;
 use App\Models\Testimonial;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class MediaStorage
 {
+    private const SUPPORTED_IMAGE_EXTENSIONS = ['jpg', 'png', 'webp', 'avif'];
+
+    private const SUPPORTED_IMAGE_MIMES = [
+        'image/jpeg' => 'jpg',
+        'image/jpg' => 'jpg',
+        'image/pjpeg' => 'jpg',
+        'image/png' => 'png',
+        'image/webp' => 'webp',
+        'image/avif' => 'avif',
+    ];
+
+    /**
+     * Safely verify whether an uploaded file is a supported image (JPEG, PNG, WebP, or AVIF)
+     * even when php-fileinfo / shell_exec are unavailable or getMimeType() returns null.
+     */
+    public static function isSupportedUploadedImage(UploadedFile $file): bool
+    {
+        if (!$file->isValid()) {
+            return false;
+        }
+
+        $mime = null;
+        try {
+            $mime = $file->getMimeType();
+        } catch (\Throwable) {
+            $mime = null;
+        }
+
+        if (is_string($mime) && $mime !== '') {
+            $normalizedMime = strtolower(trim($mime));
+            if (array_key_exists($normalizedMime, self::SUPPORTED_IMAGE_MIMES)) {
+                return true;
+            }
+
+            // Explicitly reject non-image MIME types unless generic binary stream (older libmagic on AVIF/WebP)
+            if ($normalizedMime !== 'application/octet-stream') {
+                return false;
+            }
+        }
+
+        $path = $file->getPathname() ?: $file->getRealPath();
+        if (is_string($path) && $path !== '' && is_file($path) && is_readable($path)) {
+            if (self::detectImageExtensionFromFile($path) !== null) {
+                return true;
+            }
+        }
+
+        try {
+            $guessed = $file->guessExtension();
+            if (is_string($guessed) && $guessed !== '') {
+                $ext = self::normalizeImageExtension($guessed);
+                if (in_array($ext, self::SUPPORTED_IMAGE_EXTENSIONS, true)) {
+                    return true;
+                }
+            }
+        } catch (\Throwable) {
+            // Ignore Symfony MimeTypes LogicException / TypeError
+        }
+
+        return false;
+    }
+
+    /**
+     * Safely detect the canonical file extension ("jpg", "png", "webp", or "avif") for an uploaded image.
+     */
+    public static function detectImageExtension(UploadedFile $file): string
+    {
+        try {
+            $guessed = $file->guessExtension();
+            if (is_string($guessed) && $guessed !== '') {
+                $ext = self::normalizeImageExtension($guessed);
+                if (in_array($ext, self::SUPPORTED_IMAGE_EXTENSIONS, true)) {
+                    return $ext;
+                }
+            }
+        } catch (\Throwable) {
+            // Fall through when php-fileinfo/shell_exec is disabled or getMimeType() returns null
+        }
+
+        $path = $file->getPathname() ?: $file->getRealPath();
+        if (is_string($path) && $path !== '' && is_file($path) && is_readable($path)) {
+            $detected = self::detectImageExtensionFromFile($path);
+            if ($detected !== null) {
+                return $detected;
+            }
+        }
+
+        $clientExt = self::normalizeImageExtension(
+            (string) preg_replace('/[^a-zA-Z0-9]/', '', (string) $file->getClientOriginalExtension())
+        );
+        if (in_array($clientExt, self::SUPPORTED_IMAGE_EXTENSIONS, true)) {
+            return $clientExt;
+        }
+
+        return 'webp';
+    }
+
+    private static function normalizeImageExtension(string $extension): string
+    {
+        $ext = strtolower(trim($extension));
+
+        return match ($ext) {
+            'jpeg' => 'jpg',
+            'avifs' => 'avif',
+            default => $ext,
+        };
+    }
+
+    /**
+     * Inspect magic bytes and getimagesize() without depending on php-fileinfo.
+     */
+    private static function detectImageExtensionFromFile(string $path): ?string
+    {
+        $bytes = @file_get_contents($path, false, null, 0, 32);
+        if (is_string($bytes) && $bytes !== '') {
+            if (str_starts_with($bytes, "\xFF\xD8\xFF")) {
+                return 'jpg';
+            }
+
+            if (str_starts_with($bytes, "\x89PNG\r\n\x1A\n")) {
+                return 'png';
+            }
+
+            if (strlen($bytes) >= 12 && substr($bytes, 0, 4) === 'RIFF' && substr($bytes, 8, 4) === 'WEBP') {
+                return 'webp';
+            }
+
+            if (
+                strlen($bytes) >= 12
+                && substr($bytes, 4, 4) === 'ftyp'
+                && (
+                    in_array(substr($bytes, 8, 4), ['avif', 'avis'], true)
+                    || str_contains(substr($bytes, 16), 'avif')
+                    || str_contains(substr($bytes, 16), 'avis')
+                )
+            ) {
+                return 'avif';
+            }
+        }
+
+        try {
+            $info = @getimagesize($path);
+            if (is_array($info) && isset($info[2])) {
+                $imageType = (int) $info[2];
+                if ($imageType === IMAGETYPE_JPEG) {
+                    return 'jpg';
+                }
+                if ($imageType === IMAGETYPE_PNG) {
+                    return 'png';
+                }
+                if (defined('IMAGETYPE_WEBP') && $imageType === IMAGETYPE_WEBP) {
+                    return 'webp';
+                }
+                if (defined('IMAGETYPE_AVIF') && $imageType === IMAGETYPE_AVIF) {
+                    return 'avif';
+                }
+            }
+        } catch (\Throwable) {
+            // Ignore getimagesize failures
+        }
+
+        return null;
+    }
     /**
      * Normalize stored image URLs so React (/admin) and Filament (/filament)
      * always persist a consistent format.
@@ -148,8 +313,19 @@ class MediaStorage
             return false;
         }
 
-        if (Storage::disk('public')->exists($diskPath)) {
-            return Storage::disk('public')->delete($diskPath);
+        try {
+            $disk = Storage::disk('public');
+            if ($disk->exists($diskPath)) {
+                return $disk->delete($diskPath);
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Failed to delete unused media file from public disk', [
+                'disk_path' => $diskPath,
+                'exception' => $e::class,
+                'message' => $e->getMessage(),
+            ]);
+
+            return false;
         }
 
         return false;
