@@ -30,6 +30,85 @@ export function resolveImageUrl(url, fallback = DEFAULT_PROJECT_PLACEHOLDER) {
 }
 
 /**
+ * Normalize project gallery_images (supports string[] or { url, caption }[] or JSON string)
+ * into a clean array of { url, caption }.
+ */
+export function normalizeProjectGallery(galleryImages) {
+  let raw = galleryImages;
+  if (typeof raw === 'string') {
+    try {
+      raw = JSON.parse(raw);
+    } catch {
+      raw = [];
+    }
+  }
+
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+
+  const seen = new Set();
+  const normalized = [];
+
+  for (const entry of raw) {
+    let url = '';
+    let caption = '';
+
+    if (typeof entry === 'string') {
+      url = entry.trim();
+    } else if (entry && typeof entry === 'object') {
+      url = typeof entry.url === 'string' ? entry.url.trim() : '';
+      caption = typeof entry.caption === 'string' ? entry.caption : '';
+    }
+
+    if (!url || url.includes('1541888946425')) {
+      continue;
+    }
+
+    const resolved = resolveImageUrl(url, '');
+    if (!resolved || seen.has(resolved)) {
+      continue;
+    }
+
+    seen.add(resolved);
+    normalized.push({ url: resolved, caption });
+  }
+
+  return normalized;
+}
+
+/**
+ * Build the combined public media list for a project:
+ * Cover thumbnail first, followed by deduplicated gallery_images.
+ */
+export function getProjectMediaList(project) {
+  const coverUrl = resolveImageUrl(project?.thumbnail_url, DEFAULT_PROJECT_PLACEHOLDER);
+  const gallery = normalizeProjectGallery(project?.gallery_images);
+
+  const items = [
+    {
+      url: coverUrl,
+      caption: project?.title || 'Foto Utama Proyek',
+      isCover: true,
+    },
+  ];
+
+  const seen = new Set([coverUrl]);
+  for (const item of gallery) {
+    if (!seen.has(item.url)) {
+      seen.add(item.url);
+      items.push({
+        url: item.url,
+        caption: item.caption || project?.title || 'Dokumentasi Proyek',
+        isCover: false,
+      });
+    }
+  }
+
+  return items;
+}
+
+/**
  * Check whether a selected File is a supported image by MIME type or filename extension.
  */
 export function isSupportedImageFile(file) {

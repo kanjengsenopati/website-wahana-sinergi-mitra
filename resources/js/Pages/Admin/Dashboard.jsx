@@ -51,15 +51,19 @@ import {
   Wrench,
   Hammer,
   AlertCircle,
-  Loader2
+  Loader2,
+  Images
 } from 'lucide-react';
 import Text, { formatRupiah, formatThousands } from '../../Components/Typography';
 import CurrencyInput from '../../Components/CurrencyInput';
 import ImageUploader from '../../Components/ImageUploader';
+import MultiImageUploader from '../../Components/MultiImageUploader';
 import {
   DEFAULT_PROJECT_PLACEHOLDER,
   DEFAULT_AVATAR_PLACEHOLDER,
   resolveImageUrl,
+  normalizeProjectGallery,
+  getProjectMediaList,
 } from '../../utils/imageUtils';
 
 const iconMap = {
@@ -549,6 +553,7 @@ export default function Dashboard({
     project_value: '',
     year: new Date().getFullYear(),
     thumbnail_url: '',
+    gallery_images: [],
     status: 'Selesai',
     description: '',
     is_featured: true,
@@ -606,6 +611,7 @@ export default function Dashboard({
       project_value: '',
       year: new Date().getFullYear(),
       thumbnail_url: '',
+      gallery_images: [],
       status: 'Selesai',
       description: '',
       is_featured: true,
@@ -624,6 +630,7 @@ export default function Dashboard({
       project_value: item.project_value || '',
       year: item.year,
       thumbnail_url: item.thumbnail_url || '',
+      gallery_images: normalizeProjectGallery(item.gallery_images),
       status: item.status,
       description: item.description || '',
       is_featured: !!item.is_featured,
@@ -631,6 +638,35 @@ export default function Dashboard({
     });
     setEditingItem(item);
     setEditorMode('project');
+  };
+
+  const handleProjectGalleryChange = (updaterOrNext) => {
+    setProjectForm((prev) => {
+      const current = Array.isArray(prev.gallery_images) ? prev.gallery_images : [];
+      const next = typeof updaterOrNext === 'function' ? updaterOrNext(current) : updaterOrNext;
+      return { ...prev, gallery_images: Array.isArray(next) ? next : [] };
+    });
+  };
+
+  const handleSetGalleryAsCover = (galleryIdx) => {
+    setProjectForm((prev) => {
+      const currentGallery = Array.isArray(prev.gallery_images) ? [...prev.gallery_images] : [];
+      const chosen = currentGallery[galleryIdx];
+      if (!chosen || !chosen.url) return prev;
+
+      const previousCover = (prev.thumbnail_url || '').trim();
+      if (previousCover && previousCover !== chosen.url && previousCover !== DEFAULT_PROJECT_PLACEHOLDER) {
+        currentGallery[galleryIdx] = { url: previousCover, caption: '' };
+      } else {
+        currentGallery.splice(galleryIdx, 1);
+      }
+
+      return {
+        ...prev,
+        thumbnail_url: chosen.url,
+        gallery_images: currentGallery,
+      };
+    });
   };
 
   const submitProject = (e) => {
@@ -2550,16 +2586,23 @@ export default function Dashboard({
                               <tr key={proj.id} className="hover:bg-slate-50/70 transition-colors">
                                 <td className="py-3.5 px-4 sm:px-5">
                                   <div className="flex items-center gap-3">
-                                    <img
-                                      key={proj.thumbnail_url || proj.id}
-                                      src={resolveImageUrl(proj.thumbnail_url)}
-                                      alt={proj.title}
-                                      onError={(e) => {
-                                        e.currentTarget.onerror = null;
-                                        e.currentTarget.src = DEFAULT_PROJECT_PLACEHOLDER;
-                                      }}
-                                      className="w-12 h-10 rounded-lg object-cover bg-slate-100 shrink-0 border border-slate-200/60 shadow-xs"
-                                    />
+                                    <div className="relative shrink-0">
+                                      <img
+                                        key={proj.thumbnail_url || proj.id}
+                                        src={resolveImageUrl(proj.thumbnail_url)}
+                                        alt={proj.title}
+                                        onError={(e) => {
+                                          e.currentTarget.onerror = null;
+                                          e.currentTarget.src = DEFAULT_PROJECT_PLACEHOLDER;
+                                        }}
+                                        className="w-12 h-10 rounded-lg object-cover bg-slate-100 border border-slate-200/60 shadow-xs"
+                                      />
+                                      {getProjectMediaList(proj).length > 1 && (
+                                        <span className="absolute -bottom-1.5 -right-1.5 px-1.5 py-0.2 rounded-full bg-blue-600 text-white text-[9px] font-extrabold shadow-xs tabular-nums">
+                                          +{getProjectMediaList(proj).length - 1}
+                                        </span>
+                                      )}
+                                    </div>
                                     <div className="min-w-0 flex-1">
                                       <div className="font-bold text-slate-900 text-xs truncate" title={proj.title}>
                                         {proj.title}
@@ -2762,7 +2805,7 @@ export default function Dashboard({
 
                     <div>
                       <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
-                        Foto Proyek Konstruksi (Thumbnail) <span className="text-rose-500">*</span>
+                        Foto Sampul Utama Proyek (Thumbnail) <span className="text-rose-500">*</span>
                       </label>
                       <ImageUploader
                         value={projectForm.thumbnail_url}
@@ -2770,6 +2813,17 @@ export default function Dashboard({
                         onUploadingChange={handleUploaderBusyChange}
                         folder="projects"
                         aspect="landscape"
+                      />
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-100">
+                      <MultiImageUploader
+                        value={projectForm.gallery_images}
+                        onChange={handleProjectGalleryChange}
+                        onSetAsCover={handleSetGalleryAsCover}
+                        onUploadingChange={handleUploaderBusyChange}
+                        folder="projects"
+                        maxFiles={12}
                       />
                     </div>
 
@@ -2823,6 +2877,12 @@ export default function Dashboard({
                           }}
                           className="w-full h-full object-cover"
                         />
+                        {getProjectMediaList(projectForm).length > 1 && (
+                          <div className="absolute top-3 left-3 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-900/75 backdrop-blur-md text-white text-[10px] font-bold tabular-nums">
+                            <Images className="w-3 h-3 text-sky-300" />
+                            <span>{getProjectMediaList(projectForm).length} Foto</span>
+                          </div>
+                        )}
                         <div className="absolute top-3 right-3 flex items-center gap-1.5">
                           <span className="px-2.5 py-0.5 rounded-full bg-white/90 backdrop-blur-md text-[10px] font-bold text-slate-800">
                             {projectForm.category}

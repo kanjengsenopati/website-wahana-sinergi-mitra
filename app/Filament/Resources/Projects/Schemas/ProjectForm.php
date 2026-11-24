@@ -56,7 +56,61 @@ class ProjectForm
                     })
                     ->helperText('Unggah foto JPG, PNG, WebP, atau AVIF (maks. 5 MB). Tersinkron otomatis dengan panel /admin.')
                     ->columnSpanFull(),
-                Textarea::make('gallery_images')
+                FileUpload::make('gallery_images')
+                    ->label('Galeri Dokumentasi Proyek (Maks. 12 Foto)')
+                    ->image()
+                    ->multiple()
+                    ->reorderable()
+                    ->appendFiles()
+                    ->disk('public')
+                    ->directory('uploads/projects')
+                    ->visibility('public')
+                    ->maxFiles(12)
+                    ->maxSize(5120)
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/avif'])
+                    ->formatStateUsing(function (mixed $state): array {
+                        $items = MediaStorage::normalizeGalleryItems($state, 12);
+                        $paths = [];
+                        foreach ($items as $item) {
+                            $diskPath = MediaStorage::toPublicDiskPath($item['url']);
+                            if ($diskPath !== null) {
+                                $paths[] = $diskPath;
+                            }
+                        }
+
+                        return $paths;
+                    })
+                    ->dehydrateStateUsing(function (mixed $state, ?Model $record): array {
+                        $existingItems = MediaStorage::normalizeGalleryItems($record?->getAttribute('gallery_images'), 12);
+                        $captionByUrl = [];
+                        $externalItems = [];
+
+                        foreach ($existingItems as $item) {
+                            $captionByUrl[$item['url']] = $item['caption'];
+                            if (MediaStorage::toPublicDiskPath($item['url']) === null) {
+                                $externalItems[] = $item;
+                            }
+                        }
+
+                        $result = $externalItems;
+                        if (is_array($state)) {
+                            foreach ($state as $entry) {
+                                if (!is_string($entry) || trim($entry) === '') {
+                                    continue;
+                                }
+                                $normalized = MediaStorage::normalizeUrl($entry);
+                                if ($normalized !== null) {
+                                    $result[] = [
+                                        'url' => $normalized,
+                                        'caption' => $captionByUrl[$normalized] ?? '',
+                                    ];
+                                }
+                            }
+                        }
+
+                        return MediaStorage::normalizeGalleryItems($result, 12);
+                    })
+                    ->helperText('Unggah hingga 12 foto dokumentasi proyek (JPG, PNG, WebP, AVIF, maks. 5 MB/foto). Bisa diurutkan ulang dan tersinkron otomatis dengan /admin.')
                     ->columnSpanFull(),
                 TextInput::make('status')
                     ->required()

@@ -609,4 +609,146 @@ class ImageUploadTest extends TestCase
             }
         }
     }
+
+    public function test_project_store_and_update_supports_gallery_images_with_captions_and_renders_public_detail()
+    {
+        $user = User::factory()->create();
+
+        $coverUrl = $this->actingAs($user)->postJson(route('admin.upload'), [
+            'image' => UploadedFile::fake()->image('cover.jpg', 800, 600),
+            'folder' => 'projects',
+        ])->json('url');
+
+        $g1Url = $this->actingAs($user)->postJson(route('admin.upload'), [
+            'image' => UploadedFile::fake()->image('gal1.jpg', 800, 600),
+            'folder' => 'projects',
+        ])->json('url');
+
+        $g2Url = $this->actingAs($user)->postJson(route('admin.upload'), [
+            'image' => UploadedFile::fake()->image('gal2.jpg', 800, 600),
+            'folder' => 'projects',
+        ])->json('url');
+
+        $storeRes = $this->actingAs($user)->post(route('admin.projects.store'), [
+            'title' => 'Gudang Multi-Foto WSM',
+            'category' => 'Industri',
+            'client_name' => 'PT. Logistik Nusantara',
+            'location' => 'Cikarang, Bekasi',
+            'project_value' => 15000000000,
+            'year' => 2026,
+            'thumbnail_url' => $coverUrl,
+            'gallery_images' => [
+                ['url' => $g1Url, 'caption' => 'Erection Baja WF 400'],
+                $g2Url, // legacy string format compatibility
+            ],
+            'status' => 'Selesai',
+            'description' => 'Proyek dengan galeri dokumentasi multi-foto.',
+        ]);
+
+        $storeRes->assertRedirect(route('admin.dashboard'));
+
+        $project = Project::where('title', 'Gudang Multi-Foto WSM')->firstOrFail();
+        $this->assertCount(2, $project->gallery_images);
+        $this->assertSame($g1Url, $project->gallery_images[0]['url']);
+        $this->assertSame('Erection Baja WF 400', $project->gallery_images[0]['caption']);
+        $this->assertSame($g2Url, $project->gallery_images[1]['url']);
+        $this->assertSame('', $project->gallery_images[1]['caption']);
+
+        // Verify public project detail renders gallery images & caption
+        $detailRes = $this->get(route('project.detail', $project));
+        $detailRes->assertStatus(200);
+        $detailRes->assertSee(str_replace('/', '\/', $g1Url), false);
+        $detailRes->assertSee('Erection Baja WF 400');
+
+        // Verify Filament edit page renders cleanly with gallery_images FileUpload
+        $admin = User::factory()->create(['role' => 'Super Admin']);
+        $this->actingAs($admin)->get("/filament/projects/{$project->id}/edit")->assertStatus(200);
+    }
+
+    public function test_project_gallery_rejects_more_than_12_images()
+    {
+        $user = User::factory()->create();
+        $project = Project::first();
+
+        $tooMany = [];
+        for ($i = 1; $i <= 13; $i++) {
+            $tooMany[] = ['url' => "/storage/uploads/projects/photo-{$i}.webp", 'caption' => "Foto {$i}"];
+        }
+
+        $res = $this->actingAs($user)->put(route('admin.projects.update', $project), [
+            'title' => $project->title,
+            'category' => $project->category,
+            'location' => $project->location,
+            'year' => $project->year,
+            'status' => $project->status,
+            'gallery_images' => $tooMany,
+        ]);
+
+        $res->assertSessionHasErrors('gallery_images');
+    }
+
+    public function test_project_gallery_safe_orphan_cleanup_preserves_shared_and_cleans_removed_files()
+    {
+        $user = User::factory()->create();
+        $projects = Project::take(2)->get();
+        $project1 = $projects[0];
+        $project2 = $projects[1];
+
+        $g1 = $this->actingAs($user)->postJson(route('admin.upload'), [
+            'image' => UploadedFile::fake()->image('g1.jpg'),
+            'folder' => 'projects',
+        ])->json('url');
+        $g2 = $this->actingAs($user)->postJson(route('admin.upload'), [
+            'image' => UploadedFile::fake()->image('g2.jpg'),
+            'folder' => 'projects',
+        ])->json('url');
+        $g3 = $this->actingAs($user)->postJson(route('admin.upload'), [
+            'image' => UploadedFile::fake()->image('g3.jpg'),
+            'folder' => 'projects',
+        ])->json('url');
+
+        $project1->update([
+            'gallery_images' => [
+                ['url' => $g1, 'caption' => 'G1'],
+                ['url' => $g2, 'caption' => 'G2 shared'],
+            ],
+        ]);
+        $project2->update([
+            'gallery_images' => [
+                ['url' => $g2, 'caption' => 'G2 shared'],
+            ],
+        ]);
+
+        // Replace project 1 gallery with [G3]: G1 deleted, G2 preserved (used by project 2), G3 exists
+        $project1->update([
+            'gallery_images' => [
+                ['url' => $g3, 'caption' => 'G3 new'],
+            ],
+        ]);
+
+        Storage::disk('public')->assertMissing(MediaStorage::toPublicDiskPath($g1));
+        Storage::disk('public')->assertExists(MediaStorage::toPublicDiskPath($g2));
+        Storage::disk('public')->assertExists(MediaStorage::toPublicDiskPath($g3));
+
+        // Partial PUT without gallery_images key preserves existing gallery and file G3
+        $this->actingAs($user)->put(route('admin.projects.update', $project1), [
+            'title' => $project1->title . ' Revised',
+            'category' => $project1->category,
+            'location' => $project1->location,
+            'year' => $project1->year,
+            'status' => $project1->status,
+            'thumbnail_url' => $project1->thumbnail_url,
+        ])->assertRedirect(route('admin.dashboard'));
+
+        $this->assertCount(1, $project1->fresh()->gallery_images);
+        Storage::disk('public')->assertExists(MediaStorage::toPublicDiskPath($g3));
+
+        // Deleting both projects cleans up G3 and G2
+        $project1->delete();
+        Storage::disk('public')->assertMissing(MediaStorage::toPublicDiskPath($g3));
+        Storage::disk('public')->assertExists(MediaStorage::toPublicDiskPath($g2));
+
+        $project2->delete();
+        Storage::disk('public')->assertMissing(MediaStorage::toPublicDiskPath($g2));
+    }
 }

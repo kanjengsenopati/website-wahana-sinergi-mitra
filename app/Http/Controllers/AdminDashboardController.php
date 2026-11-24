@@ -97,16 +97,37 @@ class AdminDashboardController extends Controller
             'project_value' => 'nullable|numeric|min:0',
             'year' => 'required|integer|min:1990|max:2050',
             'thumbnail_url' => 'nullable|string',
+            'gallery_images' => 'nullable|array|max:12',
+            'gallery_images.*' => [
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if (is_string($value)) {
+                        if (trim($value) === '') {
+                            $fail('URL foto galeri tidak boleh kosong.');
+                        }
+                        return;
+                    }
+                    if (!is_array($value) || !is_string($value['url'] ?? null) || trim($value['url']) === '') {
+                        $fail('Setiap item galeri harus memiliki URL foto yang valid.');
+                        return;
+                    }
+                    if (isset($value['caption']) && (!is_string($value['caption']) || mb_strlen($value['caption']) > 255)) {
+                        $fail('Caption foto galeri maksimal 255 karakter.');
+                    }
+                },
+            ],
             'status' => 'required|string|in:Selesai,Berjalan',
             'description' => 'nullable|string',
             'is_featured' => 'boolean',
             'order' => 'integer',
+        ], [
+            'gallery_images.max' => 'Maksimal 12 foto galeri per proyek.',
         ]);
 
         $slug = Str::slug($validated['title']) . '-' . rand(100, 999);
 
         Project::create([
             ...$validated,
+            'gallery_images' => MediaStorage::normalizeGalleryItems($request->input('gallery_images', [])),
             'slug' => $slug,
             'is_featured' => $request->boolean('is_featured', true),
             'order' => $request->input('order', 0),
@@ -125,17 +146,43 @@ class AdminDashboardController extends Controller
             'project_value' => 'nullable|numeric|min:0',
             'year' => 'required|integer|min:1990|max:2050',
             'thumbnail_url' => 'nullable|string',
+            'gallery_images' => 'nullable|array|max:12',
+            'gallery_images.*' => [
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if (is_string($value)) {
+                        if (trim($value) === '') {
+                            $fail('URL foto galeri tidak boleh kosong.');
+                        }
+                        return;
+                    }
+                    if (!is_array($value) || !is_string($value['url'] ?? null) || trim($value['url']) === '') {
+                        $fail('Setiap item galeri harus memiliki URL foto yang valid.');
+                        return;
+                    }
+                    if (isset($value['caption']) && (!is_string($value['caption']) || mb_strlen($value['caption']) > 255)) {
+                        $fail('Caption foto galeri maksimal 255 karakter.');
+                    }
+                },
+            ],
             'status' => 'required|string|in:Selesai,Berjalan',
             'description' => 'nullable|string',
             'is_featured' => 'boolean',
             'order' => 'integer',
+        ], [
+            'gallery_images.max' => 'Maksimal 12 foto galeri per proyek.',
         ]);
 
-        $project->update([
+        $updatePayload = [
             ...$validated,
             'is_featured' => $request->boolean('is_featured', $project->is_featured),
             'order' => $request->input('order', $project->order),
-        ]);
+        ];
+
+        if ($request->has('gallery_images')) {
+            $updatePayload['gallery_images'] = MediaStorage::normalizeGalleryItems($request->input('gallery_images', []));
+        }
+
+        $project->update($updatePayload);
 
         return redirect()->route('admin.dashboard')->with('success', 'Data proyek berhasil diperbarui.');
     }

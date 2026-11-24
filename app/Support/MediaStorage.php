@@ -203,6 +203,74 @@ class MediaStorage
     }
 
     /**
+     * Normalize project gallery_images into a consistent array of ['url' => ..., 'caption' => ...].
+     * Supports both legacy string arrays and structured objects.
+     *
+     * @return array<int, array{url: string, caption: string}>
+     */
+    public static function normalizeGalleryItems(mixed $items, int $maxItems = 12): array
+    {
+        if (is_string($items)) {
+            $decoded = json_decode($items, true);
+            $items = is_array($decoded) ? $decoded : [];
+        }
+
+        if (!is_array($items)) {
+            return [];
+        }
+
+        // Preserve exact numeric index order even if Validator::validated() reordered mixed scalar/array entries
+        if (!empty($items) && array_reduce(array_keys($items), static fn (bool $carry, int|string $k): bool => $carry && is_int($k), true)) {
+            ksort($items, SORT_NUMERIC);
+        }
+
+        $result = [];
+        $seen = [];
+
+        foreach ($items as $entry) {
+            $rawUrl = null;
+            $rawCaption = '';
+
+            if (is_string($entry)) {
+                $rawUrl = $entry;
+            } elseif (is_array($entry)) {
+                $rawUrl = is_string($entry['url'] ?? null) ? $entry['url'] : null;
+                $rawCaption = is_string($entry['caption'] ?? null) ? trim($entry['caption']) : '';
+            }
+
+            $normalizedUrl = self::normalizeUrl($rawUrl);
+            if ($normalizedUrl === null || isset($seen[$normalizedUrl])) {
+                continue;
+            }
+
+            $seen[$normalizedUrl] = true;
+            $result[] = [
+                'url' => $normalizedUrl,
+                'caption' => mb_substr($rawCaption, 0, 255),
+            ];
+
+            if (count($result) >= $maxItems) {
+                break;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Extract a flat list of normalized URLs from gallery_images (supports string[] or object[]).
+     *
+     * @return array<int, string>
+     */
+    public static function extractGalleryUrls(mixed $items): array
+    {
+        return array_values(array_map(
+            static fn (array $item): string => $item['url'],
+            self::normalizeGalleryItems($items, 100)
+        ));
+    }
+
+    /**
      * Extract the public-disk relative path ONLY for managed local uploads under "uploads/...".
      * Returns null for external URLs or static public assets like "/images/*".
      */
@@ -266,6 +334,17 @@ class MediaStorage
 
         if (Project::whereIn('thumbnail_url', $candidates)->exists()) {
             return true;
+        }
+
+        $projectsWithGallery = Project::whereNotNull('gallery_images')->get(['gallery_images']);
+        foreach ($projectsWithGallery as $project) {
+            foreach (self::extractGalleryUrls($project->gallery_images) as $galleryUrl) {
+                $norm = self::normalizeUrl($galleryUrl);
+                $path = self::toPublicDiskPath($galleryUrl);
+                if (in_array($norm, $candidates, true) || ($path !== null && in_array($path, $candidates, true))) {
+                    return true;
+                }
+            }
         }
 
         if (Service::whereIn('image_url', $candidates)->exists()) {

@@ -9,10 +9,11 @@ import {
   Table2, 
   CheckCircle2,
   FileSpreadsheet,
-  ArrowRight
+  ArrowRight,
+  Images
 } from 'lucide-react';
 import Text from './Typography';
-import { DEFAULT_PROJECT_PLACEHOLDER, resolveImageUrl } from '../utils/imageUtils';
+import { DEFAULT_PROJECT_PLACEHOLDER, resolveImageUrl, getProjectMediaList } from '../utils/imageUtils';
 
 export function PortfolioSection({ projects = [], company = {}, meta = {} }) {
   const [activeTab, setActiveTab] = useState('All');
@@ -154,7 +155,9 @@ export function PortfolioSection({ projects = [], company = {}, meta = {} }) {
         ) : viewMode === 'grid' ? (
           /* MODE 1: VISUAL PHOTO CARDS GRID (Rule 1: rounded-[24px], shadow-[0_8px_30px_rgb(0,0,0,0.04)], no solid border on white cards) */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProjects.map((item, idx) => (
+            {filteredProjects.map((item, idx) => {
+              const totalPhotos = getProjectMediaList(item).length;
+              return (
               <Link
                 key={item.id || idx}
                 href={`/proyek/${item.id}`}
@@ -174,6 +177,14 @@ export function PortfolioSection({ projects = [], company = {}, meta = {} }) {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-transparent to-transparent" />
                   
+                  {/* Top-Left Multi-Photo Count Badge */}
+                  {totalPhotos > 1 && (
+                    <div className="absolute top-4 left-4 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-900/75 backdrop-blur-md text-white text-[11px] font-bold tracking-[-0.015em] shadow-sm tabular-nums">
+                      <Images className="w-3.5 h-3.5 text-sky-300 shrink-0" />
+                      <span>{totalPhotos} Foto</span>
+                    </div>
+                  )}
+
                   {/* Top-Right Badges */}
                   <div className="absolute top-4 right-4 flex items-center gap-2 shrink-0 whitespace-nowrap">
                     <span className="px-3 py-1 rounded-full bg-white/95 backdrop-blur-md text-[11px] font-bold text-slate-800 shadow-sm uppercase tracking-[-0.015em]">
@@ -258,7 +269,8 @@ export function PortfolioSection({ projects = [], company = {}, meta = {} }) {
                   </div>
                 </div>
               </Link>
-            ))}
+              );
+            })}
           </div>
         ) : (
           /* MODE 2: TABEL DATA PENGALAMAN PEKERJAAN (Jaya Arnikon Official Tender Ledger Style) */
