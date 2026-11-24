@@ -13,6 +13,33 @@ export const DEFAULT_PROJECT_CATEGORIES = [
 ];
 
 /**
+ * Defensive client-side auto-sort matching Project::orderedForPortfolio():
+ * 1. Most recent year first (year DESC)
+ * 2. Same year: "Berjalan" before "Selesai"
+ * 3. Same year & status: newest record first (id DESC)
+ */
+export function sortProjectsByRecency(projects = []) {
+  if (!Array.isArray(projects)) {
+    return [];
+  }
+
+  return [...projects].sort((a, b) => {
+    const yearDiff = (Number(b?.year) || 0) - (Number(a?.year) || 0);
+    if (yearDiff !== 0) {
+      return yearDiff;
+    }
+
+    const statusRankA = a?.status === 'Berjalan' ? 0 : 1;
+    const statusRankB = b?.status === 'Berjalan' ? 0 : 1;
+    if (statusRankA !== statusRankB) {
+      return statusRankA - statusRankB;
+    }
+
+    return (Number(b?.id) || 0) - (Number(a?.id) || 0);
+  });
+}
+
+/**
  * Resolve the active website logo URL with safe fallback to the static default logo.
  */
 export function resolveSiteLogoUrl(logoUrl) {

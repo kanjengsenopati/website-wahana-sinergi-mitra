@@ -22,8 +22,7 @@ class LandingPageController extends Controller
             ->orderBy('order')
             ->get();
 
-        $projects = Project::orderBy('order')
-            ->get();
+        $projects = Project::orderedForPortfolio()->get();
 
         $testimonials = Testimonial::where('is_active', true)
             ->orderBy('order')
@@ -38,14 +37,7 @@ class LandingPageController extends Controller
             'years_experience' => 12,
         ];
 
-        $company = [
-            'logo_url' => CompanySetting::getSiteLogoUrl(),
-            'phone' => CompanySetting::get('company_phone', '+62 812-3456-7890'),
-            'email' => CompanySetting::get('company_email', 'info@wahanasinergimitra.id'),
-            'address' => CompanySetting::get('company_address', 'Jl. Sinergi Raya No. 88, Kawasan Niaga Terpadu, Jawa Barat, Indonesia'),
-            'operating_hours' => CompanySetting::get('company_operating_hours', 'Senin – Sabtu: 08.00 – 17.00 WIB'),
-            'about' => CompanySetting::get('company_about', 'Perusahaan penyedia jasa pelaksana konstruksi terpercaya yang melayani pekerjaan gedung komersial, industri pergudangan, infrastruktur jalan/jembatan, dan rekayasa sipil berstandar mutu tinggi.'),
-        ];
+        $company = CompanySetting::getCompanyProfile();
 
         // SSOT Section Visibility & Section Dynamic Contents
         $visibility = CompanySetting::getSectionVisibility();
@@ -116,24 +108,17 @@ class LandingPageController extends Controller
      */
     public function showProject(Project $project): Response
     {
-        $relatedProjects = Project::where('id', '!=', $project->id)
-            ->where(function ($q) use ($project) {
-                if ($project->category) {
-                    $q->where('category', $project->category);
-                }
-            })
-            ->orWhere('id', '!=', $project->id)
-            ->orderBy('order')
+        $relatedQuery = Project::where('id', '!=', $project->id);
+        if ($project->category) {
+            $relatedQuery->orderByRaw('CASE WHEN category = ? THEN 0 ELSE 1 END ASC', [$project->category]);
+        }
+
+        $relatedProjects = $relatedQuery
+            ->orderedForPortfolio()
             ->take(3)
             ->get();
 
-        $company = [
-            'logo_url' => CompanySetting::getSiteLogoUrl(),
-            'phone' => CompanySetting::get('company_phone', '+62 812-3456-7890'),
-            'email' => CompanySetting::get('company_email', 'info@wahanasinergimitra.id'),
-            'address' => CompanySetting::get('company_address', 'Jl. Sinergi Raya No. 88, Kawasan Niaga Terpadu, Jawa Barat, Indonesia'),
-            'about' => CompanySetting::get('company_about', 'Perusahaan penyedia jasa pelaksana konstruksi terpercaya yang melayani pekerjaan gedung komersial, industri pergudangan, infrastruktur jalan/jembatan, dan rekayasa sipil berstandar mutu tinggi.'),
-        ];
+        $company = CompanySetting::getCompanyProfile();
 
         return Inertia::render('Public/ProjectDetail', [
             'project' => $project,
@@ -154,22 +139,19 @@ class LandingPageController extends Controller
             ->take(3)
             ->get();
 
-        $relevantProjects = Project::where('category', 'like', "%{$service->title}%")
-            ->orWhere('description', 'like', "%{$service->title}%")
+        $relevantProjects = Project::where(function ($q) use ($service) {
+                $q->where('category', 'like', "%{$service->title}%")
+                    ->orWhere('description', 'like', "%{$service->title}%");
+            })
+            ->orderedForPortfolio()
             ->take(3)
             ->get();
 
         if ($relevantProjects->isEmpty()) {
-            $relevantProjects = Project::orderBy('order')->take(3)->get();
+            $relevantProjects = Project::orderedForPortfolio()->take(3)->get();
         }
 
-        $company = [
-            'logo_url' => CompanySetting::getSiteLogoUrl(),
-            'phone' => CompanySetting::get('company_phone', '+62 812-3456-7890'),
-            'email' => CompanySetting::get('company_email', 'info@wahanasinergimitra.id'),
-            'address' => CompanySetting::get('company_address', 'Jl. Sinergi Raya No. 88, Kawasan Niaga Terpadu, Jawa Barat, Indonesia'),
-            'about' => CompanySetting::get('company_about', 'Perusahaan penyedia jasa pelaksana konstruksi terpercaya yang melayani pekerjaan gedung komersial, industri pergudangan, infrastruktur jalan/jembatan, dan rekayasa sipil berstandar mutu tinggi.'),
-        ];
+        $company = CompanySetting::getCompanyProfile();
 
         return Inertia::render('Public/ServiceDetail', [
             'service' => $service,

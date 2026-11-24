@@ -28,7 +28,7 @@ class AdminDashboardController extends Controller
      */
     public function index(): Response
     {
-        $projects = Project::orderBy('order')->orderByDesc('id')->get();
+        $projects = Project::orderedForPortfolio()->get();
         $services = Service::orderBy('order')->get();
         $inquiries = Inquiry::orderByDesc('id')->get();
         $testimonials = Testimonial::orderBy('order')->get();
@@ -41,11 +41,17 @@ class AdminDashboardController extends Controller
             'hero_stat_value' => CompanySetting::get('hero_stat_value', 'Rp 85+ Miliar'),
             'hero_stat_satisfaction' => CompanySetting::get('hero_stat_satisfaction', '99.4%'),
             'hero_stat_safety' => CompanySetting::get('hero_stat_safety', '1.250.000+ Jam'),
-            'company_phone' => CompanySetting::get('company_phone', '+62 812-3456-7890'),
-            'company_email' => CompanySetting::get('company_email', 'info@wahanasinergimitra.id'),
-            'company_address' => CompanySetting::get('company_address', 'Jl. Sinergi Raya No. 88, Kawasan Niaga Terpadu, Jawa Barat, Indonesia'),
-            'company_operating_hours' => CompanySetting::get('company_operating_hours', 'Senin – Sabtu: 08.00 – 17.00 WIB'),
-            'company_about' => CompanySetting::get('company_about', 'Perusahaan penyedia jasa pelaksana konstruksi terpercaya...'),
+            'company_phone' => CompanySetting::get('company_phone', CompanySetting::DEFAULT_PHONE),
+            'company_phone_label' => CompanySetting::get('company_phone_label', CompanySetting::DEFAULT_PHONE_LABEL),
+            'company_phone_2' => CompanySetting::get('company_phone_2', CompanySetting::DEFAULT_PHONE_2),
+            'company_phone_2_label' => CompanySetting::get('company_phone_2_label', CompanySetting::DEFAULT_PHONE_2_LABEL),
+            'company_email' => CompanySetting::get('company_email', CompanySetting::DEFAULT_EMAIL),
+            'company_address' => CompanySetting::get('company_address', CompanySetting::DEFAULT_ADDRESS),
+            'company_workshop_address' => CompanySetting::get('company_workshop_address', CompanySetting::DEFAULT_WORKSHOP_ADDRESS),
+            'company_workshop_coordinates' => CompanySetting::get('company_workshop_coordinates', CompanySetting::DEFAULT_WORKSHOP_COORDINATES),
+            'company_workshop_map_url' => CompanySetting::get('company_workshop_map_url', ''),
+            'company_operating_hours' => CompanySetting::get('company_operating_hours', CompanySetting::DEFAULT_OPERATING_HOURS),
+            'company_about' => CompanySetting::get('company_about', CompanySetting::DEFAULT_ABOUT),
         ];
 
         $metrics = [
@@ -336,6 +342,35 @@ class AdminDashboardController extends Controller
     {
         $request->validate([
             'company_logo_url' => 'nullable|string|max:500',
+            'company_phone' => 'nullable|string|max:100',
+            'company_phone_label' => 'nullable|string|max:100',
+            'company_phone_2' => 'nullable|string|max:100',
+            'company_phone_2_label' => 'nullable|string|max:100',
+            'company_email' => 'nullable|email|max:255',
+            'company_address' => 'nullable|string|max:500',
+            'company_workshop_address' => 'nullable|string|max:500',
+            'company_operating_hours' => 'nullable|string|max:255',
+            'company_about' => 'nullable|string|max:2000',
+            'company_workshop_coordinates' => [
+                'nullable',
+                'string',
+                'max:100',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if (is_string($value) && trim($value) !== '' && CompanySetting::parseCoordinates($value) === null) {
+                        $fail('Format koordinat Workshop tidak valid. Gunakan format "Latitude, Longitude" (contoh: -6.300641, 107.148957).');
+                    }
+                },
+            ],
+            'company_workshop_map_url' => [
+                'nullable',
+                'string',
+                'max:2000',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if (is_string($value) && trim($value) !== '' && CompanySetting::sanitizeGoogleMapInput($value) === null) {
+                        $fail('Link atau kode embed Google Maps Workshop harus menggunakan tautan HTTPS resmi dari Google Maps.');
+                    }
+                },
+            ],
         ]);
 
         if ($request->exists('company_logo_url')) {
@@ -349,6 +384,31 @@ class AdminDashboardController extends Controller
                 array_values(array_filter([$oldLogo])),
                 array_values(array_filter([$normalizedLogo]))
             );
+        }
+
+        if ($request->exists('company_workshop_coordinates')) {
+            $rawCoords = $request->input('company_workshop_coordinates');
+            $parsed = CompanySetting::parseCoordinates(is_string($rawCoords) ? $rawCoords : null);
+            CompanySetting::set('company_workshop_coordinates', $parsed ? $parsed['formatted'] : '');
+        }
+
+        if ($request->exists('company_workshop_map_url')) {
+            $rawMapUrl = $request->input('company_workshop_map_url');
+            $sanitizedMapUrl = CompanySetting::sanitizeGoogleMapInput(is_string($rawMapUrl) ? $rawMapUrl : null) ?? '';
+            CompanySetting::set('company_workshop_map_url', $sanitizedMapUrl);
+        }
+
+        $nullableClearableKeys = [
+            'company_phone_label',
+            'company_phone_2',
+            'company_phone_2_label',
+            'company_workshop_address',
+        ];
+        foreach ($nullableClearableKeys as $key) {
+            if ($request->exists($key)) {
+                $val = $request->input($key);
+                CompanySetting::set($key, is_string($val) ? trim($val) : '');
+            }
         }
 
         $inputs = $request->only([
@@ -369,7 +429,7 @@ class AdminDashboardController extends Controller
             }
         }
 
-        return redirect()->route('admin.dashboard')->with('success', 'Pengaturan logo, tampilan depan, dan informasi kontak berhasil disimpan.');
+        return redirect()->route('admin.dashboard')->with('success', 'Pengaturan logo, tampilan depan, kontak, alamat & peta Workshop berhasil disimpan.');
     }
 
     /**

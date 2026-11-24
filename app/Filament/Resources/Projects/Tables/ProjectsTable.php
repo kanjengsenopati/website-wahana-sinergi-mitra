@@ -12,12 +12,14 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class ProjectsTable
 {
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultSort(fn (Builder $query): Builder => $query->orderedForPortfolio())
             ->columns([
                 ImageColumn::make('thumbnail_url')
                     ->label('Foto')

@@ -12,6 +12,34 @@ class CompanySetting extends Model
 
     public const DEFAULT_LOGO_URL = '/images/logo-wsm.jpg';
 
+    public const DEFAULT_PHONE = '+62 812-3456-7890';
+
+    public const DEFAULT_PHONE_LABEL = 'Hotline Utama / Kantor';
+
+    public const DEFAULT_PHONE_2 = '+62 813-2233-4455';
+
+    public const DEFAULT_PHONE_2_LABEL = 'Kontak Workshop / Operasional';
+
+    public const DEFAULT_EMAIL = 'info@wahanasinergimitra.id';
+
+    public const DEFAULT_OPERATING_HOURS = 'Senin – Sabtu: 08.00 – 17.00 WIB';
+
+    public const DEFAULT_ADDRESS = 'Jl. Sinergi Raya No. 88, Kawasan Niaga Terpadu, Jawa Barat, Indonesia';
+
+    public const DEFAULT_WORKSHOP_ADDRESS = 'Jl. Industri Fabrikasi No. 12, Kawasan Workshop & Gudang Baja WSM, Jawa Barat, Indonesia';
+
+    public const DEFAULT_WORKSHOP_COORDINATES = '-6.300641, 107.148957';
+
+    public const DEFAULT_ABOUT = 'Perusahaan penyedia jasa pelaksana konstruksi terpercaya yang melayani pekerjaan gedung komersial, industri pergudangan, infrastruktur jalan/jembatan, dan rekayasa sipil berstandar mutu tinggi.';
+
+    private const ALLOWED_GOOGLE_MAP_HOSTS = [
+        'google.com',
+        'www.google.com',
+        'maps.google.com',
+        'maps.app.goo.gl',
+        'goo.gl',
+    ];
+
     protected $guarded = [];
 
     /**
@@ -27,6 +55,203 @@ class CompanySetting extends Model
         } catch (\Throwable) {
             return self::DEFAULT_LOGO_URL;
         }
+    }
+
+    /**
+     * Parse and validate a GPS coordinate string ("lat, lng" or "lat lng").
+     *
+     * @return array{lat: float, lng: float, formatted: string}|null
+     */
+    public static function parseCoordinates(?string $raw): ?array
+    {
+        if (!is_string($raw)) {
+            return null;
+        }
+
+        $trimmed = trim($raw);
+        if ($trimmed === '') {
+            return null;
+        }
+
+        if (!preg_match('/^\s*(-?\d{1,2}(?:\.\d+)?)\s*[,;\s]\s*(-?\d{1,3}(?:\.\d+)?)\s*$/', $trimmed, $matches)) {
+            return null;
+        }
+
+        $lat = (float) $matches[1];
+        $lng = (float) $matches[2];
+
+        if ($lat < -90.0 || $lat > 90.0 || $lng < -180.0 || $lng > 180.0) {
+            return null;
+        }
+
+        return [
+            'lat' => $lat,
+            'lng' => $lng,
+            'formatted' => $matches[1] . ', ' . $matches[2],
+        ];
+    }
+
+    /**
+     * Extract a safe Google Maps URL from either a plain URL or an <iframe> embed snippet.
+     * Returns null when non-empty input is not a valid HTTPS Google Maps URL.
+     */
+    public static function sanitizeGoogleMapInput(?string $raw): ?string
+    {
+        if (!is_string($raw)) {
+            return '';
+        }
+
+        $trimmed = trim($raw);
+        if ($trimmed === '') {
+            return '';
+        }
+
+        // If admin pasted full <iframe ... src="..."> snippet, extract src attribute
+        if (stripos($trimmed, '<iframe') !== false) {
+            if (preg_match('/\bsrc\s*=\s*["\']([^"\']+)["\']/i', $trimmed, $matches)) {
+                $trimmed = html_entity_decode(trim($matches[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            } else {
+                return null;
+            }
+        }
+
+        $parts = parse_url($trimmed);
+        if (!is_array($parts)) {
+            return null;
+        }
+
+        $scheme = strtolower((string) ($parts['scheme'] ?? ''));
+        $host = strtolower((string) ($parts['host'] ?? ''));
+
+        if ($scheme !== 'https' || $host === '') {
+            return null;
+        }
+
+        $isAllowedHost = in_array($host, self::ALLOWED_GOOGLE_MAP_HOSTS, true)
+            || preg_match('/^(?:www\.|maps\.)?google\.[a-z]{2,3}(?:\.[a-z]{2})?$/', $host) === 1;
+
+        if (!$isAllowedHost) {
+            return null;
+        }
+
+        // Restrict goo.gl shortlinks specifically to /maps paths
+        if ($host === 'goo.gl' && !str_starts_with((string) ($parts['path'] ?? ''), '/maps')) {
+            return null;
+        }
+
+        return $trimmed;
+    }
+
+    /**
+     * Extract exact pin coordinates from a Google Maps URL (!3d...!4d..., @lat,lng, or query params).
+     *
+     * @return array{lat: float, lng: float, formatted: string}|null
+     */
+    public static function extractCoordinatesFromGoogleMapUrl(?string $url): ?array
+    {
+        if (!is_string($url) || trim($url) === '') {
+            return null;
+        }
+
+        // 1. Exact place pin (!3dLAT!4dLNG) - highest precision in Google Maps URLs
+        if (preg_match('/!3d(-?\d{1,2}\.\d+)!4d(-?\d{1,3}\.\d+)/', $url, $matches)) {
+            return self::parseCoordinates($matches[1] . ', ' . $matches[2]);
+        }
+
+        // 2. Query parameter (?q=lat,lng or &query=lat,lng or &ll=lat,lng or &destination=lat,lng)
+        if (preg_match('/[?&](?:q|query|ll|destination)=(-?\d{1,2}\.\d+)(?:,|%2C|\+)(-?\d{1,3}\.\d+)/i', $url, $matches)) {
+            return self::parseCoordinates($matches[1] . ', ' . $matches[2]);
+        }
+
+        // 3. Viewport center (@lat,lng)
+        if (preg_match('/@(-?\d{1,2}\.\d+),(-?\d{1,3}\.\d+)/', $url, $matches)) {
+            return self::parseCoordinates($matches[1] . ', ' . $matches[2]);
+        }
+
+        return null;
+    }
+
+    /**
+     * Resolve embeddable and external Google Maps URLs for the Workshop location.
+     *
+     * @return array{embed_url: string, external_url: string, coordinates_formatted: string, is_precise: bool}
+     */
+    public static function resolveWorkshopMap(?string $coordinates, ?string $mapUrl, ?string $address): array
+    {
+        $parsedCoords = self::parseCoordinates($coordinates);
+        $cleanMapUrl = self::sanitizeGoogleMapInput($mapUrl);
+        if ($cleanMapUrl === null) {
+            $cleanMapUrl = '';
+        }
+
+        $isEmbedUrl = $cleanMapUrl !== '' && str_contains(strtolower($cleanMapUrl), '/maps/embed');
+        $isShortLink = $cleanMapUrl !== '' && preg_match('#^https://(?:maps\.app\.goo\.gl|goo\.gl/maps)/#i', $cleanMapUrl) === 1;
+        $urlCoords = self::extractCoordinatesFromGoogleMapUrl($cleanMapUrl);
+        $effectiveCoords = $parsedCoords ?? $urlCoords;
+
+        $embedUrl = '';
+        $isPrecise = false;
+
+        if ($isEmbedUrl) {
+            $embedUrl = $cleanMapUrl;
+            $isPrecise = true;
+        } elseif ($effectiveCoords !== null) {
+            $coordQuery = rawurlencode($effectiveCoords['formatted']);
+            $embedUrl = "https://maps.google.com/maps?q={$coordQuery}&hl=id&z=17&output=embed";
+            $isPrecise = true;
+        } elseif (is_string($address) && trim($address) !== '') {
+            $addrQuery = rawurlencode(trim($address));
+            $embedUrl = "https://maps.google.com/maps?q={$addrQuery}&hl=id&z=16&output=embed";
+            $isPrecise = false;
+        }
+
+        $externalUrl = '';
+        if ($cleanMapUrl !== '' && !$isEmbedUrl) {
+            $externalUrl = $cleanMapUrl;
+        } elseif ($effectiveCoords !== null) {
+            $coordQuery = rawurlencode($effectiveCoords['formatted']);
+            $externalUrl = "https://www.google.com/maps/search/?api=1&query={$coordQuery}";
+        } elseif (is_string($address) && trim($address) !== '') {
+            $addrQuery = rawurlencode(trim($address));
+            $externalUrl = "https://www.google.com/maps/search/?api=1&query={$addrQuery}";
+        }
+
+        return [
+            'embed_url' => $embedUrl,
+            'external_url' => $externalUrl,
+            'coordinates_formatted' => $effectiveCoords['formatted'] ?? '',
+            'is_precise' => $isPrecise,
+            'is_short_link_without_coords' => $isShortLink && $parsedCoords === null,
+        ];
+    }
+
+    /**
+     * Get the complete SSOT company profile (2 contacts, 2 addresses, precise Workshop Google Map, & logo).
+     */
+    public static function getCompanyProfile(): array
+    {
+        $workshopAddress = (string) static::get('company_workshop_address', self::DEFAULT_WORKSHOP_ADDRESS);
+        $workshopCoordinates = (string) static::get('company_workshop_coordinates', self::DEFAULT_WORKSHOP_COORDINATES);
+        $workshopMapUrl = (string) static::get('company_workshop_map_url', '');
+        $resolvedMap = self::resolveWorkshopMap($workshopCoordinates, $workshopMapUrl, $workshopAddress);
+
+        return [
+            'logo_url' => self::getSiteLogoUrl(),
+            'phone' => (string) static::get('company_phone', self::DEFAULT_PHONE),
+            'phone_label' => (string) static::get('company_phone_label', self::DEFAULT_PHONE_LABEL),
+            'phone_2' => (string) static::get('company_phone_2', self::DEFAULT_PHONE_2),
+            'phone_2_label' => (string) static::get('company_phone_2_label', self::DEFAULT_PHONE_2_LABEL),
+            'email' => (string) static::get('company_email', self::DEFAULT_EMAIL),
+            'operating_hours' => (string) static::get('company_operating_hours', self::DEFAULT_OPERATING_HOURS),
+            'address' => (string) static::get('company_address', self::DEFAULT_ADDRESS),
+            'workshop_address' => $workshopAddress,
+            'workshop_coordinates' => $workshopCoordinates,
+            'workshop_map_url' => $workshopMapUrl,
+            'workshop_map_embed_url' => $resolvedMap['embed_url'],
+            'workshop_map_external_url' => $resolvedMap['external_url'],
+            'workshop_map_is_precise' => $resolvedMap['is_precise'],
+            'about' => (string) static::get('company_about', self::DEFAULT_ABOUT),
+        ];
     }
 
     /**

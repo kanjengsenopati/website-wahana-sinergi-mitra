@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Support\MediaStorage;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -57,6 +58,20 @@ class Project extends Model
         'year' => 'integer',
         'order' => 'integer',
     ];
+
+    /**
+     * Auto-sort projects for all portfolio listings:
+     * 1. Most recent year first (older years automatically sink to the bottom)
+     * 2. Same year: ongoing ("Berjalan") before completed ("Selesai")
+     * 3. Same year & status: most recently added first (id DESC)
+     */
+    public function scopeOrderedForPortfolio(Builder $query): Builder
+    {
+        return $query
+            ->orderByDesc('year')
+            ->orderByRaw("CASE WHEN status = 'Berjalan' THEN 0 ELSE 1 END ASC")
+            ->orderByDesc('id');
+    }
 
     protected static function booted(): void
     {

@@ -53,7 +53,10 @@ import {
   AlertCircle,
   Loader2,
   Images,
-  RotateCcw
+  RotateCcw,
+  Navigation,
+  Compass,
+  ArrowDownWideNarrow
 } from 'lucide-react';
 import Text, { formatRupiah, formatThousands } from '../../Components/Typography';
 import CurrencyInput from '../../Components/CurrencyInput';
@@ -67,7 +70,9 @@ import {
   resolveSiteLogoUrl,
   normalizeProjectGallery,
   getProjectMediaList,
+  sortProjectsByRecency,
 } from '../../utils/imageUtils';
+import { resolveWorkshopMap } from '../../utils/mapUtils';
 
 const iconMap = {
   Building2,
@@ -598,8 +603,14 @@ export default function Dashboard({
     hero_stat_satisfaction: settings.hero_stat_satisfaction || '99.4%',
     hero_stat_safety: settings.hero_stat_safety || '1.250.000+ Jam',
     company_phone: settings.company_phone || '+62 812-3456-7890',
+    company_phone_label: settings.company_phone_label || 'Hotline Utama / Kantor',
+    company_phone_2: settings.company_phone_2 ?? '',
+    company_phone_2_label: settings.company_phone_2_label || 'Kontak Workshop / Operasional',
     company_email: settings.company_email || 'info@wahanasinergimitra.id',
     company_address: settings.company_address || '',
+    company_workshop_address: settings.company_workshop_address ?? '',
+    company_workshop_coordinates: settings.company_workshop_coordinates ?? '',
+    company_workshop_map_url: settings.company_workshop_map_url ?? '',
     company_operating_hours: settings.company_operating_hours || 'Senin – Sabtu: 08.00 – 17.00 WIB',
     company_about: settings.company_about || '',
   });
@@ -608,8 +619,10 @@ export default function Dashboard({
     setSettingsForm((prev) => ({
       ...prev,
       company_logo_url: settings.company_logo_url || '',
+      company_workshop_coordinates: settings.company_workshop_coordinates ?? prev.company_workshop_coordinates,
+      company_workshop_map_url: settings.company_workshop_map_url ?? prev.company_workshop_map_url,
     }));
-  }, [settings.company_logo_url]);
+  }, [settings.company_logo_url, settings.company_workshop_coordinates, settings.company_workshop_map_url]);
 
   // Handle Logout
   const handleLogout = () => {
@@ -2520,7 +2533,8 @@ export default function Dashboard({
                 ]),
               ];
 
-              const filteredProjectsList = projects.filter((proj) => {
+              const orderedProjectsList = sortProjectsByRecency(projects);
+              const filteredProjectsList = orderedProjectsList.filter((proj) => {
                 if (projectCategoryFilter !== 'All' && proj.category !== projectCategoryFilter) {
                   return false;
                 }
@@ -2541,11 +2555,17 @@ export default function Dashboard({
                   <div className="bg-white p-5 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div className="min-w-0">
-                        <Text.H2 title="Portofolio Proyek Konstruksi" singleLine className="text-[18px] text-slate-900">
-                          Portofolio Proyek Konstruksi
-                        </Text.H2>
+                        <div className="flex flex-wrap items-center gap-2 min-w-0">
+                          <Text.H2 title="Portofolio Proyek Konstruksi" singleLine className="text-[18px] text-slate-900">
+                            Portofolio Proyek Konstruksi
+                          </Text.H2>
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-600/10 text-blue-700 text-[10.5px] font-bold tracking-[-0.015em] shrink-0 whitespace-nowrap">
+                            <ArrowDownWideNarrow className="w-3 h-3" />
+                            <span>Auto-Sort: Tahun Terbaru</span>
+                          </span>
+                        </div>
                         <Text.Caption className="block mt-0.5 text-slate-600">
-                          Menampilkan {filteredProjectsList.length} dari {projects.length} proyek di database.
+                          Menampilkan {filteredProjectsList.length} dari {projects.length} proyek (otomatis diurutkan dari Tahun Pengerjaan terkini ke terlama).
                         </Text.Caption>
                       </div>
 
@@ -2886,6 +2906,9 @@ export default function Dashboard({
                           onChange={(e) => setProjectForm({ ...projectForm, year: parseInt(e.target.value, 10) || 2025 })}
                           className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
                         />
+                        <Text.Caption className="block text-[11px] text-slate-600 mt-1">
+                          Auto-sort: tahun terbaru tampil di urutan paling atas.
+                        </Text.Caption>
                       </div>
                     </div>
 
@@ -4040,23 +4063,69 @@ export default function Dashboard({
                     </div>
                   </div>
 
-                  {/* Company Contacts Section */}
-                  <div className="pt-4 border-t border-slate-100">
-                    <Text.Label className="text-blue-700 block mb-3">3. Kontak &amp; Alamat Kantor Resmi</Text.Label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Company Contacts Section (2 Numbers + Email + Hours) */}
+                  <div className="pt-4 border-t border-slate-100 space-y-4">
+                    <Text.Label className="text-blue-700 block">
+                      3. Kontak Resmi (2 Nomor WhatsApp / Telepon &amp; Email)
+                    </Text.Label>
+
+                    {/* Contact 1 */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-2xl bg-slate-50/80 border border-slate-200/70">
                       <div>
                         <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
-                          Nomor WhatsApp Hotline
+                          Nomor Kontak 1 (WhatsApp Utama)
                         </label>
                         <input
                           type="text"
                           value={settingsForm.company_phone}
                           onChange={(e) => setSettingsForm({ ...settingsForm, company_phone: e.target.value })}
                           placeholder="+62 812-3456-7890"
-                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900"
+                          className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-900"
                         />
                       </div>
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                          Label Kontak 1
+                        </label>
+                        <input
+                          type="text"
+                          value={settingsForm.company_phone_label}
+                          onChange={(e) => setSettingsForm({ ...settingsForm, company_phone_label: e.target.value })}
+                          placeholder="Hotline Utama / Kantor"
+                          className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                        />
+                      </div>
+                    </div>
 
+                    {/* Contact 2 */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-2xl bg-emerald-50/40 border border-emerald-200/60">
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                          Nomor Kontak 2 (WhatsApp Workshop / Kedua)
+                        </label>
+                        <input
+                          type="text"
+                          value={settingsForm.company_phone_2}
+                          onChange={(e) => setSettingsForm({ ...settingsForm, company_phone_2: e.target.value })}
+                          placeholder="+62 813-2233-4455"
+                          className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-900"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                          Label Kontak 2
+                        </label>
+                        <input
+                          type="text"
+                          value={settingsForm.company_phone_2_label}
+                          onChange={(e) => setSettingsForm({ ...settingsForm, company_phone_2_label: e.target.value })}
+                          placeholder="Kontak Workshop / Operasional"
+                          className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
                           Email Resmi
@@ -4069,34 +4138,179 @@ export default function Dashboard({
                           className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900"
                         />
                       </div>
-                    </div>
 
-                    <div className="mt-4">
-                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
-                        Jam Operasional (Top Bar Header)
-                      </label>
-                      <input
-                        type="text"
-                        value={settingsForm.company_operating_hours}
-                        onChange={(e) => setSettingsForm({ ...settingsForm, company_operating_hours: e.target.value })}
-                        placeholder="Senin – Sabtu: 08.00 – 17.00 WIB"
-                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
-                      />
-                    </div>
-
-                    <div className="mt-4">
-                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
-                        Alamat Kantor Utama
-                      </label>
-                      <input
-                        type="text"
-                        value={settingsForm.company_address}
-                        onChange={(e) => setSettingsForm({ ...settingsForm, company_address: e.target.value })}
-                        placeholder="Jl. Sinergi Raya No. 88, Kawasan Niaga Terpadu, Jawa Barat"
-                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
-                      />
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                          Jam Operasional (Top Bar Header)
+                        </label>
+                        <input
+                          type="text"
+                          value={settingsForm.company_operating_hours}
+                          onChange={(e) => setSettingsForm({ ...settingsForm, company_operating_hours: e.target.value })}
+                          placeholder="Senin – Sabtu: 08.00 – 17.00 WIB"
+                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                        />
+                      </div>
                     </div>
                   </div>
+
+                  {/* 2 Official Addresses & Precise Workshop Google Maps Section */}
+                  {(() => {
+                    const liveWorkshopMap = resolveWorkshopMap({
+                      coordinates: settingsForm.company_workshop_coordinates,
+                      mapUrl: settingsForm.company_workshop_map_url,
+                      address: settingsForm.company_workshop_address,
+                    });
+
+                    return (
+                      <div className="pt-4 border-t border-slate-100 space-y-4">
+                        <Text.Label className="text-blue-700 block">
+                          4. Alamat Kantor Utama, Alamat Workshop &amp; Google Maps Presisi
+                        </Text.Label>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                            Alamat 1: Alamat Kantor Utama
+                          </label>
+                          <input
+                            type="text"
+                            value={settingsForm.company_address}
+                            onChange={(e) => setSettingsForm({ ...settingsForm, company_address: e.target.value })}
+                            placeholder="Jl. Sinergi Raya No. 88, Kawasan Niaga Terpadu, Jawa Barat"
+                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                            Alamat 2: Alamat Workshop
+                          </label>
+                          <input
+                            type="text"
+                            value={settingsForm.company_workshop_address}
+                            onChange={(e) => setSettingsForm({ ...settingsForm, company_workshop_address: e.target.value })}
+                            placeholder="Jl. Industri Fabrikasi No. 12, Kawasan Workshop & Gudang Baja WSM"
+                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                              Koordinat GPS Presisi Workshop (Lat, Lng)
+                            </label>
+                            <input
+                              type="text"
+                              value={settingsForm.company_workshop_coordinates}
+                              onChange={(e) =>
+                                setSettingsForm({ ...settingsForm, company_workshop_coordinates: e.target.value })
+                              }
+                              placeholder="-6.300641, 107.148957"
+                              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono font-semibold text-slate-900"
+                            />
+                            <Text.Caption className="block text-[11px] text-slate-600 mt-1">
+                              Klik kanan titik lokasi Workshop di Google Maps lalu klik angka koordinat untuk menyalin.
+                            </Text.Caption>
+                          </div>
+
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                              Link / Kode Embed Google Maps (Opsional)
+                            </label>
+                            <input
+                              type="text"
+                              value={settingsForm.company_workshop_map_url}
+                              onChange={(e) =>
+                                setSettingsForm({ ...settingsForm, company_workshop_map_url: e.target.value })
+                              }
+                              placeholder="Paste link Google Maps atau <iframe src=...> Sematkan Peta"
+                              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                            />
+                            <Text.Caption className="block text-[11px] text-slate-600 mt-1">
+                              Mendukung tautan Google Maps, kode &lt;iframe&gt; &quot;Sematkan Peta&quot;, atau maps.app.goo.gl.
+                            </Text.Caption>
+                          </div>
+                        </div>
+
+                        {/* Validation Hints */}
+                        {liveWorkshopMap.hasInvalidCoordinatesInput && (
+                          <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2 tracking-[-0.015em]">
+                            <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+                            <span>
+                              Format koordinat belum valid. Gunakan angka desimal Latitude, Longitude (contoh: -6.300641, 107.148957).
+                            </span>
+                          </div>
+                        )}
+
+                        {!liveWorkshopMap.isMapUrlValid && (
+                          <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2 tracking-[-0.015em]">
+                            <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+                            <span>
+                              URL peta harus berupa tautan HTTPS resmi dari Google Maps (google.com/maps atau maps.app.goo.gl).
+                            </span>
+                          </div>
+                        )}
+
+                        {liveWorkshopMap.isShortLinkWithoutCoords && (
+                          <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold flex items-center gap-2 tracking-[-0.015em]">
+                            <AlertCircle className="w-4 h-4 shrink-0 text-amber-600" />
+                            <span>
+                              Link pendek maps.app.goo.gl dipakai untuk tombol &quot;Buka Rute&quot;. Isi juga Koordinat GPS (Lat, Lng) agar pin peta interaktif tepat akurat ke titik Workshop.
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Live Workshop Google Maps Preview */}
+                        {liveWorkshopMap.embedUrl && (
+                          <div className="rounded-2xl bg-slate-50 border border-slate-200/80 p-4 space-y-3">
+                            <div className="flex flex-wrap items-center justify-between gap-2 min-w-0">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <Compass className="w-4 h-4 text-blue-600 shrink-0" />
+                                <Text.Label title="Live Preview Peta Alamat Workshop" singleLine className="text-slate-700">
+                                  Live Preview Peta Alamat Workshop
+                                </Text.Label>
+                              </div>
+                              <div className="flex flex-wrap items-center gap-2 shrink-0 whitespace-nowrap">
+                                <span
+                                  className={`px-2.5 py-0.5 rounded-full text-[10.5px] font-bold tracking-[-0.015em] ${
+                                    liveWorkshopMap.isPrecise
+                                      ? 'bg-emerald-600/10 text-emerald-700'
+                                      : 'bg-amber-500/15 text-amber-800'
+                                  }`}
+                                >
+                                  {liveWorkshopMap.isPrecise
+                                    ? 'Pin Presisi Aktif'
+                                    : 'Mode Perkiraan Alamat'}
+                                </span>
+                                {liveWorkshopMap.externalUrl && (
+                                  <a
+                                    href={liveWorkshopMap.externalUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-[10.5px] font-bold tracking-[-0.015em] transition-colors"
+                                  >
+                                    <Navigation className="w-3 h-3" />
+                                    <span>Uji di Google Maps</span>
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="rounded-xl overflow-hidden bg-slate-200 h-56 border border-slate-200">
+                              <iframe
+                                key={liveWorkshopMap.embedUrl}
+                                src={liveWorkshopMap.embedUrl}
+                                title="Preview Peta Alamat Workshop"
+                                className="w-full h-full border-0"
+                                loading="lazy"
+                                referrerPolicy="no-referrer-when-downgrade"
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                   <div className="pt-4 flex justify-end border-t border-slate-100">
                     <button

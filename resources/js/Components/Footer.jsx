@@ -1,20 +1,44 @@
 import React from 'react';
 import { usePage } from '@inertiajs/react';
-import { Mail, Phone, MapPin, ShieldCheck, ArrowUpRight, PhoneCall, Award, CheckCircle2 } from 'lucide-react';
+import {
+  Mail,
+  Phone,
+  MapPin,
+  ShieldCheck,
+  ArrowUpRight,
+  PhoneCall,
+  Award,
+  CheckCircle2,
+  Wrench,
+  Navigation,
+} from 'lucide-react';
 import Text from './Typography';
 import { DEFAULT_SITE_LOGO, resolveSiteLogoUrl } from '../utils/imageUtils';
+import { buildWhatsAppUrl, resolveWorkshopMap } from '../utils/mapUtils';
 
 export function Footer({ company = {}, visibility = {} }) {
   const { site_logo: sharedSiteLogo } = usePage().props || {};
   const logoSrc = resolveSiteLogoUrl(company?.logo_url || sharedSiteLogo);
-  const cleanPhone = (company?.phone || '+62 812-3456-7890')
-    .replace(/\D/g, '')
-    .replace(/^0/, '62');
-  const waUrl = `https://wa.me/${cleanPhone}?text=Halo%20CV.%20Wahana%20Sinergi%20Mitra,%20saya%20ingin%20berkonsultasi%20mengenai%20proyek%20konstruksi.`;
   const phoneDisplay = company?.phone || '+62 812-3456-7890';
+  const phoneLabel = company?.phone_label || 'Hotline Utama / Kantor';
+  const phone2Display = (company?.phone_2 || '').trim();
+  const phone2Label = company?.phone_2_label || 'Kontak Workshop / Operasional';
   const emailDisplay = company?.email || 'info@wahanasinergimitra.id';
   const addressDisplay = company?.address || 'Jl. Sinergi Raya No. 88, Kawasan Niaga Terpadu, Jawa Barat, Indonesia';
+  const workshopAddressDisplay = (company?.workshop_address || '').trim();
   const aboutDisplay = company?.about || 'Perusahaan penyedia jasa pelaksana konstruksi terpercaya yang melayani pekerjaan gedung komersial, industri pergudangan, infrastruktur jalan/jembatan, dan rekayasa sipil berstandar mutu tinggi di seluruh wilayah Indonesia.';
+
+  const waUrl = buildWhatsAppUrl(phoneDisplay);
+  const waUrl2 = buildWhatsAppUrl(
+    phone2Display,
+    'Halo Tim Workshop CV. Wahana Sinergi Mitra, saya ingin berkonsultasi mengenai kunjungan workshop atau fabrikasi proyek.'
+  );
+  const fallbackWorkshopMap = resolveWorkshopMap({
+    coordinates: company?.workshop_coordinates || '',
+    mapUrl: company?.workshop_map_url || '',
+    address: workshopAddressDisplay,
+  });
+  const workshopMapExternalUrl = company?.workshop_map_external_url || fallbackWorkshopMap.externalUrl;
 
   const quickLinks = [
     { key: 'hero', name: 'Beranda Utama', href: '/#beranda' },
@@ -101,34 +125,91 @@ export function Footer({ company = {}, visibility = {} }) {
               </ul>
             </div>
 
-            {/* Col 3: Direct Office Contact */}
+            {/* Col 3: Direct Office & Workshop Contact */}
             <div className="lg:col-span-4 space-y-3">
               <span className="text-[12px] font-bold text-sky-300 uppercase tracking-[-0.015em] block">
-                Kantor Operasional & Kontak Resmi
+                Kantor Operasional, Workshop &amp; Kontak Resmi
               </span>
-              <ul className="space-y-3.5 text-[13.5px] text-slate-200 font-medium tracking-[-0.015em]">
+              <ul className="space-y-3 text-[13px] text-slate-200 font-medium tracking-[-0.015em]">
                 <li className="flex items-start gap-3">
                   <MapPin className="w-4 h-4 text-emerald-400 shrink-0 mt-1" />
-                  <span className="leading-relaxed">
-                    {addressDisplay}
-                  </span>
+                  <div className="min-w-0">
+                    <span className="text-[10.5px] font-bold uppercase tracking-[-0.015em] text-sky-300 block">
+                      Alamat Kantor Utama
+                    </span>
+                    <span className="leading-relaxed block">
+                      {addressDisplay}
+                    </span>
+                  </div>
                 </li>
-                <li className="flex items-center gap-3">
-                  <Phone className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <a 
-                    href={waUrl} 
-                    target="_blank" 
-                    rel="noreferrer"
-                    className="hover:text-emerald-300 font-bold transition-colors"
-                  >
-                    {phoneDisplay} (Hotline / WhatsApp)
-                  </a>
+
+                {workshopAddressDisplay && (
+                  <li className="flex items-start gap-3">
+                    <Wrench className="w-4 h-4 text-sky-400 shrink-0 mt-1" />
+                    <div className="min-w-0">
+                      <span className="text-[10.5px] font-bold uppercase tracking-[-0.015em] text-sky-300 block">
+                        Alamat Workshop
+                      </span>
+                      <span className="leading-relaxed block">
+                        {workshopAddressDisplay}
+                      </span>
+                      {workshopMapExternalUrl && (
+                        <a
+                          href={workshopMapExternalUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1 mt-1 text-[11.5px] font-bold text-emerald-300 hover:text-emerald-200 transition-colors"
+                        >
+                          <Navigation className="w-3 h-3" />
+                          <span>Lihat Lokasi Workshop di Google Maps</span>
+                          <ArrowUpRight className="w-3 h-3" />
+                        </a>
+                      )}
+                    </div>
+                  </li>
+                )}
+
+                <li className="flex items-start gap-3 pt-1">
+                  <Phone className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <div className="min-w-0">
+                    <span className="text-[10.5px] font-bold uppercase tracking-[-0.015em] text-slate-300 block">
+                      {phoneLabel}
+                    </span>
+                    <a
+                      href={waUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="hover:text-emerald-300 font-bold transition-colors"
+                    >
+                      {phoneDisplay} (WhatsApp)
+                    </a>
+                  </div>
                 </li>
+
+                {phone2Display && (
+                  <li className="flex items-start gap-3">
+                    <PhoneCall className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <span className="text-[10.5px] font-bold uppercase tracking-[-0.015em] text-slate-300 block">
+                        {phone2Label}
+                      </span>
+                      <a
+                        href={waUrl2}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="hover:text-emerald-300 font-bold transition-colors"
+                      >
+                        {phone2Display} (WhatsApp)
+                      </a>
+                    </div>
+                  </li>
+                )}
+
                 <li className="flex items-center gap-3">
                   <Mail className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <a 
+                  <a
                     href={`mailto:${emailDisplay}`}
-                    className="hover:text-emerald-300 transition-colors"
+                    className="hover:text-emerald-300 transition-colors truncate"
                   >
                     {emailDisplay}
                   </a>
