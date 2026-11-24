@@ -1165,7 +1165,7 @@ export default function Dashboard({
                   {/* Card 1: Total Proyek */}
                   <div className="group bg-white rounded-[24px] p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_12px_36px_rgb(0,0,0,0.08)] transition-all duration-300 flex flex-col justify-between hover:-translate-y-1">
                     <div className="flex items-center justify-between gap-2 min-w-0 mb-3">
-                      <Text.Label title="Total Proyek Terverifikasi" singleLine className="text-slate-600 font-bold">Total Proyek</Text.Label>
+                      <Text.Label uppercase={false} title="Total Proyek Terverifikasi" singleLine className="text-[12px] font-bold text-slate-700">Total Proyek</Text.Label>
                       <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                         <Building2 className="w-[18px] h-[18px] stroke-[2]" />
                       </div>
@@ -1184,7 +1184,7 @@ export default function Dashboard({
                   {/* Card 2: Nilai Portofolio */}
                   <div className="group bg-white rounded-[24px] p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_12px_36px_rgb(0,0,0,0.08)] transition-all duration-300 flex flex-col justify-between hover:-translate-y-1">
                     <div className="flex items-center justify-between gap-2 min-w-0 mb-3">
-                      <Text.Label title="Total Nilai Kontrak" singleLine className="text-slate-600 font-bold">Nilai Portofolio</Text.Label>
+                      <Text.Label uppercase={false} title="Total Nilai Kontrak" singleLine className="text-[12px] font-bold text-slate-700">Nilai Portofolio</Text.Label>
                       <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                         <TrendingUp className="w-[18px] h-[18px] stroke-[2]" />
                       </div>
@@ -1203,7 +1203,7 @@ export default function Dashboard({
                   {/* Card 3: Leads & Pesan RAB */}
                   <div className="group bg-white rounded-[24px] p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_12px_36px_rgb(0,0,0,0.08)] transition-all duration-300 flex flex-col justify-between hover:-translate-y-1">
                     <div className="flex items-center justify-between gap-2 min-w-0 mb-3">
-                      <Text.Label title="Pesan Masuk" singleLine className="text-slate-600 font-bold">Leads & Pesan RAB</Text.Label>
+                      <Text.Label uppercase={false} title="Pesan Masuk" singleLine className="text-[12px] font-bold text-slate-700">Leads &amp; Pesan RAB</Text.Label>
                       <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                         <MessageSquareText className="w-[18px] h-[18px] stroke-[2]" />
                       </div>
@@ -1218,7 +1218,7 @@ export default function Dashboard({
                         )}
                       </div>
                       <div className="flex items-center justify-between gap-2 mt-1.5 pt-1.5 border-t border-slate-100">
-                        <Text.Caption className="text-slate-600 font-medium truncate">Form landing page & RAB</Text.Caption>
+                        <Text.Caption className="text-slate-600 font-medium truncate">Form landing page &amp; RAB</Text.Caption>
                         <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full shrink-0">
                           Inbound
                         </span>
@@ -1229,7 +1229,7 @@ export default function Dashboard({
                   {/* Card 4: Layanan Aktif */}
                   <div className="group bg-white rounded-[24px] p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_12px_36px_rgb(0,0,0,0.08)] transition-all duration-300 flex flex-col justify-between hover:-translate-y-1">
                     <div className="flex items-center justify-between gap-2 min-w-0 mb-3">
-                      <Text.Label title="Layanan Konstruksi" singleLine className="text-slate-600 font-bold">Layanan Aktif</Text.Label>
+                      <Text.Label uppercase={false} title="Layanan Konstruksi" singleLine className="text-[12px] font-bold text-slate-700">Layanan Aktif</Text.Label>
                       <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                         <HardHat className="w-[18px] h-[18px] stroke-[2]" />
                       </div>
@@ -1268,7 +1268,7 @@ export default function Dashboard({
 
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs">
-                      <thead className="bg-slate-50 text-slate-600 uppercase tracking-[-0.015em] border-y border-slate-100 font-bold text-[11px]">
+                      <thead className="bg-slate-50 text-slate-700 tracking-[-0.015em] border-y border-slate-100 font-bold text-[12px]">
                         <tr>
                           <th className="py-3 px-4">Nama Calon Klien</th>
                           <th className="py-3 px-4">Kategori Proyek</th>
@@ -1364,7 +1364,7 @@ export default function Dashboard({
                           <ArrowLeft className="w-4 h-4" />
                         </button>
                         <div>
-                          <Text.Label className="text-blue-600">Editor Konten Seksi</Text.Label>
+                          <Text.SectionTitle className="text-blue-600">Editor Konten Seksi</Text.SectionTitle>
                           <Text.H2 className="text-[18px]">
                             {activeSectionEditor === 'hero' && 'Seksi Banner Hero Utama & 4 Slide Foto'}
                             {activeSectionEditor === 'about_data' && 'Seksi Tentang Kami, 5 Pilar & Kredibilitas'}
@@ -1385,7 +1385,7 @@ export default function Dashboard({
                       <form onSubmit={handleSaveHeroSection} className="space-y-5 max-w-3xl">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                            <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                               Badge Teks (Overline)
                             </label>
                             <input
@@ -1396,7 +1396,7 @@ export default function Dashboard({
                             />
                           </div>
                           <div>
-                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                            <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                               Judul Baris 1 (Hitam Pekat)
                             </label>
                             <input
@@ -1409,7 +1409,7 @@ export default function Dashboard({
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                          <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                             Judul Baris 2 (Gradien Aksen Biru-Hijau)
                           </label>
                           <input
@@ -1421,7 +1421,7 @@ export default function Dashboard({
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                          <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                             Deskripsi / Subtitle Hero
                           </label>
                           <textarea
@@ -1434,7 +1434,7 @@ export default function Dashboard({
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                            <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                               Teks Tombol CTA Utama
                             </label>
                             <input
@@ -1445,7 +1445,7 @@ export default function Dashboard({
                             />
                           </div>
                           <div>
-                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                            <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                               Link Tombol CTA Utama
                             </label>
                             <input
@@ -1459,7 +1459,7 @@ export default function Dashboard({
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                            <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                               Teks Tombol CTA Sekunder
                             </label>
                             <input
@@ -1470,7 +1470,7 @@ export default function Dashboard({
                             />
                           </div>
                           <div>
-                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                            <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                               Link Tombol CTA Sekunder
                             </label>
                             <input
@@ -1485,9 +1485,9 @@ export default function Dashboard({
                         {/* 4-Slide Photo Slider Editor */}
                         <div className="pt-5 border-t border-slate-100 space-y-4">
                           <div>
-                            <Text.Label className="text-blue-600 block mb-1">
+                            <Text.SectionTitle className="text-blue-600 block mb-1">
                               Kelola 4 Slide Foto Konstruksi Hero
-                            </Text.Label>
+                            </Text.SectionTitle>
                             <Text.Caption className="text-slate-600">
                               Unggah foto proyek lapangan atau masukkan URL gambar beserta caption untuk slider otomatis di bagian Hero.
                             </Text.Caption>
@@ -1522,7 +1522,7 @@ export default function Dashboard({
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                   <div>
-                                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                                    <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                                       Tag Sertifikasi / Kategori
                                     </label>
                                     <input
@@ -1537,7 +1537,7 @@ export default function Dashboard({
                                     />
                                   </div>
                                   <div>
-                                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                                    <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                                       Lokasi / Wilayah
                                     </label>
                                     <input
@@ -1552,7 +1552,7 @@ export default function Dashboard({
                                     />
                                   </div>
                                   <div>
-                                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                                    <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                                       Judul / Caption Dokumentasi
                                     </label>
                                     <input
@@ -1567,7 +1567,7 @@ export default function Dashboard({
                                     />
                                   </div>
                                   <div>
-                                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                                    <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                                       Fokus Spesialisasi Slide
                                     </label>
                                     <input
@@ -1605,7 +1605,7 @@ export default function Dashboard({
                       <form onSubmit={handleSaveAboutSection} className="space-y-6 max-w-4xl">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                            <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                               Badge Overline
                             </label>
                             <input
@@ -1616,7 +1616,7 @@ export default function Dashboard({
                             />
                           </div>
                           <div>
-                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                            <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                               Pengalaman (Highlight Card)
                             </label>
                             <input
@@ -1629,7 +1629,7 @@ export default function Dashboard({
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                          <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                             Judul Utama (Gunakan &#123;kata&#125; untuk highlight gradien)
                           </label>
                           <input
@@ -1641,7 +1641,7 @@ export default function Dashboard({
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                          <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                             Paragraf Pendukung / Engineering & PROKSI
                           </label>
                           <textarea
@@ -1654,7 +1654,7 @@ export default function Dashboard({
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                           <div>
-                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-2">
+                            <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-2">
                               Foto Utama Proyek (Kolom Kanan Besar)
                             </label>
                             <ImageUploader
@@ -1666,7 +1666,7 @@ export default function Dashboard({
                             />
                           </div>
                           <div>
-                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-2">
+                            <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-2">
                               Foto Sekunder Inspeksi K3 / HSE
                             </label>
                             <ImageUploader
@@ -1681,7 +1681,7 @@ export default function Dashboard({
 
                         {/* 5 Pillars */}
                         <div className="pt-4 border-t border-slate-100 space-y-3">
-                          <Text.Label className="text-blue-600 block">5 Pilar Keunggulan Eksekusi WSM</Text.Label>
+                          <Text.SectionTitle className="text-blue-600 block">5 Pilar Keunggulan Eksekusi WSM</Text.SectionTitle>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             {(aboutForm.pillars || []).map((pillar, pIdx) => (
                               <div key={pillar.code || pIdx} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
@@ -1726,7 +1726,7 @@ export default function Dashboard({
 
                         {/* 3 Certifications */}
                         <div className="pt-4 border-t border-slate-100 space-y-3">
-                          <Text.Label className="text-emerald-700 block">3 Kartu Sertifikasi & Legalitas</Text.Label>
+                          <Text.SectionTitle className="text-emerald-700 block">3 Kartu Sertifikasi & Legalitas</Text.SectionTitle>
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                             {(aboutForm.certifications || []).map((cert, cIdx) => (
                               <div key={cIdx} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
@@ -1781,7 +1781,7 @@ export default function Dashboard({
 
                         {/* 5 Client Sectors */}
                         <div className="pt-4 border-t border-slate-100 space-y-3">
-                          <Text.Label className="text-slate-700 block">5 Sektor Industri & Pemberi Tugas</Text.Label>
+                          <Text.SectionTitle className="text-slate-700 block">5 Sektor Industri & Pemberi Tugas</Text.SectionTitle>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {(aboutForm.client_sectors || []).map((sec, idx) => (
                               <div key={idx} className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 grid grid-cols-1 gap-2">
@@ -1830,7 +1830,7 @@ export default function Dashboard({
                       <form onSubmit={handleSaveEstimatorSection} className="space-y-5 max-w-3xl">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                            <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                               Badge Teks
                             </label>
                             <input
@@ -1841,7 +1841,7 @@ export default function Dashboard({
                             />
                           </div>
                           <div>
-                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                            <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                               Judul Seksi
                             </label>
                             <input
@@ -1855,7 +1855,7 @@ export default function Dashboard({
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                          <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                             Subjudul / Deskripsi Seksi
                           </label>
                           <textarea
@@ -1867,12 +1867,12 @@ export default function Dashboard({
                         </div>
 
                         <div className="pt-2">
-                          <Text.Label className="text-emerald-700 block mb-3">
+                          <Text.SectionTitle className="text-emerald-700 block mb-3">
                             Tarif Dasar Biaya per M2 (Rp) - Digunakan untuk Rumus Perhitungan Otomatis
-                          </Text.Label>
+                          </Text.SectionTitle>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                              <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                                 Gudang & Industri (Rp/m²)
                               </label>
                               <CurrencyInput
@@ -1881,7 +1881,7 @@ export default function Dashboard({
                               />
                             </div>
                             <div>
-                              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                              <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                                 Komersial / Ruko / Kantor (Rp/m²)
                               </label>
                               <CurrencyInput
@@ -1890,7 +1890,7 @@ export default function Dashboard({
                               />
                             </div>
                             <div>
-                              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                              <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                                 Hunian Residensial (Rp/m²)
                               </label>
                               <CurrencyInput
@@ -1899,7 +1899,7 @@ export default function Dashboard({
                               />
                             </div>
                             <div>
-                              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                              <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                                 Renovasi & Retrofitting (Rp/m²)
                               </label>
                               <CurrencyInput
@@ -1927,7 +1927,7 @@ export default function Dashboard({
                       <form onSubmit={handleSaveWorkflowSection} className="space-y-5 max-w-3xl">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                            <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                               Badge Teks
                             </label>
                             <input
@@ -1938,7 +1938,7 @@ export default function Dashboard({
                             />
                           </div>
                           <div>
-                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                            <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                               Judul Seksi
                             </label>
                             <input
@@ -1952,7 +1952,7 @@ export default function Dashboard({
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                          <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                             Subjudul / Deskripsi Seksi
                           </label>
                           <textarea
@@ -1964,7 +1964,7 @@ export default function Dashboard({
                         </div>
 
                         <div className="space-y-4 pt-2">
-                          <Text.Label className="text-blue-700 block">4 Langkah Utama Eksekusi Proyek</Text.Label>
+                          <Text.SectionTitle className="text-blue-700 block">4 Langkah Utama Eksekusi Proyek</Text.SectionTitle>
                           {workflowForm.steps.map((st, i) => (
                             <div key={i} className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
                               <div className="flex items-center gap-3">
@@ -2015,7 +2015,7 @@ export default function Dashboard({
                       <form onSubmit={handleSaveProksiSection} className="space-y-5 max-w-3xl">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                            <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                               Badge Teks
                             </label>
                             <input
@@ -2026,7 +2026,7 @@ export default function Dashboard({
                             />
                           </div>
                           <div>
-                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                            <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                               Highlight Kata Kunci (Warna Gradien)
                             </label>
                             <input
@@ -2039,7 +2039,7 @@ export default function Dashboard({
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                          <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                             Subjudul / Narasi Ekosistem PROKSI
                           </label>
                           <textarea
@@ -2051,10 +2051,10 @@ export default function Dashboard({
                         </div>
 
                         <div className="pt-2">
-                          <Text.Label className="text-sky-700 block mb-3">Metrik Live Demo Simulator PROKSI</Text.Label>
+                          <Text.SectionTitle className="text-sky-700 block mb-3">Metrik Live Demo Simulator PROKSI</Text.SectionTitle>
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
-                              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                              <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                                 Kurva-S Rencana (Plan)
                               </label>
                               <input
@@ -2066,7 +2066,7 @@ export default function Dashboard({
                               />
                             </div>
                             <div>
-                              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                              <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                                 Kurva-S Aktual (Real)
                               </label>
                               <input
@@ -2078,7 +2078,7 @@ export default function Dashboard({
                               />
                             </div>
                             <div>
-                              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                              <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                                 Deviasi Kurva-S
                               </label>
                               <input
@@ -2090,7 +2090,7 @@ export default function Dashboard({
                               />
                             </div>
                             <div>
-                              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                              <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                                 Hari Kerja Aman (Zero Accident)
                               </label>
                               <input
@@ -2101,7 +2101,7 @@ export default function Dashboard({
                               />
                             </div>
                             <div>
-                              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                              <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                                 Kepatuhan APD Lapangan
                               </label>
                               <input
@@ -2113,7 +2113,7 @@ export default function Dashboard({
                               />
                             </div>
                             <div>
-                              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                              <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                                 Izin Kerja Aktif (PTW)
                               </label>
                               <input
@@ -2149,7 +2149,7 @@ export default function Dashboard({
                       >
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                            <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                               Badge Teks (Overline)
                             </label>
                             <input
@@ -2163,7 +2163,7 @@ export default function Dashboard({
                             />
                           </div>
                           <div>
-                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                            <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                               Judul Utama Seksi
                             </label>
                             <input
@@ -2180,7 +2180,7 @@ export default function Dashboard({
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                          <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                             Subjudul / Keterangan Seksi
                           </label>
                           <textarea
@@ -2263,7 +2263,7 @@ export default function Dashboard({
                           10
                         </div>
                         <div>
-                          <Text.Label className="text-blue-600 block">Vertical Section Carousel</Text.Label>
+                          <Text.SectionTitle className="text-blue-600 block">Vertical Section Carousel</Text.SectionTitle>
                           <span className="text-xs font-bold text-slate-800">
                             Struktur Seksi Publik Landing Page (SSOT)
                           </span>
@@ -2637,7 +2637,7 @@ export default function Dashboard({
                   <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100">
                     <div className="w-full">
                       <table className="w-full text-left text-xs table-fixed">
-                        <thead className="bg-slate-50 text-slate-600 uppercase tracking-[-0.015em] border-b border-slate-100 text-[11px] font-bold">
+                        <thead className="bg-slate-50 text-slate-700 tracking-[-0.015em] border-b border-slate-100 text-[12px] font-bold">
                           <tr>
                             <th className="py-3.5 px-4 sm:px-5 w-[42%]">Proyek & Klien</th>
                             <th className="py-3.5 px-3 sm:px-4 w-[26%]">Nilai Kontrak & Tahun</th>
@@ -2803,7 +2803,7 @@ export default function Dashboard({
                   <form id="project-editor-form" onSubmit={submitProject} className="lg:col-span-8 bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-sm space-y-4">
                     
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                      <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                         Judul Proyek Konstruksi <span className="text-rose-500">*</span>
                       </label>
                       <input
@@ -2818,7 +2818,7 @@ export default function Dashboard({
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                        <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                           Kategori Proyek
                         </label>
                         <select
@@ -2839,7 +2839,7 @@ export default function Dashboard({
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                        <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                           Status Pengerjaan
                         </label>
                         <select
@@ -2855,7 +2855,7 @@ export default function Dashboard({
 
                     {/* Nama Klien (1 Kolom Penuh) */}
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                      <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                         Nama Klien / Perusahaan
                       </label>
                       <input
@@ -2869,7 +2869,7 @@ export default function Dashboard({
 
                     {/* Alamat / Lokasi Proyek (1 Kolom Penuh - Textarea) */}
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                      <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                         Alamat / Lokasi Proyek <span className="text-rose-500">*</span>
                       </label>
                       <textarea
@@ -2885,7 +2885,7 @@ export default function Dashboard({
                     {/* Nominal Proyek & Tahun Pengerjaan (Berdampingan) */}
                     <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
                       <div className="sm:col-span-8">
-                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                        <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                           Nilai Kontrak Proyek (Rupiah)
                         </label>
                         <CurrencyInput
@@ -2896,7 +2896,7 @@ export default function Dashboard({
                       </div>
 
                       <div className="sm:col-span-4">
-                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                        <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                           Tahun Pengerjaan <span className="text-rose-500">*</span>
                         </label>
                         <input
@@ -2913,7 +2913,7 @@ export default function Dashboard({
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                      <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                         Foto Sampul Utama Proyek (Thumbnail) <span className="text-rose-500">*</span>
                       </label>
                       <ImageUploader
@@ -2937,7 +2937,7 @@ export default function Dashboard({
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                      <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                         Deskripsi Spesifikasi Teknis Proyek
                       </label>
                       <textarea
@@ -2972,7 +2972,7 @@ export default function Dashboard({
 
                   {/* Right Live Preview Card (4 Cols) */}
                   <div className="lg:col-span-4 space-y-3">
-                    <Text.Label className="text-slate-600 block">Live Preview Tampilan Landing Page</Text.Label>
+                    <Text.Label uppercase={false} className="text-slate-600 block">Live Preview Tampilan Landing Page</Text.Label>
                     
                     <div className="bg-white rounded-3xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200">
                       <div className="h-44 bg-slate-100 relative overflow-hidden">
@@ -3023,7 +3023,7 @@ export default function Dashboard({
                         </p>
 
                         <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
-                          <Text.Label className="text-slate-400">Nilai Kontrak</Text.Label>
+                          <Text.Label uppercase={false} className="text-slate-400">Nilai Kontrak</Text.Label>
                           <Text.Amount value={projectForm.project_value || 0} className="text-xs" />
                         </div>
                       </div>
@@ -3236,7 +3236,7 @@ export default function Dashboard({
                   {/* Left Form (8 Cols) */}
                   <form id="service-editor-form" onSubmit={submitService} className="lg:col-span-8 bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-sm space-y-4">
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                      <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                         Nama Layanan <span className="text-rose-500">*</span>
                       </label>
                       <input
@@ -3251,7 +3251,7 @@ export default function Dashboard({
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                        <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                           Icon Representatif
                         </label>
                         <select
@@ -3269,7 +3269,7 @@ export default function Dashboard({
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                        <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                           Urutan Tampil
                         </label>
                         <input
@@ -3282,7 +3282,7 @@ export default function Dashboard({
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                      <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                         Deskripsi Singkat (Tampil di Kartu) <span className="text-rose-500">*</span>
                       </label>
                       <textarea
@@ -3297,7 +3297,7 @@ export default function Dashboard({
 
                     {/* Upload Foto Layanan (Image / Banner) */}
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                      <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                         Foto Layanan Konstruksi (Image / Banner) <span className="text-rose-500">*</span>
                       </label>
                       <ImageUploader
@@ -3310,7 +3310,7 @@ export default function Dashboard({
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                      <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                         Deskripsi Lengkap Spesifikasi Teknis Divisi (Opsional)
                       </label>
                       <textarea
@@ -3344,7 +3344,7 @@ export default function Dashboard({
 
                   {/* Right Live Preview Card (4 Cols - Mirroring Landing Page Vibe) */}
                   <div className="lg:col-span-4 space-y-3">
-                    <Text.Label className="text-slate-600 block">Live Preview Tampilan Landing Page</Text.Label>
+                    <Text.Label uppercase={false} className="text-slate-600 block">Live Preview Tampilan Landing Page</Text.Label>
 
                     <div className="relative h-[320px] rounded-3xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-800 bg-[#0B2447] text-white">
                       <img
@@ -3483,7 +3483,7 @@ export default function Dashboard({
                   <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100">
                     <div className="overflow-x-auto">
                       <table className="w-full text-left text-xs">
-                        <thead className="bg-slate-50 text-slate-600 uppercase tracking-[-0.015em] border-b border-slate-100 text-[11px] font-bold">
+                        <thead className="bg-slate-50 text-slate-700 tracking-[-0.015em] border-b border-slate-100 text-[12px] font-bold">
                           <tr>
                             <th className="py-3 px-4">Calon Klien</th>
                             <th className="py-3 px-4">Kategori & Luas</th>
@@ -3763,7 +3763,7 @@ export default function Dashboard({
                 <form id="testimonial-editor-form" onSubmit={submitTestimonial} className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-sm space-y-4 max-w-2xl">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                      <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                         Nama Klien <span className="text-rose-500">*</span>
                       </label>
                       <input
@@ -3777,7 +3777,7 @@ export default function Dashboard({
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                      <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                         Jabatan Klien
                       </label>
                       <input
@@ -3792,7 +3792,7 @@ export default function Dashboard({
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                      <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                         Nama Perusahaan
                       </label>
                       <input
@@ -3805,7 +3805,7 @@ export default function Dashboard({
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                      <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                         Rating Bintang (1 - 5)
                       </label>
                       <select
@@ -3821,7 +3821,7 @@ export default function Dashboard({
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                    <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                       Foto Avatar Klien
                     </label>
                     <ImageUploader
@@ -3834,7 +3834,7 @@ export default function Dashboard({
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                    <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                       Isi Testimoni Klien <span className="text-rose-500">*</span>
                     </label>
                     <textarea
@@ -3906,9 +3906,9 @@ export default function Dashboard({
                   {/* Website Logo & Brand Identity Section */}
                   <div>
                     <div className="flex flex-wrap items-center justify-between gap-2 mb-3 min-w-0">
-                      <Text.Label title="1. Identitas & Logo Website" singleLine className="text-blue-700">
+                      <Text.SectionTitle title="1. Identitas & Logo Website" singleLine className="text-blue-700">
                         1. Identitas &amp; Logo Website
-                      </Text.Label>
+                      </Text.SectionTitle>
                       {isCustomLogoSet && (
                         <button
                           type="button"
@@ -3938,7 +3938,7 @@ export default function Dashboard({
                       {/* Light Surface Preview */}
                       <div className="rounded-2xl bg-slate-50 border border-slate-200/80 p-3.5 space-y-2.5">
                         <div className="flex items-center justify-between gap-2 min-w-0">
-                          <Text.Label title="Preview Latar Terang (Navbar)" singleLine className="text-slate-600">
+                          <Text.Label uppercase={false} title="Preview Latar Terang (Navbar)" singleLine className="text-[12px] font-bold text-slate-800">
                             Preview Latar Terang (Navbar)
                           </Text.Label>
                           <span className="px-2 py-0.5 rounded-full bg-emerald-600/10 text-emerald-700 text-[10px] font-bold tracking-[-0.015em] shrink-0 whitespace-nowrap">
@@ -3962,7 +3962,7 @@ export default function Dashboard({
                             <div className="text-[12px] font-extrabold text-slate-900 tracking-[-0.025em] truncate">
                               CV. WAHANA SINERGI MITRA
                             </div>
-                            <div className="text-[9.5px] font-bold text-slate-600 uppercase tracking-[-0.015em] truncate">
+                            <div className="text-[10.5px] font-semibold text-slate-600 tracking-[-0.015em] truncate">
                               General Contractor &amp; Civil
                             </div>
                           </div>
@@ -3972,7 +3972,7 @@ export default function Dashboard({
                       {/* Dark Surface Preview */}
                       <div className="rounded-2xl bg-slate-900 p-3.5 space-y-2.5">
                         <div className="flex items-center justify-between gap-2 min-w-0">
-                          <span className="text-[11px] font-bold uppercase tracking-[-0.015em] text-slate-300 truncate">
+                          <span className="text-[12px] font-bold tracking-[-0.015em] text-slate-200 truncate">
                             Preview Latar Gelap (Footer &amp; Admin)
                           </span>
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/10 text-sky-300 text-[10px] font-bold tracking-[-0.015em] shrink-0 whitespace-nowrap">
@@ -3996,7 +3996,7 @@ export default function Dashboard({
                             <div className="text-[12px] font-extrabold text-white tracking-[-0.025em] truncate">
                               CV. WAHANA SINERGI MITRA
                             </div>
-                            <div className="text-[9.5px] font-bold text-sky-300 uppercase tracking-[-0.015em] truncate">
+                            <div className="text-[10.5px] font-semibold text-sky-300 tracking-[-0.015em] truncate">
                               Portal CMS &amp; Footer Resmi
                             </div>
                           </div>
@@ -4007,10 +4007,12 @@ export default function Dashboard({
                   
                   {/* Hero Metric Cards Section */}
                   <div className="pt-4 border-t border-slate-100">
-                    <Text.Label className="text-blue-700 block mb-3">2. Angka Metrik Banner Hero (4 Kartu Depan)</Text.Label>
+                    <Text.SectionTitle className="text-blue-700 block mb-3">
+                      2. Angka Metrik Banner Hero (4 Kartu Depan)
+                    </Text.SectionTitle>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                        <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                           Kartu 1: Total Proyek Selesai
                         </label>
                         <input
@@ -4023,7 +4025,7 @@ export default function Dashboard({
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                        <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                           Kartu 2: Nilai Portofolio Kontrak
                         </label>
                         <input
@@ -4036,7 +4038,7 @@ export default function Dashboard({
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                        <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                           Kartu 3: Persentase Kepuasan Klien
                         </label>
                         <input
@@ -4049,7 +4051,7 @@ export default function Dashboard({
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                        <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                           Kartu 4: Jam Kerja Aman K3
                         </label>
                         <input
@@ -4065,14 +4067,14 @@ export default function Dashboard({
 
                   {/* Company Contacts Section (2 Numbers + Email + Hours) */}
                   <div className="pt-4 border-t border-slate-100 space-y-4">
-                    <Text.Label className="text-blue-700 block">
+                    <Text.SectionTitle className="text-blue-700 block">
                       3. Kontak Resmi (2 Nomor WhatsApp / Telepon &amp; Email)
-                    </Text.Label>
+                    </Text.SectionTitle>
 
                     {/* Contact 1 */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-2xl bg-slate-50/80 border border-slate-200/70">
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                        <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                           Nomor Kontak 1 (WhatsApp Utama)
                         </label>
                         <input
@@ -4084,7 +4086,7 @@ export default function Dashboard({
                         />
                       </div>
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                        <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                           Label Kontak 1
                         </label>
                         <input
@@ -4100,7 +4102,7 @@ export default function Dashboard({
                     {/* Contact 2 */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-2xl bg-emerald-50/40 border border-emerald-200/60">
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                        <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                           Nomor Kontak 2 (WhatsApp Workshop / Kedua)
                         </label>
                         <input
@@ -4112,7 +4114,7 @@ export default function Dashboard({
                         />
                       </div>
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                        <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                           Label Kontak 2
                         </label>
                         <input
@@ -4127,7 +4129,7 @@ export default function Dashboard({
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                        <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                           Email Resmi
                         </label>
                         <input
@@ -4140,7 +4142,7 @@ export default function Dashboard({
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                        <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                           Jam Operasional (Top Bar Header)
                         </label>
                         <input
@@ -4164,12 +4166,12 @@ export default function Dashboard({
 
                     return (
                       <div className="pt-4 border-t border-slate-100 space-y-4">
-                        <Text.Label className="text-blue-700 block">
+                        <Text.SectionTitle className="text-blue-700 block">
                           4. Alamat Kantor Utama, Alamat Workshop &amp; Google Maps Presisi
-                        </Text.Label>
+                        </Text.SectionTitle>
 
                         <div>
-                          <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                          <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                             Alamat 1: Alamat Kantor Utama
                           </label>
                           <input
@@ -4182,7 +4184,7 @@ export default function Dashboard({
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                          <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                             Alamat 2: Alamat Workshop
                           </label>
                           <input
@@ -4196,7 +4198,7 @@ export default function Dashboard({
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                            <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                               Koordinat GPS Presisi Workshop (Lat, Lng)
                             </label>
                             <input
@@ -4214,7 +4216,7 @@ export default function Dashboard({
                           </div>
 
                           <div>
-                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                            <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                               Link / Kode Embed Google Maps (Opsional)
                             </label>
                             <input
@@ -4266,7 +4268,7 @@ export default function Dashboard({
                             <div className="flex flex-wrap items-center justify-between gap-2 min-w-0">
                               <div className="flex items-center gap-2 min-w-0">
                                 <Compass className="w-4 h-4 text-blue-600 shrink-0" />
-                                <Text.Label title="Live Preview Peta Alamat Workshop" singleLine className="text-slate-700">
+                                <Text.Label uppercase={false} title="Live Preview Peta Alamat Workshop" singleLine className="text-[12px] font-bold text-slate-800">
                                   Live Preview Peta Alamat Workshop
                                 </Text.Label>
                               </div>
@@ -4378,7 +4380,7 @@ export default function Dashboard({
                   <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                       <thead>
-                        <tr className="border-b border-slate-100 bg-slate-50/70 text-[11px] font-bold text-slate-600 uppercase tracking-[-0.015em]">
+                        <tr className="border-b border-slate-100 bg-slate-50/70 text-[12px] font-bold text-slate-700 tracking-[-0.015em]">
                           <th className="py-3.5 px-5">Nama Pengguna & Email</th>
                           <th className="py-3.5 px-4">Peran (Role)</th>
                           <th className="py-3.5 px-4">Status Akun</th>
@@ -4514,7 +4516,7 @@ export default function Dashboard({
 
                   <form onSubmit={handleSaveProfile} className="space-y-4">
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                      <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                         Nama Lengkap
                       </label>
                       <input
@@ -4527,7 +4529,7 @@ export default function Dashboard({
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                      <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                         Alamat Email
                       </label>
                       <input
@@ -4542,7 +4544,7 @@ export default function Dashboard({
                     <div className="pt-3 border-t border-slate-100 space-y-3.5">
                       <div>
                         <div className="flex items-center justify-between">
-                          <Text.Label className="text-blue-600 block mb-0.5">Ubah Kata Sandi (Opsional)</Text.Label>
+                          <Text.SectionTitle className="text-blue-600 block mb-0.5">Ubah Kata Sandi (Opsional)</Text.SectionTitle>
                           {profileForm.password && (
                             <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60">
                               Live Security Checker
@@ -4553,7 +4555,7 @@ export default function Dashboard({
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                        <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                           Kata Sandi Saat Ini
                         </label>
                         <div className="relative">
@@ -4577,7 +4579,7 @@ export default function Dashboard({
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                        <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                           Kata Sandi Baru
                         </label>
                         <div className="relative">
@@ -4602,7 +4604,7 @@ export default function Dashboard({
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                        <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                           Konfirmasi Kata Sandi Baru
                         </label>
                         <div className="relative">
@@ -4693,7 +4695,7 @@ export default function Dashboard({
 
                   <form onSubmit={handleSaveUser} className="space-y-4">
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                      <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                         Nama Lengkap
                       </label>
                       <input
@@ -4707,7 +4709,7 @@ export default function Dashboard({
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                      <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                         Alamat Email
                       </label>
                       <input
@@ -4721,7 +4723,7 @@ export default function Dashboard({
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
+                      <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                         Peran (Hak Akses)
                       </label>
                       <select
@@ -4741,7 +4743,7 @@ export default function Dashboard({
 
                     <div>
                       <div className="flex items-center justify-between mb-1">
-                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em]">
+                        <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em]">
                           Kata Sandi {editingUser ? '(Opsional - Isi jika ingin reset)' : '(Wajib)'}
                         </label>
                         {userForm.password && (

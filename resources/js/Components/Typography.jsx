@@ -59,19 +59,36 @@ export const Text = {
   },
 
   /**
-   * Text.Label: [11px, Bold, Uppercase, Tracking-[-0.015em] (RAPAT PROPER), Slate-600 (#475569 Darker Gray), Single-Line]
+   * Text.Label: [11px, Bold, Uppercase (optional), Tracking-[-0.015em] (RAPAT PROPER), Slate-600 (#475569 Darker Gray), Single-Line]
    */
-  Label: ({ children, className = '', title, singleLine = true, ...props }) => {
+  Label: ({ children, className = '', title, singleLine = true, uppercase = true, ...props }) => {
     return (
       <span
         title={title || (typeof children === 'string' ? children : undefined)}
-        className={`text-[11px] font-bold uppercase tracking-[-0.015em] text-slate-600 ${
+        className={`text-[11px] font-bold ${uppercase ? 'uppercase' : ''} tracking-[-0.015em] text-slate-600 ${
           singleLine ? 'whitespace-nowrap truncate' : ''
         } ${className}`}
         {...props}
       >
         {children}
       </span>
+    );
+  },
+
+  /**
+   * Text.SectionTitle: [13-13.5px, ExtraBold, Title Case, Tracking-[-0.02em]] - Prominent Admin Section Title
+   */
+  SectionTitle: ({ children, className = '', title, singleLine = true, ...props }) => {
+    return (
+      <h3
+        title={title || (typeof children === 'string' ? children : undefined)}
+        className={`text-[13px] sm:text-[13.5px] font-extrabold tracking-[-0.02em] text-slate-900 ${
+          singleLine ? 'whitespace-nowrap truncate' : ''
+        } ${className}`}
+        {...props}
+      >
+        {children}
+      </h3>
     );
   },
 
