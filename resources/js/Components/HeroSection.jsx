@@ -214,9 +214,9 @@ export function HeroSection({ stats = {}, data = {} }) {
             </div>
           </div>
 
-          {/* Right Column: Field Documentation Caption Card & Slider Controls (PT MKP Smart Slider Vibe) */}
+          {/* Right Column: Field Documentation Caption Card & Slider Controls */}
           <div className="lg:col-span-4 flex flex-col items-start lg:items-end justify-end">
-            <div className="w-full rounded-[24px] bg-slate-900/80 backdrop-blur-md p-5 border border-white/15 text-white space-y-3.5 shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
+            <div className="w-full rounded-[24px] bg-slate-950 p-5 text-white space-y-3.5 shadow-[0_12px_36px_rgba(0,0,0,0.35)]">
               <div className="flex items-center justify-between gap-2 min-w-0">
                 <span className="text-[11px] font-bold uppercase tracking-[-0.015em] text-emerald-400 truncate">
                   {currentSlide.tag}
@@ -231,7 +231,7 @@ export function HeroSection({ stats = {}, data = {} }) {
               </p>
 
               {/* Slide Progress Dots & Arrow Controls */}
-              <div className="flex items-center justify-between pt-2 border-t border-white/10">
+              <div className="flex items-center justify-between pt-2 border-t border-slate-800">
                 <div className="flex items-center gap-1.5">
                   {slides.map((s, idx) => (
                     <button
@@ -241,8 +241,8 @@ export function HeroSection({ stats = {}, data = {} }) {
                       aria-label={`Slide ${idx + 1}`}
                       className={`h-2 rounded-full transition-all cursor-pointer ${
                         idx === activeSlide
-                          ? 'w-7 bg-emerald-400'
-                          : 'w-2 bg-white/30 hover:bg-white/60'
+                          ? 'w-7 bg-emerald-500'
+                          : 'w-2 bg-slate-700 hover:bg-slate-600'
                       }`}
                     />
                   ))}
@@ -253,7 +253,7 @@ export function HeroSection({ stats = {}, data = {} }) {
                     type="button"
                     onClick={prevSlide}
                     aria-label="Slide Sebelumnya"
-                    className="w-8 h-8 rounded-full bg-white/10 hover:bg-blue-600 text-white flex items-center justify-center transition-colors cursor-pointer"
+                    className="w-8 h-8 rounded-full bg-slate-800 hover:bg-blue-600 text-white flex items-center justify-center transition-colors cursor-pointer"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
@@ -261,7 +261,7 @@ export function HeroSection({ stats = {}, data = {} }) {
                     type="button"
                     onClick={nextSlide}
                     aria-label="Slide Berikutnya"
-                    className="w-8 h-8 rounded-full bg-white/10 hover:bg-blue-600 text-white flex items-center justify-center transition-colors cursor-pointer"
+                    className="w-8 h-8 rounded-full bg-slate-800 hover:bg-blue-600 text-white flex items-center justify-center transition-colors cursor-pointer"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
@@ -273,49 +273,40 @@ export function HeroSection({ stats = {}, data = {} }) {
         </div>
       </div>
 
-      {/* Bottom Live Corporate Metrics Counter Dock (3-Gradient Luminous Opal Pearl: rounded-[24px], crystal hairline border, micro-interaction) */}
+      {/* Bottom Live Corporate Metrics Counter Dock (Solid Pure White: rounded-[24px], clean shadow, solid icon squircle) */}
       <div className="relative z-10 max-w-7xl mx-auto px-5 w-full">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {statItems.map((item, idx) => {
             const IconComponent = item.icon;
-            const tintGradient = idx % 2 === 0
-              ? 'from-white via-slate-50/95 to-emerald-50/40 hover:to-emerald-100/50'
-              : 'from-white via-slate-50/95 to-sky-50/40 hover:to-sky-100/50';
-            const iconGrad = idx % 2 === 0
-              ? 'from-emerald-500/15 via-teal-500/10 to-transparent text-emerald-600 border border-emerald-500/20'
-              : 'from-blue-500/15 via-sky-500/10 to-transparent text-blue-600 border border-blue-500/20';
-            const topPrismLine = idx % 2 === 0
-              ? 'from-transparent via-emerald-400/50 to-transparent group-hover:via-emerald-500'
-              : 'from-transparent via-sky-400/50 to-transparent group-hover:via-blue-500';
+            const iconSolid = idx % 2 === 0
+              ? 'bg-emerald-50 text-emerald-600'
+              : 'bg-blue-50 text-blue-600';
 
             return (
               <div
                 key={idx}
-                className={`relative group bg-gradient-to-br ${tintGradient} rounded-[24px] p-5 shadow-[0_10px_35px_rgba(0,0,0,0.06)] hover:shadow-[0_16px_45px_rgba(0,0,0,0.12)] border border-white/80 hover:border-slate-300/80 transition-all duration-300 flex flex-col justify-between hover:-translate-y-1 overflow-hidden backdrop-blur-sm`}
+                className="group bg-white rounded-[24px] p-5 shadow-[0_12px_36px_rgba(15,23,42,0.18)] hover:shadow-[0_18px_44px_rgba(15,23,42,0.26)] transition-all duration-300 flex flex-col justify-between hover:-translate-y-1"
               >
-                {/* Subtle 3-gradient top highlight line */}
-                <div className={`absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r ${topPrismLine} transition-all`} />
-
-                {/* Top Header Row: 1-Line Label + Top-Right Icon Squircle */}
+                {/* Top Header Row: 1-Line Label + Top-Right Solid Icon Squircle */}
                 <div className="flex items-center justify-between gap-2 min-w-0 mb-3">
-                  <Text.Label title={item.label} singleLine className="text-slate-700 flex-1 min-w-0 font-bold">
+                  <Text.Label title={item.label} singleLine className="text-slate-600 flex-1 min-w-0 font-bold">
                     {item.label}
                   </Text.Label>
-                  <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${iconGrad} flex items-center justify-center shrink-0 shadow-xs group-hover:scale-110 transition-transform`}>
-                    <IconComponent className="w-[18px] h-[18px] stroke-[2.2]" />
+                  <div className={`w-8 h-8 rounded-xl ${iconSolid} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform`}>
+                    <IconComponent className="w-[18px] h-[18px] stroke-[2]" />
                   </div>
                 </div>
 
                 {/* Bottom Density: Metric Value & Supporting Caption */}
                 <div>
-                  <div className={`text-[22px] sm:text-[24px] font-black tracking-[-0.03em] tabular-nums whitespace-nowrap ${item.accent} drop-shadow-xs`}>
+                  <div className={`text-[22px] sm:text-[24px] font-extrabold tracking-[-0.03em] tabular-nums whitespace-nowrap ${item.accent}`}>
                     {item.value}
                   </div>
-                  <div className="flex items-center justify-between gap-2 mt-1.5 pt-1.5 border-t border-slate-100/80">
-                    <Text.Caption className="text-slate-600 truncate font-semibold">
+                  <div className="flex items-center justify-between gap-2 mt-1.5 pt-1.5 border-t border-slate-100">
+                    <Text.Caption className="text-slate-600 truncate font-medium">
                       {item.sub}
                     </Text.Caption>
-                    <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-emerald-700 bg-emerald-500/15 border border-emerald-500/20 px-2 py-0.5 rounded-full shrink-0 shadow-2xs">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full shrink-0">
                       <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                       <span>Verified</span>
                     </span>
