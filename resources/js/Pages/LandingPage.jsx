@@ -15,6 +15,7 @@ import Footer from '../Components/Footer';
 export default function LandingPage({ 
   services = [], 
   projects = [], 
+  projectCategories = [],
   testimonials = [], 
   stats = {}, 
   company = {},
@@ -73,7 +74,12 @@ export default function LandingPage({
 
         {/* Dual-Mode Project Portfolio (Visual Grid & Official Contract Ledger Table) */}
         {visibility?.portfolio !== false && (
-          <PortfolioSection projects={projects} company={company} meta={portfolioMeta} />
+          <PortfolioSection
+            projects={projects}
+            projectCategories={projectCategories}
+            company={company}
+            meta={portfolioMeta}
+          />
         )}
 
         {/* Interactive Cost Estimator (RAB Calculator) */}

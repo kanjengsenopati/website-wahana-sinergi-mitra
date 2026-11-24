@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Models\CompanySetting;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -28,6 +29,9 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('filament')
             ->brandName('CV. Wahana Sinergi Mitra')
+            ->brandLogo(fn (): string => CompanySetting::getSiteLogoUrl())
+            ->brandLogoHeight('2rem')
+            ->favicon(fn (): string => CompanySetting::getSiteLogoUrl())
             ->login()
             ->colors([
                 'primary' => Color::Emerald,

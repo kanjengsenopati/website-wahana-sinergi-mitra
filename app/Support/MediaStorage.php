@@ -355,6 +355,10 @@ class MediaStorage
             return true;
         }
 
+        if (CompanySetting::where('key', 'company_logo_url')->whereIn('value', $candidates)->exists()) {
+            return true;
+        }
+
         $sectionSettings = CompanySetting::whereIn('key', ['section_hero', 'section_about_data'])->get();
         foreach ($sectionSettings as $setting) {
             $decoded = json_decode((string) $setting->value, true);

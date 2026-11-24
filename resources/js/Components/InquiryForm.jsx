@@ -206,6 +206,9 @@ export function InquiryForm({ initialData = {}, company = {}, meta = {} }) {
                       <option value="Komersial / Ruko / Kantor">Komersial / Ruko / Kantor</option>
                       <option value="Gudang & Industri">Gudang & Bangunan Industri</option>
                       <option value="Hunian Residensial">Hunian Residensial</option>
+                      <option value="Bangunan Pendidikan">Bangunan Pendidikan</option>
+                      <option value="Bangunan Kesehatan">Bangunan Kesehatan</option>
+                      <option value="Bangunan Penginapan">Bangunan Penginapan</option>
                       <option value="Renovasi & Retrofitting">Renovasi & Retrofitting</option>
                       <option value="Pekerjaan Sipil & Infrastruktur">Pekerjaan Sipil & Infrastruktur</option>
                     </select>

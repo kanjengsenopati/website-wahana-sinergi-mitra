@@ -39,6 +39,7 @@ class LandingPageController extends Controller
         ];
 
         $company = [
+            'logo_url' => CompanySetting::getSiteLogoUrl(),
             'phone' => CompanySetting::get('company_phone', '+62 812-3456-7890'),
             'email' => CompanySetting::get('company_email', 'info@wahanasinergimitra.id'),
             'address' => CompanySetting::get('company_address', 'Jl. Sinergi Raya No. 88, Kawasan Niaga Terpadu, Jawa Barat, Indonesia'),
@@ -61,6 +62,7 @@ class LandingPageController extends Controller
         return Inertia::render('LandingPage', [
             'services' => $services,
             'projects' => $projects,
+            'projectCategories' => Project::standardCategoryOptions(),
             'testimonials' => $testimonials,
             'stats' => $stats,
             'company' => $company,
@@ -126,6 +128,7 @@ class LandingPageController extends Controller
             ->get();
 
         $company = [
+            'logo_url' => CompanySetting::getSiteLogoUrl(),
             'phone' => CompanySetting::get('company_phone', '+62 812-3456-7890'),
             'email' => CompanySetting::get('company_email', 'info@wahanasinergimitra.id'),
             'address' => CompanySetting::get('company_address', 'Jl. Sinergi Raya No. 88, Kawasan Niaga Terpadu, Jawa Barat, Indonesia'),
@@ -161,6 +164,7 @@ class LandingPageController extends Controller
         }
 
         $company = [
+            'logo_url' => CompanySetting::getSiteLogoUrl(),
             'phone' => CompanySetting::get('company_phone', '+62 812-3456-7890'),
             'email' => CompanySetting::get('company_email', 'info@wahanasinergimitra.id'),
             'address' => CompanySetting::get('company_address', 'Jl. Sinergi Raya No. 88, Kawasan Niaga Terpadu, Jawa Barat, Indonesia'),

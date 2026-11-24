@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\MediaStorage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -9,7 +10,24 @@ class CompanySetting extends Model
 {
     use HasFactory;
 
+    public const DEFAULT_LOGO_URL = '/images/logo-wsm.jpg';
+
     protected $guarded = [];
+
+    /**
+     * Get the active website logo URL with safe fallback to the default static logo.
+     */
+    public static function getSiteLogoUrl(): string
+    {
+        try {
+            $raw = static::get('company_logo_url');
+            $normalized = MediaStorage::normalizeUrl(is_string($raw) ? $raw : null);
+
+            return $normalized ?: self::DEFAULT_LOGO_URL;
+        } catch (\Throwable) {
+            return self::DEFAULT_LOGO_URL;
+        }
+    }
 
     /**
      * Get a setting by key with a fallback value.

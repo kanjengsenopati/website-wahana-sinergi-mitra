@@ -1,9 +1,12 @@
 import React from 'react';
+import { usePage } from '@inertiajs/react';
 import { Star, CheckCircle2 } from 'lucide-react';
 import Text from './Typography';
-import { DEFAULT_AVATAR_PLACEHOLDER, resolveImageUrl } from '../utils/imageUtils';
+import { resolveImageUrl, resolveSiteLogoUrl } from '../utils/imageUtils';
 
 export function TestimonialsSection({ testimonials = [], meta = {} }) {
+  const { site_logo: sharedSiteLogo } = usePage().props || {};
+  const avatarFallback = resolveSiteLogoUrl(sharedSiteLogo);
   const badge = meta?.badge || '• TESTIMONI & APRESIASI PEMBERI TUGAS';
   const title = meta?.title || 'Kepercayaan Nyata Dari {Para Pemilik Proyek}';
   const subtitle = meta?.subtitle || 'Simak ulasan langsung dari pimpinan perusahaan, pengembang properti, dan pemilik bisnis yang telah mempercayakan konstruksi bangunannya kepada CV. Wahana Sinergi Mitra.';
@@ -59,11 +62,11 @@ export function TestimonialsSection({ testimonials = [], meta = {} }) {
               <div className="pt-4 border-t border-slate-100 flex items-center gap-3 min-w-0">
                 <img
                   key={t.avatar_url || t.id || idx}
-                  src={resolveImageUrl(t.avatar_url, DEFAULT_AVATAR_PLACEHOLDER)}
+                  src={resolveImageUrl(t.avatar_url, avatarFallback)}
                   alt={t.client_name}
                   onError={(e) => {
                     e.currentTarget.onerror = null;
-                    e.currentTarget.src = DEFAULT_AVATAR_PLACEHOLDER;
+                    e.currentTarget.src = avatarFallback;
                   }}
                   className="w-11 h-11 rounded-full object-cover shrink-0 shadow-xs"
                 />

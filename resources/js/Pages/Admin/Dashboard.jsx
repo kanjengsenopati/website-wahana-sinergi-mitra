@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Head, router, usePage, Link } from '@inertiajs/react';
 import { 
   Building2, 
@@ -52,7 +52,8 @@ import {
   Hammer,
   AlertCircle,
   Loader2,
-  Images
+  Images,
+  RotateCcw
 } from 'lucide-react';
 import Text, { formatRupiah, formatThousands } from '../../Components/Typography';
 import CurrencyInput from '../../Components/CurrencyInput';
@@ -60,8 +61,10 @@ import ImageUploader from '../../Components/ImageUploader';
 import MultiImageUploader from '../../Components/MultiImageUploader';
 import {
   DEFAULT_PROJECT_PLACEHOLDER,
-  DEFAULT_AVATAR_PLACEHOLDER,
+  DEFAULT_SITE_LOGO,
+  DEFAULT_PROJECT_CATEGORIES,
   resolveImageUrl,
+  resolveSiteLogoUrl,
   normalizeProjectGallery,
   getProjectMediaList,
 } from '../../utils/imageUtils';
@@ -77,6 +80,7 @@ const iconMap = {
 
 export default function Dashboard({ 
   projects = [], 
+  projectCategories = [],
   services = [], 
   inquiries = [], 
   testimonials = [], 
@@ -87,7 +91,12 @@ export default function Dashboard({
   auth_user = {},
   users = []
 }) {
-  const { flash, auth, errors = {} } = usePage().props;
+  const { flash, auth, errors = {}, site_logo: sharedSiteLogo } = usePage().props;
+  const activeSiteLogo = resolveSiteLogoUrl(sharedSiteLogo);
+  const standardCategoryOptions =
+    Array.isArray(projectCategories) && projectCategories.length > 0
+      ? projectCategories
+      : DEFAULT_PROJECT_CATEGORIES;
   const currentUser = auth_user?.id ? auth_user : (auth?.user || {});
   const [activeTab, setActiveTab] = useState('overview'); // overview, sections, projects, services, inquiries, testimonials, settings, users
   const [activeUploadsCount, setActiveUploadsCount] = useState(0);
@@ -583,6 +592,7 @@ export default function Dashboard({
   });
 
   const [settingsForm, setSettingsForm] = useState({
+    company_logo_url: settings.company_logo_url || '',
     hero_stat_projects: settings.hero_stat_projects || '50+',
     hero_stat_value: settings.hero_stat_value || 'Rp 85+ Miliar',
     hero_stat_satisfaction: settings.hero_stat_satisfaction || '99.4%',
@@ -593,6 +603,13 @@ export default function Dashboard({
     company_operating_hours: settings.company_operating_hours || 'Senin – Sabtu: 08.00 – 17.00 WIB',
     company_about: settings.company_about || '',
   });
+
+  useEffect(() => {
+    setSettingsForm((prev) => ({
+      ...prev,
+      company_logo_url: settings.company_logo_url || '',
+    }));
+  }, [settings.company_logo_url]);
 
   // Handle Logout
   const handleLogout = () => {
@@ -829,8 +846,17 @@ export default function Dashboard({
             {/* Top Brand Block */}
             <div className="p-5 border-b border-slate-800">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-600 to-blue-700 text-white flex items-center justify-center font-extrabold text-sm shadow-md shadow-sky-600/30 shrink-0">
-                  WSM
+                <div className="w-10 h-10 rounded-2xl bg-white p-1 flex items-center justify-center shadow-md shadow-sky-600/20 shrink-0 overflow-hidden">
+                  <img
+                    key={activeSiteLogo}
+                    src={activeSiteLogo}
+                    alt="Logo CV. Wahana Sinergi Mitra"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = DEFAULT_SITE_LOGO;
+                    }}
+                    className="w-full h-full object-contain"
+                  />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
@@ -2486,7 +2512,18 @@ export default function Dashboard({
             {/* TAB 2: PROJECTS MANAGEMENT (LIST & FULL WORKSPACE)   */}
             {/* ==================================================== */}
             {activeTab === 'projects' && !editorMode && (() => {
+              const adminProjectCategories = [
+                'All',
+                ...new Set([
+                  ...standardCategoryOptions.map((c) => c.value),
+                  ...projects.map((p) => p.category).filter(Boolean),
+                ]),
+              ];
+
               const filteredProjectsList = projects.filter((proj) => {
+                if (projectCategoryFilter !== 'All' && proj.category !== projectCategoryFilter) {
+                  return false;
+                }
                 if (!searchQuery.trim()) return true;
                 const q = searchQuery.toLowerCase();
                 return (
@@ -2501,45 +2538,78 @@ export default function Dashboard({
                 <div className="space-y-4">
                   
                   {/* List Header & Action */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
-                    <div>
-                      <h2 className="text-lg font-bold text-slate-900">
-                        Portofolio Proyek Konstruksi
-                      </h2>
-                      <p className="text-xs text-slate-500">
-                        Menampilkan {filteredProjectsList.length} dari {projects.length} proyek di database.
-                      </p>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-3">
-                      <div className="relative">
-                        <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                        <input
-                          type="text"
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          placeholder="Cari proyek / klien / lokasi..."
-                          className="pl-9 pr-7 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 w-52 sm:w-64"
-                        />
-                        {searchQuery && (
-                          <button
-                            type="button"
-                            onClick={() => setSearchQuery('')}
-                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold"
-                          >
-                            ✕
-                          </button>
-                        )}
+                  <div className="bg-white p-5 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="min-w-0">
+                        <Text.H2 title="Portofolio Proyek Konstruksi" singleLine className="text-[18px] text-slate-900">
+                          Portofolio Proyek Konstruksi
+                        </Text.H2>
+                        <Text.Caption className="block mt-0.5 text-slate-600">
+                          Menampilkan {filteredProjectsList.length} dari {projects.length} proyek di database.
+                        </Text.Caption>
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={openCreateProject}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-md shadow-sky-600/20 transition-all cursor-pointer"
-                      >
-                        <Plus className="w-4 h-4" />
-                        <span>Tambah Proyek Baru</span>
-                      </button>
+                      <div className="flex flex-wrap items-center gap-3 shrink-0">
+                        <div className="relative">
+                          <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                          <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Cari proyek / klien / lokasi..."
+                            className="pl-9 pr-7 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800 tracking-[-0.015em] focus:outline-none focus:ring-2 focus:ring-sky-500 w-52 sm:w-64"
+                          />
+                          {searchQuery && (
+                            <button
+                              type="button"
+                              onClick={() => setSearchQuery('')}
+                              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 text-xs font-bold cursor-pointer"
+                            >
+                              ✕
+                            </button>
+                          )}
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={openCreateProject}
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs tracking-[-0.015em] shadow-md shadow-blue-600/20 transition-all cursor-pointer"
+                        >
+                          <Plus className="w-4 h-4" />
+                          <span>Tambah Proyek Baru</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Category Filter Pills (7 Standard SSOT + Legacy Custom Categories) */}
+                    <div className="flex flex-wrap items-center gap-1.5 pt-3 border-t border-slate-100">
+                      {adminProjectCategories.map((cat) => {
+                        const count = cat === 'All'
+                          ? projects.length
+                          : projects.filter((p) => p.category === cat).length;
+                        const isActive = projectCategoryFilter === cat;
+                        return (
+                          <button
+                            key={cat}
+                            type="button"
+                            onClick={() => setProjectCategoryFilter(cat)}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11.5px] font-bold tracking-[-0.015em] transition-all cursor-pointer ${
+                              isActive
+                                ? 'bg-slate-900 text-white shadow-xs'
+                                : 'bg-slate-100 text-slate-700 hover:bg-slate-200/80 hover:text-slate-900'
+                            }`}
+                          >
+                            <span>{cat === 'All' ? 'Semua Kategori' : cat}</span>
+                            <span
+                              className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold tabular-nums ${
+                                isActive ? 'bg-white/20 text-white' : 'bg-white text-slate-600'
+                              }`}
+                            >
+                              {count}
+                            </span>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -2564,18 +2634,29 @@ export default function Dashboard({
                                     <Search className="w-5 h-5" />
                                   </div>
                                   <div className="text-xs font-bold text-slate-800">
-                                    {searchQuery ? 'Tidak ada proyek yang sesuai dengan pencarian' : 'Belum ada data proyek di database'}
+                                    {searchQuery
+                                      ? 'Tidak ada proyek yang sesuai dengan pencarian'
+                                      : projectCategoryFilter !== 'All'
+                                        ? `Belum ada proyek pada kategori "${projectCategoryFilter}"`
+                                        : 'Belum ada data proyek di database'}
                                   </div>
-                                  <div className="text-[11px] text-slate-500">
-                                    {searchQuery ? `Kata kunci "${searchQuery}" tidak ditemukan pada judul, klien, atau lokasi.` : 'Klik tombol "Tambah Proyek Baru" untuk memasukkan proyek pertama.'}
+                                  <div className="text-[11px] text-slate-600">
+                                    {searchQuery
+                                      ? `Kata kunci "${searchQuery}" tidak ditemukan pada judul, klien, atau lokasi.`
+                                      : projectCategoryFilter !== 'All'
+                                        ? 'Klik tombol "Tambah Proyek Baru" atau tampilkan semua kategori proyek.'
+                                        : 'Klik tombol "Tambah Proyek Baru" untuk memasukkan proyek pertama.'}
                                   </div>
-                                  {searchQuery && (
+                                  {(searchQuery || projectCategoryFilter !== 'All') && (
                                     <button
                                       type="button"
-                                      onClick={() => setSearchQuery('')}
+                                      onClick={() => {
+                                        setSearchQuery('');
+                                        setProjectCategoryFilter('All');
+                                      }}
                                       className="mt-1 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
                                     >
-                                      Reset Pencarian
+                                      Reset Filter &amp; Pencarian
                                     </button>
                                   )}
                                 </div>
@@ -2723,12 +2804,17 @@ export default function Dashboard({
                         <select
                           value={projectForm.category}
                           onChange={(e) => setProjectForm({ ...projectForm, category: e.target.value })}
-                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 tracking-[-0.015em] focus:outline-none focus:ring-2 focus:ring-sky-500"
                         >
-                          <option value="Industri">Industri & Pergudangan</option>
-                          <option value="Komersial">Komersial & Perkantoran</option>
-                          <option value="Residensial">Residensial & Hunian</option>
-                          <option value="Infrastruktur">Infrastruktur & Sipil</option>
+                          {standardCategoryOptions.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                          {projectForm.category &&
+                            !standardCategoryOptions.some((opt) => opt.value === projectForm.category) && (
+                              <option value={projectForm.category}>{projectForm.category}</option>
+                            )}
                         </select>
                       </div>
 
@@ -3582,11 +3668,11 @@ export default function Dashboard({
                             <div className="flex items-center gap-2 min-w-0">
                               <img
                                 key={t.avatar_url || t.id}
-                                src={resolveImageUrl(t.avatar_url, DEFAULT_AVATAR_PLACEHOLDER)}
+                                src={resolveImageUrl(t.avatar_url, activeSiteLogo)}
                                 alt={t.client_name}
                                 onError={(e) => {
                                   e.currentTarget.onerror = null;
-                                  e.currentTarget.src = DEFAULT_AVATAR_PLACEHOLDER;
+                                  e.currentTarget.src = activeSiteLogo;
                                 }}
                                 className="w-8 h-8 rounded-full object-cover shrink-0"
                               />
@@ -3761,33 +3847,144 @@ export default function Dashboard({
             {/* ==================================================== */}
             {/* TAB 6: FRONTEND HERO STATS & COMPANY SETTINGS        */}
             {/* ==================================================== */}
-            {activeTab === 'settings' && (
+            {activeTab === 'settings' && (() => {
+              const previewLogoSrc = resolveSiteLogoUrl(settingsForm.company_logo_url || activeSiteLogo);
+              const isCustomLogoSet = Boolean(settingsForm.company_logo_url && settingsForm.company_logo_url.trim() !== '');
+
+              return (
               <div className="space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
-                  <div>
-                    <h2 className="text-lg font-bold text-slate-900">
-                      Pengaturan Angka Hero & Informasi Kontak Depan
-                    </h2>
-                    <p className="text-xs text-slate-500">
-                      Setiap teks dan angka di sini langsung mengubah tampilan di landing page secara real-time.
-                    </p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                  <div className="min-w-0 flex-1">
+                    <Text.H2
+                      title="Pengaturan Logo, Angka Hero & Informasi Kontak Depan"
+                      singleLine
+                      className="text-[18px] text-slate-900"
+                    >
+                      Pengaturan Logo, Angka Hero &amp; Informasi Kontak Depan
+                    </Text.H2>
+                    <Text.Caption className="block mt-0.5 text-slate-600">
+                      Setiap perubahan logo, teks, dan angka langsung sinkron ke seluruh website secara real-time.
+                    </Text.Caption>
                   </div>
 
                   <button
                     type="button"
                     onClick={submitSettings}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-md shadow-sky-600/20"
+                    disabled={isAnyImageUploading}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs tracking-[-0.015em] shadow-md shadow-blue-600/20 shrink-0 cursor-pointer"
                   >
-                    <Save className="w-4 h-4" />
-                    <span>Simpan Pengaturan Depan</span>
+                    {isAnyImageUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                    <span>{isAnyImageUploading ? 'Menunggu Upload...' : 'Simpan Pengaturan Depan'}</span>
                   </button>
                 </div>
 
-                <form onSubmit={submitSettings} className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-sm space-y-6 max-w-3xl">
+                <form onSubmit={submitSettings} className="bg-white p-6 sm:p-8 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-6 max-w-3xl">
+
+                  {/* Website Logo & Brand Identity Section */}
+                  <div>
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-3 min-w-0">
+                      <Text.Label title="1. Identitas & Logo Website" singleLine className="text-blue-700">
+                        1. Identitas &amp; Logo Website
+                      </Text.Label>
+                      {isCustomLogoSet && (
+                        <button
+                          type="button"
+                          onClick={() => setSettingsForm({ ...settingsForm, company_logo_url: '' })}
+                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 text-[11px] font-bold tracking-[-0.015em] transition-colors shrink-0 cursor-pointer"
+                        >
+                          <RotateCcw className="w-3.5 h-3.5" />
+                          <span>Reset ke Logo Default</span>
+                        </button>
+                      )}
+                    </div>
+
+                    <Text.Caption className="block text-slate-600 mb-3">
+                      Unggah logo baru berformat PNG (transparan), WebP, JPG, atau AVIF. Logo otomatis tampil di Navbar, Footer, Favicon browser, Halaman Login, Sidebar Admin, dan fallback avatar.
+                    </Text.Caption>
+
+                    <ImageUploader
+                      value={settingsForm.company_logo_url}
+                      onChange={(url) => setSettingsForm({ ...settingsForm, company_logo_url: url })}
+                      onUploadingChange={handleUploaderBusyChange}
+                      folder="branding"
+                      aspect="logo"
+                    />
+
+                    {/* Live Preview: Light Background (Navbar Scrolled) vs Dark Background (Header/Footer/Sidebar) */}
+                    <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {/* Light Surface Preview */}
+                      <div className="rounded-2xl bg-slate-50 border border-slate-200/80 p-3.5 space-y-2.5">
+                        <div className="flex items-center justify-between gap-2 min-w-0">
+                          <Text.Label title="Preview Latar Terang (Navbar)" singleLine className="text-slate-600">
+                            Preview Latar Terang (Navbar)
+                          </Text.Label>
+                          <span className="px-2 py-0.5 rounded-full bg-emerald-600/10 text-emerald-700 text-[10px] font-bold tracking-[-0.015em] shrink-0 whitespace-nowrap">
+                            {isCustomLogoSet ? 'Logo Kustom' : 'Default WSM'}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2.5 bg-white rounded-xl p-2.5 shadow-xs border border-slate-100">
+                          <div className="w-9 h-9 rounded-xl bg-white border border-slate-100 p-1 flex items-center justify-center shrink-0 overflow-hidden">
+                            <img
+                              key={`light-${previewLogoSrc}`}
+                              src={previewLogoSrc}
+                              alt="Preview Logo Terang"
+                              onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = DEFAULT_SITE_LOGO;
+                              }}
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="text-[12px] font-extrabold text-slate-900 tracking-[-0.025em] truncate">
+                              CV. WAHANA SINERGI MITRA
+                            </div>
+                            <div className="text-[9.5px] font-bold text-slate-600 uppercase tracking-[-0.015em] truncate">
+                              General Contractor &amp; Civil
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Dark Surface Preview */}
+                      <div className="rounded-2xl bg-slate-900 p-3.5 space-y-2.5">
+                        <div className="flex items-center justify-between gap-2 min-w-0">
+                          <span className="text-[11px] font-bold uppercase tracking-[-0.015em] text-slate-300 truncate">
+                            Preview Latar Gelap (Footer &amp; Admin)
+                          </span>
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/10 text-sky-300 text-[10px] font-bold tracking-[-0.015em] shrink-0 whitespace-nowrap">
+                            Favicon Aktif
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2.5 bg-[#0B2447] rounded-xl p-2.5 border border-white/10">
+                          <div className="w-9 h-9 rounded-xl bg-white p-1 flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
+                            <img
+                              key={`dark-${previewLogoSrc}`}
+                              src={previewLogoSrc}
+                              alt="Preview Logo Gelap"
+                              onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = DEFAULT_SITE_LOGO;
+                              }}
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="text-[12px] font-extrabold text-white tracking-[-0.025em] truncate">
+                              CV. WAHANA SINERGI MITRA
+                            </div>
+                            <div className="text-[9.5px] font-bold text-sky-300 uppercase tracking-[-0.015em] truncate">
+                              Portal CMS &amp; Footer Resmi
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                   
                   {/* Hero Metric Cards Section */}
-                  <div>
-                    <Text.Label className="text-sky-700 block mb-3">1. Angka Metrik Banner Hero (4 Kartu Depan)</Text.Label>
+                  <div className="pt-4 border-t border-slate-100">
+                    <Text.Label className="text-blue-700 block mb-3">2. Angka Metrik Banner Hero (4 Kartu Depan)</Text.Label>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
@@ -3845,7 +4042,7 @@ export default function Dashboard({
 
                   {/* Company Contacts Section */}
                   <div className="pt-4 border-t border-slate-100">
-                    <Text.Label className="text-sky-700 block mb-3">2. Kontak & Alamat Kantor Resmi</Text.Label>
+                    <Text.Label className="text-blue-700 block mb-3">3. Kontak &amp; Alamat Kantor Resmi</Text.Label>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-[-0.015em] mb-1">
@@ -3904,14 +4101,17 @@ export default function Dashboard({
                   <div className="pt-4 flex justify-end border-t border-slate-100">
                     <button
                       type="submit"
-                      className="px-6 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-md shadow-sky-600/20"
+                      disabled={isAnyImageUploading}
+                      className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs tracking-[-0.015em] shadow-md shadow-blue-600/20 cursor-pointer"
                     >
-                      Simpan & Terapkan ke Landing Page
+                      {isAnyImageUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                      <span>{isAnyImageUploading ? 'Menunggu Upload...' : 'Simpan & Terapkan ke Landing Page'}</span>
                     </button>
                   </div>
                 </form>
               </div>
-            )}
+              );
+            })()}
 
             {/* ==================================================== */}
             {/* TAB 8: USER MANAGEMENT (SUPER ADMIN & EDITORS)       */}

@@ -1,8 +1,12 @@
 import React from 'react';
+import { usePage } from '@inertiajs/react';
 import { Mail, Phone, MapPin, ShieldCheck, ArrowUpRight, PhoneCall, Award, CheckCircle2 } from 'lucide-react';
 import Text from './Typography';
+import { DEFAULT_SITE_LOGO, resolveSiteLogoUrl } from '../utils/imageUtils';
 
 export function Footer({ company = {}, visibility = {} }) {
+  const { site_logo: sharedSiteLogo } = usePage().props || {};
+  const logoSrc = resolveSiteLogoUrl(company?.logo_url || sharedSiteLogo);
   const cleanPhone = (company?.phone || '+62 812-3456-7890')
     .replace(/\D/g, '')
     .replace(/^0/, '62');
@@ -35,8 +39,13 @@ export function Footer({ company = {}, visibility = {} }) {
               <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-2xl bg-white p-1 flex items-center justify-center shrink-0 overflow-hidden shadow-md">
                   <img
-                    src="/images/logo-wsm.jpg"
+                    key={logoSrc}
+                    src={logoSrc}
                     alt="Logo CV. Wahana Sinergi Mitra"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = DEFAULT_SITE_LOGO;
+                    }}
                     className="w-full h-full object-contain"
                   />
                 </div>

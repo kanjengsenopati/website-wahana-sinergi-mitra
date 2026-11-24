@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources\Projects\Schemas;
 
+use App\Models\Project;
 use App\Support\MediaStorage;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
@@ -20,7 +22,18 @@ class ProjectForm
                     ->required(),
                 TextInput::make('slug')
                     ->required(),
-                TextInput::make('category')
+                Select::make('category')
+                    ->label('Kategori Proyek')
+                    ->options(function (?Model $record): array {
+                        $options = Project::STANDARD_CATEGORIES;
+                        $current = $record?->getAttribute('category');
+                        if (is_string($current) && $current !== '' && !array_key_exists($current, $options)) {
+                            $options[$current] = $current;
+                        }
+
+                        return $options;
+                    })
+                    ->searchable()
                     ->required()
                     ->default('Komersial'),
                 TextInput::make('client_name'),

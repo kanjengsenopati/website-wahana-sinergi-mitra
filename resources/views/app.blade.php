@@ -6,8 +6,12 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <title inertia>{{ config('app.name', 'CV. Wahana Sinergi Mitra') }}</title>
 
-        <!-- Favicon -->
-        <link rel="icon" type="image/jpeg" href="/images/logo-wsm.jpg">
+        <!-- Favicon (Dynamic SSOT Logo) -->
+        @php
+            $siteLogoUrl = \App\Models\CompanySetting::getSiteLogoUrl();
+            $siteLogoMime = \App\Support\MediaStorage::guessMimeTypeFromExtension($siteLogoUrl) ?? 'image/jpeg';
+        @endphp
+        <link id="site-favicon" rel="icon" type="{{ $siteLogoMime }}" href="{{ $siteLogoUrl }}">
 
         <!-- Plus Jakarta Sans / Inter Google Font -->
         <link rel="preconnect" href="https://fonts.googleapis.com">

@@ -10,7 +10,45 @@ class Project extends Model
 {
     use HasFactory;
 
+    /**
+     * Single Source of Truth (SSOT) standard portfolio project categories.
+     *
+     * @var array<string, string>
+     */
+    public const STANDARD_CATEGORIES = [
+        'Industri' => 'Industri & Pergudangan',
+        'Komersial' => 'Komersial & Perkantoran',
+        'Residensial' => 'Residensial & Hunian',
+        'Infrastruktur' => 'Infrastruktur & Sipil',
+        'Bangunan Pendidikan' => 'Bangunan Pendidikan',
+        'Bangunan Kesehatan' => 'Bangunan Kesehatan',
+        'Bangunan Penginapan' => 'Bangunan Penginapan',
+    ];
+
     protected $guarded = [];
+
+    /**
+     * @return array<int, string>
+     */
+    public static function standardCategoryValues(): array
+    {
+        return array_keys(self::STANDARD_CATEGORIES);
+    }
+
+    /**
+     * @return array<int, array{value: string, label: string}>
+     */
+    public static function standardCategoryOptions(): array
+    {
+        return array_map(
+            static fn (string $value, string $label): array => [
+                'value' => $value,
+                'label' => $label,
+            ],
+            array_keys(self::STANDARD_CATEGORIES),
+            array_values(self::STANDARD_CATEGORIES)
+        );
+    }
 
     protected $casts = [
         'gallery_images' => 'array',

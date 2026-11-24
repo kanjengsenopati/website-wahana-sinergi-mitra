@@ -3,7 +3,7 @@ import { usePage } from '@inertiajs/react';
 import { UploadCloud, Image as ImageIcon, X, RefreshCw, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import {
   DEFAULT_PROJECT_PLACEHOLDER,
-  DEFAULT_AVATAR_PLACEHOLDER,
+  resolveSiteLogoUrl,
   resolveImageUrl,
   isSupportedImageFile,
   getFreshCsrfHeaders,
@@ -22,10 +22,10 @@ export default function ImageUploader({
   onChange,
   onUploadingChange,
   folder = 'general',
-  aspect = 'landscape', // 'landscape' | 'avatar'
+  aspect = 'landscape', // 'landscape' | 'avatar' | 'logo'
   className = '',
 }) {
-  const { csrf_token: pageCsrfToken, upload_limits: uploadLimits } = usePage().props || {};
+  const { csrf_token: pageCsrfToken, upload_limits: uploadLimits, site_logo: sharedSiteLogo } = usePage().props || {};
 
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -64,7 +64,9 @@ export default function ImageUploader({
     };
   }, []);
 
-  const fallbackImg = aspect === 'avatar' ? DEFAULT_AVATAR_PLACEHOLDER : DEFAULT_PROJECT_PLACEHOLDER;
+  const logoFallback = resolveSiteLogoUrl(sharedSiteLogo);
+  const fallbackImg =
+    aspect === 'avatar' || aspect === 'logo' ? logoFallback : DEFAULT_PROJECT_PLACEHOLDER;
   const resolvedPreviewSrc = imgLoadFailed ? fallbackImg : resolveImageUrl(value, fallbackImg);
 
   const handleDragOver = (e) => {
@@ -126,8 +128,9 @@ export default function ImageUploader({
 
       const { file: fileToUpload, wasCompressed, originalSize, compressedSize } =
         await compressImageIfNeeded(rawFile, {
-          maxDimension: aspect === 'avatar' ? 800 : 1920,
+          maxDimension: aspect === 'avatar' ? 800 : aspect === 'logo' ? 1024 : 1920,
           targetMaxBytes: targetCompressBytes,
+          preserveTransparency: aspect === 'logo',
         });
 
       if (fileToUpload.size > serverMaxBytes) {
@@ -238,15 +241,19 @@ export default function ImageUploader({
           <div className="flex flex-col sm:flex-row items-center gap-4">
             {/* Image Preview Container */}
             <div
-              className={`relative overflow-hidden shrink-0 bg-slate-200 border border-slate-300/80 shadow-xs ${
-                aspect === 'avatar' ? 'w-16 h-16 rounded-full' : 'w-full sm:w-36 h-28 sm:h-22 rounded-xl'
+              className={`relative overflow-hidden shrink-0 border border-slate-300/80 shadow-xs flex items-center justify-center ${
+                aspect === 'avatar'
+                  ? 'w-16 h-16 rounded-full bg-slate-200'
+                  : aspect === 'logo'
+                    ? 'w-20 h-20 rounded-2xl bg-white p-2'
+                    : 'w-full sm:w-36 h-28 sm:h-22 rounded-xl bg-slate-200'
               }`}
             >
               <img
                 key={resolvedPreviewSrc}
                 src={resolvedPreviewSrc}
                 alt="Uploaded Preview"
-                className="w-full h-full object-cover"
+                className={`w-full h-full ${aspect === 'logo' ? 'object-contain' : 'object-cover'}`}
                 onError={() => setImgLoadFailed(true)}
               />
               {isUploading && (

@@ -38,6 +38,7 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'appName' => config('app.name'),
+            'site_logo' => fn () => \App\Models\CompanySetting::getSiteLogoUrl(),
             'csrf_token' => fn () => $request->session()->token(),
             'upload_limits' => fn () => [
                 'max_kb' => 5120,

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { usePage } from '@inertiajs/react';
 import { 
   PhoneCall, 
   Menu, 
@@ -11,11 +12,14 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import Text from './Typography';
+import { DEFAULT_SITE_LOGO, resolveSiteLogoUrl } from '../utils/imageUtils';
 
 export function Navbar({ company = {}, visibility = {} }) {
+  const { site_logo: sharedSiteLogo } = usePage().props || {};
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const logoSrc = resolveSiteLogoUrl(company?.logo_url || sharedSiteLogo);
   const phoneDisplay = company?.phone || '+62 812-3456-7890';
   const emailDisplay = company?.email || 'info@wahanasinergimitra.id';
   const operatingHours = company?.operating_hours || 'Senin – Sabtu: 08.00 – 17.00 WIB';
@@ -117,8 +121,13 @@ export function Navbar({ company = {}, visibility = {} }) {
               }`}
             >
               <img
-                src="/images/logo-wsm.jpg"
+                key={logoSrc}
+                src={logoSrc}
                 alt="Logo CV. Wahana Sinergi Mitra"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = DEFAULT_SITE_LOGO;
+                }}
                 className="w-full h-full object-contain"
               />
             </div>

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Head, useForm, Link } from '@inertiajs/react';
+import { Head, useForm, Link, usePage } from '@inertiajs/react';
 import { 
-  Building2, 
   Mail, 
   Lock, 
   ArrowRight, 
@@ -14,8 +13,11 @@ import {
   Eye,
   EyeOff 
 } from 'lucide-react';
+import { DEFAULT_SITE_LOGO, resolveSiteLogoUrl } from '../../utils/imageUtils';
 
 export default function Login() {
+  const { site_logo: sharedSiteLogo } = usePage().props || {};
+  const logoSrc = resolveSiteLogoUrl(sharedSiteLogo);
   const [showPassword, setShowPassword] = useState(false);
 
   const { data, setData, post, processing, errors, reset } = useForm({
@@ -49,8 +51,17 @@ export default function Login() {
               
               {/* Brand Top Header */}
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center shadow-inner border border-white/20 shrink-0">
-                  <Building2 className="w-6 h-6 text-white" />
+                <div className="w-12 h-12 rounded-2xl bg-white p-1.5 flex items-center justify-center shadow-md border border-white/30 shrink-0 overflow-hidden">
+                  <img
+                    key={logoSrc}
+                    src={logoSrc}
+                    alt="Logo CV. Wahana Sinergi Mitra"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = DEFAULT_SITE_LOGO;
+                    }}
+                    className="w-full h-full object-contain"
+                  />
                 </div>
                 <div className="min-w-0">
                   <span className="text-[11px] uppercase tracking-[-0.015em] text-sky-200 font-bold block truncate">

@@ -1,5 +1,59 @@
 export const DEFAULT_PROJECT_PLACEHOLDER = '/images/project-placeholder.jpg';
-export const DEFAULT_AVATAR_PLACEHOLDER = '/images/logo-wsm.jpg';
+export const DEFAULT_SITE_LOGO = '/images/logo-wsm.jpg';
+export const DEFAULT_AVATAR_PLACEHOLDER = DEFAULT_SITE_LOGO;
+
+export const DEFAULT_PROJECT_CATEGORIES = [
+  { value: 'Industri', label: 'Industri & Pergudangan' },
+  { value: 'Komersial', label: 'Komersial & Perkantoran' },
+  { value: 'Residensial', label: 'Residensial & Hunian' },
+  { value: 'Infrastruktur', label: 'Infrastruktur & Sipil' },
+  { value: 'Bangunan Pendidikan', label: 'Bangunan Pendidikan' },
+  { value: 'Bangunan Kesehatan', label: 'Bangunan Kesehatan' },
+  { value: 'Bangunan Penginapan', label: 'Bangunan Penginapan' },
+];
+
+/**
+ * Resolve the active website logo URL with safe fallback to the static default logo.
+ */
+export function resolveSiteLogoUrl(logoUrl) {
+  return resolveImageUrl(logoUrl, DEFAULT_SITE_LOGO);
+}
+
+/**
+ * Synchronize the browser tab favicon dynamically during Inertia SPA navigation/updates.
+ */
+export function syncBrowserFavicon(logoUrl) {
+  if (typeof document === 'undefined') {
+    return;
+  }
+
+  const href = resolveSiteLogoUrl(logoUrl);
+  let link = document.getElementById('site-favicon') || document.querySelector("link[rel*='icon']");
+
+  if (!link) {
+    link = document.createElement('link');
+    link.id = 'site-favicon';
+    link.rel = 'icon';
+    document.head.appendChild(link);
+  }
+
+  const lowerHref = href.toLowerCase();
+  if (lowerHref.endsWith('.png')) {
+    link.type = 'image/png';
+  } else if (lowerHref.endsWith('.webp')) {
+    link.type = 'image/webp';
+  } else if (lowerHref.endsWith('.avif')) {
+    link.type = 'image/avif';
+  } else if (lowerHref.endsWith('.ico')) {
+    link.type = 'image/x-icon';
+  } else {
+    link.type = 'image/jpeg';
+  }
+
+  if (link.getAttribute('href') !== href) {
+    link.setAttribute('href', href);
+  }
+}
 
 const VALID_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
 const VALID_EXT_REGEX = /\.(jpe?g|png|webp|avif)$/i;
@@ -212,6 +266,7 @@ export async function compressImageIfNeeded(
   {
     maxDimension = 1920,
     targetMaxBytes = 1.5 * 1024 * 1024,
+    preserveTransparency = false,
   } = {}
 ) {
   if (!file || typeof window === 'undefined' || typeof document === 'undefined') {
@@ -249,9 +304,14 @@ export async function compressImageIfNeeded(
     ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(img, 0, 0, targetW, targetH);
 
-    // Prefer WebP; fall back to JPEG if the browser doesn't support WebP encoding
-    const preferredTypes = ['image/webp', 'image/jpeg'];
-    const qualities = [0.85, 0.76, 0.66, 0.56];
+    // Keep alpha channel intact for transparent logos (PNG/WebP/AVIF)
+    const isTransparentSource =
+      preserveTransparency &&
+      ['image/png', 'image/webp', 'image/avif'].includes((file.type || '').toLowerCase());
+    const preferredTypes = isTransparentSource
+      ? ['image/webp', 'image/png']
+      : ['image/webp', 'image/jpeg'];
+    const qualities = isTransparentSource ? [0.92, 0.85, 0.78] : [0.85, 0.76, 0.66, 0.56];
     let bestBlob = null;
 
     for (const mimeType of preferredTypes) {
@@ -263,7 +323,7 @@ export async function compressImageIfNeeded(
           break;
         }
         bestBlob = blob;
-        if (blob.size <= targetMaxBytes) {
+        if (blob.size <= targetMaxBytes || mimeType === 'image/png') {
           break;
         }
       }
@@ -281,7 +341,7 @@ export async function compressImageIfNeeded(
       return { file, wasCompressed: false };
     }
 
-    const ext = bestBlob.type === 'image/webp' ? 'webp' : 'jpg';
+    const ext = bestBlob.type === 'image/webp' ? 'webp' : bestBlob.type === 'image/png' ? 'png' : 'jpg';
     const baseName = (file.name || 'image').replace(/\.[^.]+$/, '') || 'image';
     const optimizedFile = new File([bestBlob], `${baseName}.${ext}`, {
       type: bestBlob.type,

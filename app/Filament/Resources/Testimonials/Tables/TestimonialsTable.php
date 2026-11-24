@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Testimonials\Tables;
 
+use App\Models\CompanySetting;
 use App\Support\MediaStorage;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -21,7 +22,7 @@ class TestimonialsTable
                     ->label('Avatar')
                     ->disk('public')
                     ->getStateUsing(fn ($record): ?string => MediaStorage::toFilamentImageState($record->avatar_url))
-                    ->defaultImageUrl(url('/images/logo-wsm.jpg'))
+                    ->defaultImageUrl(fn (): string => url(CompanySetting::getSiteLogoUrl()))
                     ->circular(),
                 TextColumn::make('client_name')
                     ->searchable(),

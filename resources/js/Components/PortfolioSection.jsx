@@ -13,9 +13,14 @@ import {
   Images
 } from 'lucide-react';
 import Text from './Typography';
-import { DEFAULT_PROJECT_PLACEHOLDER, resolveImageUrl, getProjectMediaList } from '../utils/imageUtils';
+import {
+  DEFAULT_PROJECT_PLACEHOLDER,
+  DEFAULT_PROJECT_CATEGORIES,
+  resolveImageUrl,
+  getProjectMediaList,
+} from '../utils/imageUtils';
 
-export function PortfolioSection({ projects = [], company = {}, meta = {} }) {
+export function PortfolioSection({ projects = [], projectCategories = [], company = {}, meta = {} }) {
   const [activeTab, setActiveTab] = useState('All');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'ledger'
   const [selectedProject, setSelectedProject] = useState(null);
@@ -24,12 +29,15 @@ export function PortfolioSection({ projects = [], company = {}, meta = {} }) {
   const title = meta?.title || 'Karya Konstruksi Terbukti {Kokoh & Bernilai Tinggi}';
   const subtitle = meta?.subtitle || 'Jelajahi dokumentasi visual proyek kami atau beralih ke mode Tabel Data Pengalaman Pekerjaan untuk meninjau daftar kontrak secara terperinci.';
 
-  // Dynamic Categories: Standard Base + Distinct Database Categories
+  // Dynamic Categories: SSOT Standard 7 Categories + Distinct Database Categories
   const categories = useMemo(() => {
-    const base = ['Industri', 'Komersial', 'Residensial', 'Infrastruktur'];
+    const standardList =
+      Array.isArray(projectCategories) && projectCategories.length > 0
+        ? projectCategories.map((item) => (typeof item === 'string' ? item : item.value)).filter(Boolean)
+        : DEFAULT_PROJECT_CATEGORIES.map((item) => item.value);
     const fromProjects = projects.map((p) => p.category).filter(Boolean);
-    return ['All', ...new Set([...base, ...fromProjects])];
-  }, [projects]);
+    return ['All', ...new Set([...standardList, ...fromProjects])];
+  }, [projects, projectCategories]);
 
   const filteredProjects = activeTab === 'All'
     ? projects
@@ -97,7 +105,7 @@ export function PortfolioSection({ projects = [], company = {}, meta = {} }) {
 
         {/* Category Filter Bar + Cumulative Contract Summary */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-          <div className="flex flex-wrap items-center gap-1.5 bg-white p-1.5 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+          <div className="flex flex-wrap items-center gap-1.5 bg-white p-1.5 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
             {categories.map((cat) => (
               <button
                 key={cat}

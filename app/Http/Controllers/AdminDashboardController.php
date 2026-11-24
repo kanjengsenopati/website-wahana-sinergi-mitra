@@ -36,6 +36,7 @@ class AdminDashboardController extends Controller
         $authUser = Auth::user();
 
         $settings = [
+            'company_logo_url' => CompanySetting::get('company_logo_url', ''),
             'hero_stat_projects' => CompanySetting::get('hero_stat_projects', '50+'),
             'hero_stat_value' => CompanySetting::get('hero_stat_value', 'Rp 85+ Miliar'),
             'hero_stat_satisfaction' => CompanySetting::get('hero_stat_satisfaction', '99.4%'),
@@ -72,6 +73,7 @@ class AdminDashboardController extends Controller
 
         return Inertia::render('Admin/Dashboard', [
             'projects' => $projects,
+            'projectCategories' => Project::standardCategoryOptions(),
             'services' => $services,
             'inquiries' => $inquiries,
             'testimonials' => $testimonials,
@@ -332,6 +334,23 @@ class AdminDashboardController extends Controller
      */
     public function updateSettings(Request $request)
     {
+        $request->validate([
+            'company_logo_url' => 'nullable|string|max:500',
+        ]);
+
+        if ($request->exists('company_logo_url')) {
+            $oldLogo = CompanySetting::get('company_logo_url', '');
+            $normalizedLogo = MediaStorage::normalizeUrl(
+                is_string($request->input('company_logo_url')) ? $request->input('company_logo_url') : null
+            ) ?? '';
+
+            CompanySetting::set('company_logo_url', $normalizedLogo, 'branding');
+            MediaStorage::deleteUnusedDiff(
+                array_values(array_filter([$oldLogo])),
+                array_values(array_filter([$normalizedLogo]))
+            );
+        }
+
         $inputs = $request->only([
             'hero_stat_projects',
             'hero_stat_value',
@@ -350,7 +369,7 @@ class AdminDashboardController extends Controller
             }
         }
 
-        return redirect()->route('admin.dashboard')->with('success', 'Pengaturan tampilan depan dan informasi kontak berhasil disimpan.');
+        return redirect()->route('admin.dashboard')->with('success', 'Pengaturan logo, tampilan depan, dan informasi kontak berhasil disimpan.');
     }
 
     /**
@@ -401,7 +420,7 @@ class AdminDashboardController extends Controller
                     }
                 },
             ],
-            'folder' => 'nullable|string|in:projects,services,testimonials,general',
+            'folder' => 'nullable|string|in:projects,services,testimonials,general,branding',
         ], [
             'image.required' => 'Harap pilih file gambar terlebih dahulu.',
             'image.file' => 'File yang diunggah harus berupa gambar yang valid.',
