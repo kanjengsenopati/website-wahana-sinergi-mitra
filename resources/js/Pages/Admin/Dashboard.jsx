@@ -345,8 +345,6 @@ export default function Dashboard({
     rate_gudang: sectionData?.estimator_data?.building_options?.find((b) => b.id === 'gudang')?.baseRatePerM2 || 3600000,
     rate_komersial: sectionData?.estimator_data?.building_options?.find((b) => b.id === 'komersial')?.baseRatePerM2 || 5200000,
     rate_renovasi: sectionData?.estimator_data?.building_options?.find((b) => b.id === 'renovasi')?.baseRatePerM2 || 2800000,
-    rate_irigasi: sectionData?.estimator_data?.building_options?.find((b) => b.id === 'irigasi')?.baseRatePerM2 || 1850000,
-    rate_jalan: sectionData?.estimator_data?.building_options?.find((b) => b.id === 'jalan')?.baseRatePerM2 || 1450000,
   });
 
   const [workflowForm, setWorkflowForm] = useState({
@@ -424,12 +422,10 @@ export default function Dashboard({
   const handleSaveEstimatorSection = (e) => {
     e.preventDefault();
     const updatedOptions = [
-      { id: 'gedung', label: 'Gedung', icon: 'Building', isCivil: false, baseRatePerM2: Number(estimatorForm.rate_gedung), description: 'Struktur beton bertulang, fasilitas publik, pendidikan & bertingkat' },
-      { id: 'gudang', label: 'Gudang', icon: 'Warehouse', isCivil: false, baseRatePerM2: Number(estimatorForm.rate_gudang), description: 'Struktur baja WF, pelat beton heavy-duty, atap zincalume' },
-      { id: 'komersial', label: 'Perkantoran / Komersial', icon: 'Building2', isCivil: false, baseRatePerM2: Number(estimatorForm.rate_komersial), description: 'Struktur beton bertulang, fasad ACP/kaca, partisi rapi' },
-      { id: 'renovasi', label: 'Renovasi', icon: 'Wrench', isCivil: false, baseRatePerM2: Number(estimatorForm.rate_renovasi), description: 'Peremajaan fasad, perkuatan struktur, utilitas MEP baru' },
-      { id: 'irigasi', label: 'Irigasi / Drainase', icon: 'Waves', isCivil: true, baseRatePerM2: Number(estimatorForm.rate_irigasi), description: 'Saluran beton precast/cor, pintu air, pasangan batu kali' },
-      { id: 'jalan', label: 'Jalan', icon: 'Route', isCivil: true, baseRatePerM2: Number(estimatorForm.rate_jalan), description: 'Perkerasan beton rigid / aspal hotmix, pemadatan CBR' },
+      { id: 'gedung', label: 'Gedung', icon: 'Building', baseRatePerM2: Number(estimatorForm.rate_gedung), description: 'Struktur beton bertulang, fasilitas publik, pendidikan & bertingkat' },
+      { id: 'gudang', label: 'Gudang', icon: 'Warehouse', baseRatePerM2: Number(estimatorForm.rate_gudang), description: 'Struktur baja WF, pelat beton heavy-duty, atap zincalume' },
+      { id: 'komersial', label: 'Perkantoran / Komersial', icon: 'Building2', baseRatePerM2: Number(estimatorForm.rate_komersial), description: 'Struktur beton bertulang, fasad ACP/kaca, partisi rapi' },
+      { id: 'renovasi', label: 'Renovasi', icon: 'Wrench', baseRatePerM2: Number(estimatorForm.rate_renovasi), description: 'Peremajaan fasad, perkuatan struktur, utilitas MEP baru' },
     ];
     router.post('/admin/sections/estimator_data', {
       data: {
@@ -1927,24 +1923,6 @@ export default function Dashboard({
                               <CurrencyInput
                                 value={estimatorForm.rate_renovasi}
                                 onChange={(val) => setEstimatorForm({ ...estimatorForm, rate_renovasi: val })}
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
-                                Irigasi / Drainase (Rp/m²)
-                              </label>
-                              <CurrencyInput
-                                value={estimatorForm.rate_irigasi}
-                                onChange={(val) => setEstimatorForm({ ...estimatorForm, rate_irigasi: val })}
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
-                                Jalan (Rp/m²)
-                              </label>
-                              <CurrencyInput
-                                value={estimatorForm.rate_jalan}
-                                onChange={(val) => setEstimatorForm({ ...estimatorForm, rate_jalan: val })}
                               />
                             </div>
                           </div>

@@ -301,8 +301,6 @@ export function InquiryForm({ initialData = {}, company = {}, meta = {} }) {
                       <option value="Gudang">Gudang</option>
                       <option value="Perkantoran / Komersial">Perkantoran / Komersial</option>
                       <option value="Renovasi">Renovasi</option>
-                      <option value="Irigasi / Drainase">Irigasi / Drainase</option>
-                      <option value="Jalan">Jalan</option>
                     </select>
                   </div>
                 </div>

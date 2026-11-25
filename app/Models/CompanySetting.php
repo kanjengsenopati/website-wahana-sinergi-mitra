@@ -464,7 +464,6 @@ class CompanySetting extends Model
                         'label' => 'Gedung',
                         'icon' => 'Building',
                         'baseRatePerM2' => 5500000,
-                        'isCivil' => false,
                         'description' => 'Struktur beton bertulang, fasilitas publik, pendidikan & bertingkat',
                     ],
                     [
@@ -472,7 +471,6 @@ class CompanySetting extends Model
                         'label' => 'Gudang',
                         'icon' => 'Warehouse',
                         'baseRatePerM2' => 3600000,
-                        'isCivil' => false,
                         'description' => 'Struktur baja WF, pelat beton heavy-duty, atap zincalume',
                     ],
                     [
@@ -480,7 +478,6 @@ class CompanySetting extends Model
                         'label' => 'Perkantoran / Komersial',
                         'icon' => 'Building2',
                         'baseRatePerM2' => 5200000,
-                        'isCivil' => false,
                         'description' => 'Struktur beton bertulang, fasad ACP/kaca, partisi rapi',
                     ],
                     [
@@ -488,24 +485,7 @@ class CompanySetting extends Model
                         'label' => 'Renovasi',
                         'icon' => 'Wrench',
                         'baseRatePerM2' => 2800000,
-                        'isCivil' => false,
                         'description' => 'Peremajaan fasad, perkuatan struktur, utilitas MEP baru',
-                    ],
-                    [
-                        'id' => 'irigasi',
-                        'label' => 'Irigasi / Drainase',
-                        'icon' => 'Waves',
-                        'baseRatePerM2' => 1850000,
-                        'isCivil' => true,
-                        'description' => 'Saluran beton precast/cor, pintu air, pasangan batu kali',
-                    ],
-                    [
-                        'id' => 'jalan',
-                        'label' => 'Jalan',
-                        'icon' => 'Route',
-                        'baseRatePerM2' => 1450000,
-                        'isCivil' => true,
-                        'description' => 'Perkerasan beton rigid / aspal hotmix, pemadatan CBR',
                     ],
                 ],
                 'material_tiers' => [
@@ -601,7 +581,6 @@ class CompanySetting extends Model
                 'label' => $defaultOpt['label'],
                 'icon' => $defaultOpt['icon'],
                 'baseRatePerM2' => $rate,
-                'isCivil' => $defaultOpt['isCivil'],
                 'description' => $defaultOpt['description'],
             ];
         }
