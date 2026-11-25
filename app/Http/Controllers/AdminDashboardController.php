@@ -41,6 +41,8 @@ class AdminDashboardController extends Controller
             'hero_stat_value' => CompanySetting::get('hero_stat_value', 'Rp 85+ Miliar'),
             'hero_stat_satisfaction' => CompanySetting::get('hero_stat_satisfaction', '99.4%'),
             'hero_stat_safety' => CompanySetting::get('hero_stat_safety', '1.250.000+ Jam'),
+            'company_phone_landline' => CompanySetting::get('company_phone_landline', CompanySetting::DEFAULT_PHONE_LANDLINE),
+            'company_phone_landline_label' => CompanySetting::get('company_phone_landline_label', CompanySetting::DEFAULT_PHONE_LANDLINE_LABEL),
             'company_phone' => CompanySetting::get('company_phone', CompanySetting::DEFAULT_PHONE),
             'company_phone_label' => CompanySetting::get('company_phone_label', CompanySetting::DEFAULT_PHONE_LABEL),
             'company_phone_2' => CompanySetting::get('company_phone_2', CompanySetting::DEFAULT_PHONE_2),
@@ -350,6 +352,8 @@ class AdminDashboardController extends Controller
     {
         $request->validate([
             'company_logo_url' => 'nullable|string|max:500',
+            'company_phone_landline' => 'nullable|string|max:100',
+            'company_phone_landline_label' => 'nullable|string|max:100',
             'company_phone' => 'nullable|string|max:100',
             'company_phone_label' => 'nullable|string|max:100',
             'company_phone_2' => 'nullable|string|max:100',
@@ -407,6 +411,8 @@ class AdminDashboardController extends Controller
         }
 
         $nullableClearableKeys = [
+            'company_phone_landline',
+            'company_phone_landline_label',
             'company_phone_label',
             'company_phone_2',
             'company_phone_2_label',

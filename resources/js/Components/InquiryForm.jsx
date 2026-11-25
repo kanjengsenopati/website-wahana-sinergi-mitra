@@ -2,6 +2,7 @@ import React from 'react';
 import { useForm, usePage } from '@inertiajs/react';
 import {
   Send,
+  Phone,
   PhoneCall,
   CheckCircle2,
   MapPin,
@@ -22,6 +23,9 @@ export function InquiryForm({ initialData = {}, company = {}, meta = {} }) {
   const title = meta?.title || 'Rencanakan Proyek Impian {Bersama Tim Engineer Kami}';
   const subtitle = meta?.subtitle || 'Konsultasikan kebutuhan teknis, survei lokasi lahan, atau perhitungan RAB Anda. Tim estimator dan insinyur CV. Wahana Sinergi Mitra siap memberikan rekomendasi efisien dan tepat sasaran.';
 
+  const landlineDisplay = (company?.phone_landline ?? '024-7xxxx').trim();
+  const landlineLabel = company?.phone_landline_label || 'Telepon Kantor / Kabel';
+  const landlineHref = landlineDisplay ? `tel:${landlineDisplay.replace(/[^+\d]/g, '')}` : '';
   const phoneDisplay = company?.phone || '+62 812-3456-7890';
   const phoneLabel = company?.phone_label || 'Hotline Utama / Kantor';
   const phone2Display = (company?.phone_2 || '').trim();
@@ -104,8 +108,32 @@ export function InquiryForm({ initialData = {}, company = {}, meta = {} }) {
                 )}
               </div>
 
-              {/* Quick Contacts (2 WhatsApp Numbers, Email & 2 Official Addresses) */}
+              {/* Quick Contacts (Landline, 2 WhatsApp Numbers, Email & HQ Address) */}
               <div className="space-y-3 pt-2">
+                {landlineDisplay && (
+                  <a
+                    href={landlineHref || '#'}
+                    className="p-4 rounded-2xl bg-sky-50/70 hover:bg-sky-50 flex items-center gap-3.5 transition-colors group"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-sky-600 text-white flex items-center justify-center shrink-0">
+                      <Phone className="w-[18px] h-[18px] stroke-[2]" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2 min-w-0">
+                        <Text.Label title={landlineLabel} singleLine className="text-sky-900">
+                          {landlineLabel}
+                        </Text.Label>
+                        <span className="px-2 py-0.5 rounded-full bg-sky-600/10 text-sky-700 text-[10px] font-bold tracking-[-0.015em] shrink-0 whitespace-nowrap">
+                          Fixed Line
+                        </span>
+                      </div>
+                      <div className="text-[14px] font-bold text-slate-900 group-hover:text-sky-700 tracking-[-0.015em] truncate tabular-nums">
+                        {landlineDisplay}
+                      </div>
+                    </div>
+                  </a>
+                )}
+
                 <a
                   href={waUrl1}
                   target="_blank"
@@ -186,35 +214,6 @@ export function InquiryForm({ initialData = {}, company = {}, meta = {} }) {
                     </div>
                   </div>
                 </div>
-
-                {workshopAddressDisplay && (
-                  <div className="p-4 rounded-2xl bg-blue-50/50 flex items-start gap-3.5">
-                    <div className="w-10 h-10 rounded-xl bg-blue-700 text-white flex items-center justify-center shrink-0 mt-0.5">
-                      <Wrench className="w-[18px] h-[18px] stroke-[2]" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between gap-2 min-w-0">
-                        <Text.Label title="Alamat Workshop" singleLine className="text-blue-900">
-                          Alamat Workshop
-                        </Text.Label>
-                        {workshopMapExternalUrl && (
-                          <a
-                            href={workshopMapExternalUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-700 tracking-[-0.015em] shrink-0 whitespace-nowrap"
-                          >
-                            <span>Google Maps</span>
-                            <ExternalLink className="w-3 h-3" />
-                          </a>
-                        )}
-                      </div>
-                      <div className="text-[13px] font-semibold text-slate-800 leading-snug tracking-[-0.015em] mt-0.5">
-                        {workshopAddressDisplay}
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
 
@@ -370,6 +369,37 @@ export function InquiryForm({ initialData = {}, company = {}, meta = {} }) {
                   <span>{processing ? 'Mengirim Formulir...' : 'Kirim Pengajuan Proyek'}</span>
                 </button>
               </form>
+
+              {workshopAddressDisplay && (
+                <div className="mt-5 pt-4 border-t border-slate-200/80">
+                  <div className="p-4 rounded-2xl bg-blue-50/70 flex items-start gap-3.5">
+                    <div className="w-10 h-10 rounded-xl bg-blue-700 text-white flex items-center justify-center shrink-0 mt-0.5">
+                      <Wrench className="w-[18px] h-[18px] stroke-[2]" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2 min-w-0">
+                        <Text.Label title="Alamat Workshop" singleLine className="text-blue-900">
+                          Alamat Workshop
+                        </Text.Label>
+                        {workshopMapExternalUrl && (
+                          <a
+                            href={workshopMapExternalUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-700 tracking-[-0.015em] shrink-0 whitespace-nowrap"
+                          >
+                            <span>Google Maps</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        )}
+                      </div>
+                      <div className="text-[13px] font-semibold text-slate-800 leading-snug tracking-[-0.015em] mt-0.5">
+                        {workshopAddressDisplay}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
             </div>
 

@@ -12,6 +12,10 @@ class CompanySetting extends Model
 
     public const DEFAULT_LOGO_URL = '/images/logo-wsm.jpg';
 
+    public const DEFAULT_PHONE_LANDLINE = '024-7xxxx';
+
+    public const DEFAULT_PHONE_LANDLINE_LABEL = 'Telepon Kantor / Kabel';
+
     public const DEFAULT_PHONE = '+62 812-3456-7890';
 
     public const DEFAULT_PHONE_LABEL = 'Hotline Utama / Kantor';
@@ -237,6 +241,8 @@ class CompanySetting extends Model
 
         return [
             'logo_url' => self::getSiteLogoUrl(),
+            'phone_landline' => (string) static::get('company_phone_landline', self::DEFAULT_PHONE_LANDLINE),
+            'phone_landline_label' => (string) static::get('company_phone_landline_label', self::DEFAULT_PHONE_LANDLINE_LABEL),
             'phone' => (string) static::get('company_phone', self::DEFAULT_PHONE),
             'phone_label' => (string) static::get('company_phone_label', self::DEFAULT_PHONE_LABEL),
             'phone_2' => (string) static::get('company_phone_2', self::DEFAULT_PHONE_2),

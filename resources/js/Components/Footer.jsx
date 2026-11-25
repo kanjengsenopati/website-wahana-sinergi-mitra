@@ -19,6 +19,9 @@ import { buildWhatsAppUrl, resolveWorkshopMap } from '../utils/mapUtils';
 export function Footer({ company = {}, visibility = {} }) {
   const { site_logo: sharedSiteLogo } = usePage().props || {};
   const logoSrc = resolveSiteLogoUrl(company?.logo_url || sharedSiteLogo);
+  const landlineDisplay = (company?.phone_landline ?? '024-7xxxx').trim();
+  const landlineLabel = company?.phone_landline_label || 'Telepon Kantor / Kabel';
+  const landlineHref = landlineDisplay ? `tel:${landlineDisplay.replace(/[^+\d]/g, '')}` : '';
   const phoneDisplay = company?.phone || '+62 812-3456-7890';
   const phoneLabel = company?.phone_label || 'Hotline Utama / Kantor';
   const phone2Display = (company?.phone_2 || '').trim();
@@ -165,6 +168,20 @@ export function Footer({ company = {}, visibility = {} }) {
                           <ArrowUpRight className="w-3 h-3" />
                         </a>
                       )}
+                    </div>
+                  </li>
+                )}
+
+                {landlineDisplay && (
+                  <li className="flex items-start gap-3 pt-1">
+                    <Phone className="w-4 h-4 text-sky-400 shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <span className="text-[10.5px] font-bold uppercase tracking-[-0.015em] text-slate-300 block">
+                        {landlineLabel}
+                      </span>
+                      <a href={landlineHref || '#'} className="hover:text-sky-300 transition-colors tabular-nums">
+                        {landlineDisplay}
+                      </a>
                     </div>
                   </li>
                 )}

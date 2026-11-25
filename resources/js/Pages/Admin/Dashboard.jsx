@@ -616,6 +616,8 @@ export default function Dashboard({
     hero_stat_value: settings.hero_stat_value || 'Rp 85+ Miliar',
     hero_stat_satisfaction: settings.hero_stat_satisfaction || '99.4%',
     hero_stat_safety: settings.hero_stat_safety || '1.250.000+ Jam',
+    company_phone_landline: settings.company_phone_landline ?? '024-7xxxx',
+    company_phone_landline_label: settings.company_phone_landline_label || 'Telepon Kantor / Kabel',
     company_phone: settings.company_phone || '+62 812-3456-7890',
     company_phone_label: settings.company_phone_label || 'Hotline Utama / Kantor',
     company_phone_2: settings.company_phone_2 ?? '',
@@ -4184,8 +4186,36 @@ export default function Dashboard({
                   {/* Company Contacts Section (2 Numbers + Email + Hours) */}
                   <div className="pt-4 border-t border-slate-100 space-y-4">
                     <Text.SectionTitle className="text-blue-700 block">
-                      3. Kontak Resmi (2 Nomor WhatsApp / Telepon &amp; Email)
+                      3. Kontak Resmi (Telepon Kabel, 2 Nomor WhatsApp &amp; Email)
                     </Text.SectionTitle>
+
+                    {/* Landline / Wired Office Phone */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-2xl bg-sky-50/60 border border-sky-200/70">
+                      <div>
+                        <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
+                          Nomor Telepon Kabel (Fixed Line)
+                        </label>
+                        <input
+                          type="text"
+                          value={settingsForm.company_phone_landline}
+                          onChange={(e) => setSettingsForm({ ...settingsForm, company_phone_landline: e.target.value })}
+                          placeholder="024-7xxxx"
+                          className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-900"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
+                          Label Telepon Kabel
+                        </label>
+                        <input
+                          type="text"
+                          value={settingsForm.company_phone_landline_label}
+                          onChange={(e) => setSettingsForm({ ...settingsForm, company_phone_landline_label: e.target.value })}
+                          placeholder="Telepon Kantor / Kabel"
+                          className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-900"
+                        />
+                      </div>
+                    </div>
 
                     {/* Contact 1 */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-2xl bg-slate-50/80 border border-slate-200/70">
