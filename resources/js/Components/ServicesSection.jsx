@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { Link } from '@inertiajs/react';
 import { 
+  Building,
   Building2, 
   HardHat, 
   Warehouse, 
   Briefcase, 
   Wrench, 
   Hammer, 
+  Waves,
+  Route,
   ArrowUpRight, 
   CheckCircle2,
   ShieldCheck,
@@ -18,12 +21,15 @@ import { DEFAULT_PROJECT_PLACEHOLDER, resolveImageUrl } from '../utils/imageUtil
 import { DEFAULT_BADGE_COLOR, getBadgeContrastColor, normalizeBadgeColor } from '../utils/badgeUtils';
 
 const iconMap = {
+  Building,
   Building2,
   HardHat,
   Warehouse,
   Briefcase,
   Wrench,
   Hammer,
+  Waves,
+  Route,
 };
 
 const servicePhotos = [

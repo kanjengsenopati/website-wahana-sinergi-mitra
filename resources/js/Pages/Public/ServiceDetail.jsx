@@ -1,12 +1,15 @@
 import React from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { 
+  Building,
   Building2, 
   HardHat, 
   Warehouse, 
   Briefcase, 
   Wrench, 
   Hammer, 
+  Waves,
+  Route,
   ArrowLeft, 
   CheckCircle2, 
   Phone, 
@@ -23,12 +26,15 @@ import Text from '../../Components/Typography';
 import { DEFAULT_PROJECT_PLACEHOLDER, resolveImageUrl } from '../../utils/imageUtils';
 
 const iconMap = {
+  Building,
   Building2,
   HardHat,
   Warehouse,
   Briefcase,
   Wrench,
   Hammer,
+  Waves,
+  Route,
 };
 
 export default function ServiceDetail({ 

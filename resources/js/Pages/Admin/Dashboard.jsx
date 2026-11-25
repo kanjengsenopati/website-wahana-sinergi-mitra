@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Head, router, usePage, Link } from '@inertiajs/react';
 import { 
+  Building,
   Building2, 
   HardHat, 
+  Waves,
+  Route,
   MessageSquareText, 
   Star, 
   SlidersHorizontal, 
@@ -81,12 +84,15 @@ import {
 import { resolveWorkshopMap } from '../../utils/mapUtils';
 
 const iconMap = {
+  Building,
   Building2,
   HardHat,
   Warehouse,
   Briefcase,
   Wrench,
   Hammer,
+  Waves,
+  Route,
 };
 
 export default function Dashboard({ 
@@ -586,7 +592,7 @@ export default function Dashboard({
 
   const [serviceForm, setServiceForm] = useState({
     title: '',
-    icon: 'Building2',
+    icon: 'Building',
     badge_text: '',
     badge_color: DEFAULT_BADGE_COLOR,
     image_url: '',
@@ -737,7 +743,7 @@ export default function Dashboard({
   const openCreateService = () => {
     setServiceForm({
       title: '',
-      icon: 'Building2',
+      icon: 'Building',
       badge_text: '',
       badge_color: DEFAULT_BADGE_COLOR,
       image_url: '',
@@ -3300,18 +3306,32 @@ export default function Dashboard({
                         <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                           Icon Representatif
                         </label>
-                        <select
-                          value={serviceForm.icon}
-                          onChange={(e) => setServiceForm({ ...serviceForm, icon: e.target.value })}
-                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                        >
-                          <option value="Building2">Building2 (Gedung)</option>
-                          <option value="HardHat">HardHat (K3 / Kontraktor)</option>
-                          <option value="Warehouse">Warehouse (Pergudangan)</option>
-                          <option value="Briefcase">Briefcase (Komersial)</option>
-                          <option value="Wrench">Wrench (MEP / Utilitas)</option>
-                          <option value="Hammer">Hammer (Renovasi)</option>
-                        </select>
+                        <div className="flex items-center gap-2.5">
+                          <div
+                            title={serviceForm.icon}
+                            className="w-10 h-10 rounded-xl bg-sky-50 border border-sky-200 text-sky-700 flex items-center justify-center shrink-0"
+                          >
+                            {(() => {
+                              const SelectedIconComp = iconMap[serviceForm.icon] || Building;
+                              return <SelectedIconComp className="w-5 h-5" />;
+                            })()}
+                          </div>
+                          <select
+                            value={serviceForm.icon}
+                            onChange={(e) => setServiceForm({ ...serviceForm, icon: e.target.value })}
+                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                          >
+                            <option value="Building">Building (Gedung)</option>
+                            <option value="Warehouse">Warehouse (Gudang)</option>
+                            <option value="Building2">Building2 (Perkantoran / Komersial)</option>
+                            <option value="Wrench">Wrench (Renovasi)</option>
+                            <option value="Waves">Waves (Irigasi / Drainase)</option>
+                            <option value="Route">Route (Jalan)</option>
+                            {['HardHat', 'Briefcase', 'Hammer'].includes(serviceForm.icon) && (
+                              <option value={serviceForm.icon}>{serviceForm.icon} (Legacy)</option>
+                            )}
+                          </select>
+                        </div>
                       </div>
 
                       <div>
