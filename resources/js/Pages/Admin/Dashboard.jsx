@@ -341,10 +341,13 @@ export default function Dashboard({
     badge: sectionData?.estimator_data?.badge || 'Kalkulator Biaya Proyek',
     title: sectionData?.estimator_data?.title || 'Simulasi Estimasi Rencana Anggaran Biaya (RAB)',
     subtitle: sectionData?.estimator_data?.subtitle || 'Dapatkan estimasi awal biaya pembangunan proyek Anda secara transparan berdasarkan luas bangunan dan spesifikasi mutu material berstandar SNI.',
-    rate_gedung: sectionData?.estimator_data?.building_options?.find((b) => b.id === 'gedung')?.baseRatePerM2 || 5500000,
+    rate_hunian: sectionData?.estimator_data?.building_options?.find((b) => b.id === 'hunian')?.baseRatePerM2 || 4500000,
+    rate_kantor: sectionData?.estimator_data?.building_options?.find((b) => b.id === 'kantor')?.baseRatePerM2 || 5200000,
     rate_gudang: sectionData?.estimator_data?.building_options?.find((b) => b.id === 'gudang')?.baseRatePerM2 || 3600000,
-    rate_komersial: sectionData?.estimator_data?.building_options?.find((b) => b.id === 'komersial')?.baseRatePerM2 || 5200000,
-    rate_renovasi: sectionData?.estimator_data?.building_options?.find((b) => b.id === 'renovasi')?.baseRatePerM2 || 2800000,
+    rate_kesehatan: sectionData?.estimator_data?.building_options?.find((b) => b.id === 'kesehatan')?.baseRatePerM2 || 6500000,
+    rate_pendidikan: sectionData?.estimator_data?.building_options?.find((b) => b.id === 'pendidikan')?.baseRatePerM2 || 5000000,
+    rate_komersial_khusus: sectionData?.estimator_data?.building_options?.find((b) => b.id === 'komersial_khusus')?.baseRatePerM2 || 5800000,
+    rate_renovasi_hunian: sectionData?.estimator_data?.building_options?.find((b) => b.id === 'renovasi_hunian')?.baseRatePerM2 || 2800000,
   });
 
   const [workflowForm, setWorkflowForm] = useState({
@@ -422,10 +425,13 @@ export default function Dashboard({
   const handleSaveEstimatorSection = (e) => {
     e.preventDefault();
     const updatedOptions = [
-      { id: 'gedung', label: 'Gedung', icon: 'Building', baseRatePerM2: Number(estimatorForm.rate_gedung), description: 'Struktur beton bertulang, fasilitas publik, pendidikan & bertingkat' },
+      { id: 'hunian', label: 'Hunian', icon: 'Home', baseRatePerM2: Number(estimatorForm.rate_hunian), description: 'Rumah tinggal, cluster perumahan, struktur beton bertulang & finishing rapi' },
+      { id: 'kantor', label: 'Kantor / Ruko / Publik', icon: 'Building2', baseRatePerM2: Number(estimatorForm.rate_kantor), description: 'Gedung kantor, ruko komersial, fasilitas layanan publik & fasad ACP/kaca' },
       { id: 'gudang', label: 'Gudang', icon: 'Warehouse', baseRatePerM2: Number(estimatorForm.rate_gudang), description: 'Struktur baja WF, pelat beton heavy-duty, atap zincalume' },
-      { id: 'komersial', label: 'Perkantoran / Komersial', icon: 'Building2', baseRatePerM2: Number(estimatorForm.rate_komersial), description: 'Struktur beton bertulang, fasad ACP/kaca, partisi rapi' },
-      { id: 'renovasi', label: 'Renovasi', icon: 'Wrench', baseRatePerM2: Number(estimatorForm.rate_renovasi), description: 'Peremajaan fasad, perkuatan struktur, utilitas MEP baru' },
+      { id: 'kesehatan', label: 'Kesehatan', icon: 'HeartPulse', baseRatePerM2: Number(estimatorForm.rate_kesehatan), description: 'Klinik, rumah sakit, ruang steril, tata udara HVAC & MEP medis' },
+      { id: 'pendidikan', label: 'Pendidikan', icon: 'GraduationCap', baseRatePerM2: Number(estimatorForm.rate_pendidikan), description: 'Sekolah, kampus, laboratorium & aula dengan standar akustik dan K3' },
+      { id: 'komersial_khusus', label: 'Komersial Khusus', icon: 'Store', baseRatePerM2: Number(estimatorForm.rate_komersial_khusus), description: 'Showroom, hotel, pusat niaga, restoran & bangunan komersial tematik' },
+      { id: 'renovasi_hunian', label: 'Renovasi Hunian', icon: 'Wrench', baseRatePerM2: Number(estimatorForm.rate_renovasi_hunian), description: 'Peremajaan fasad, perluasan ruang, perkuatan struktur & MEP baru' },
     ];
     router.post('/admin/sections/estimator_data', {
       data: {
@@ -1893,11 +1899,20 @@ export default function Dashboard({
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                               <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
-                                Gedung (Rp/m²)
+                                Hunian (Rp/m²)
                               </label>
                               <CurrencyInput
-                                value={estimatorForm.rate_gedung}
-                                onChange={(val) => setEstimatorForm({ ...estimatorForm, rate_gedung: val })}
+                                value={estimatorForm.rate_hunian}
+                                onChange={(val) => setEstimatorForm({ ...estimatorForm, rate_hunian: val })}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
+                                Kantor / Ruko / Publik (Rp/m²)
+                              </label>
+                              <CurrencyInput
+                                value={estimatorForm.rate_kantor}
+                                onChange={(val) => setEstimatorForm({ ...estimatorForm, rate_kantor: val })}
                               />
                             </div>
                             <div>
@@ -1911,20 +1926,38 @@ export default function Dashboard({
                             </div>
                             <div>
                               <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
-                                Perkantoran / Komersial (Rp/m²)
+                                Kesehatan (Rp/m²)
                               </label>
                               <CurrencyInput
-                                value={estimatorForm.rate_komersial}
-                                onChange={(val) => setEstimatorForm({ ...estimatorForm, rate_komersial: val })}
+                                value={estimatorForm.rate_kesehatan}
+                                onChange={(val) => setEstimatorForm({ ...estimatorForm, rate_kesehatan: val })}
                               />
                             </div>
                             <div>
                               <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
-                                Renovasi (Rp/m²)
+                                Pendidikan (Rp/m²)
                               </label>
                               <CurrencyInput
-                                value={estimatorForm.rate_renovasi}
-                                onChange={(val) => setEstimatorForm({ ...estimatorForm, rate_renovasi: val })}
+                                value={estimatorForm.rate_pendidikan}
+                                onChange={(val) => setEstimatorForm({ ...estimatorForm, rate_pendidikan: val })}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
+                                Komersial Khusus (Rp/m²)
+                              </label>
+                              <CurrencyInput
+                                value={estimatorForm.rate_komersial_khusus}
+                                onChange={(val) => setEstimatorForm({ ...estimatorForm, rate_komersial_khusus: val })}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
+                                Renovasi Hunian (Rp/m²)
+                              </label>
+                              <CurrencyInput
+                                value={estimatorForm.rate_renovasi_hunian}
+                                onChange={(val) => setEstimatorForm({ ...estimatorForm, rate_renovasi_hunian: val })}
                               />
                             </div>
                           </div>

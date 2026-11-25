@@ -1,11 +1,14 @@
 import React, { useState, useMemo } from 'react';
-import { Calculator, ArrowRight, Building, Warehouse, Building2, Wrench, Sparkles } from 'lucide-react';
+import { Calculator, ArrowRight, Home, Building2, Warehouse, HeartPulse, GraduationCap, Store, Wrench, Sparkles } from 'lucide-react';
 import Text, { formatRupiah } from './Typography';
 
 const iconMap = {
-  Building,
-  Warehouse,
+  Home,
   Building2,
+  Warehouse,
+  HeartPulse,
+  GraduationCap,
+  Store,
   Wrench,
   Calculator,
   Sparkles,
@@ -13,11 +16,18 @@ const iconMap = {
 
 const defaultBuildingOptions = [
   {
-    id: 'gedung',
-    label: 'Gedung',
-    icon: 'Building',
-    baseRatePerM2: 5500000,
-    description: 'Struktur beton bertulang, fasilitas publik, pendidikan & bertingkat',
+    id: 'hunian',
+    label: 'Hunian',
+    icon: 'Home',
+    baseRatePerM2: 4500000,
+    description: 'Rumah tinggal, cluster perumahan, struktur beton bertulang & finishing rapi',
+  },
+  {
+    id: 'kantor',
+    label: 'Kantor / Ruko / Publik',
+    icon: 'Building2',
+    baseRatePerM2: 5200000,
+    description: 'Gedung kantor, ruko komersial, fasilitas layanan publik & fasad ACP/kaca',
   },
   {
     id: 'gudang',
@@ -27,18 +37,32 @@ const defaultBuildingOptions = [
     description: 'Struktur baja WF, pelat beton heavy-duty, atap zincalume',
   },
   {
-    id: 'komersial',
-    label: 'Perkantoran / Komersial',
-    icon: 'Building2',
-    baseRatePerM2: 5200000,
-    description: 'Struktur beton bertulang, fasad ACP/kaca, partisi rapi',
+    id: 'kesehatan',
+    label: 'Kesehatan',
+    icon: 'HeartPulse',
+    baseRatePerM2: 6500000,
+    description: 'Klinik, rumah sakit, ruang steril, tata udara HVAC & MEP medis',
   },
   {
-    id: 'renovasi',
-    label: 'Renovasi',
+    id: 'pendidikan',
+    label: 'Pendidikan',
+    icon: 'GraduationCap',
+    baseRatePerM2: 5000000,
+    description: 'Sekolah, kampus, laboratorium & aula dengan standar akustik dan K3',
+  },
+  {
+    id: 'komersial_khusus',
+    label: 'Komersial Khusus',
+    icon: 'Store',
+    baseRatePerM2: 5800000,
+    description: 'Showroom, hotel, pusat niaga, restoran & bangunan komersial tematik',
+  },
+  {
+    id: 'renovasi_hunian',
+    label: 'Renovasi Hunian',
     icon: 'Wrench',
     baseRatePerM2: 2800000,
-    description: 'Peremajaan fasad, perkuatan struktur, utilitas MEP baru',
+    description: 'Peremajaan fasad, perluasan ruang, perkuatan struktur & MEP baru',
   },
 ];
 
@@ -63,7 +87,7 @@ export function CostEstimator({ data = {}, onApplyToForm }) {
     ? data.material_tiers
     : defaultMaterialTiers;
 
-  const [buildingType, setBuildingType] = useState('komersial');
+  const [buildingType, setBuildingType] = useState('kantor');
   const [areaM2, setAreaM2] = useState(350);
   const [materialTier, setMaterialTier] = useState('premium');
   const [floors, setFloors] = useState(2);

@@ -60,7 +60,7 @@ export function InquiryForm({ initialData = {}, company = {}, meta = {} }) {
     client_name: '',
     phone_wa: '',
     email: '',
-    project_type: initialData.project_type || 'Perkantoran / Komersial',
+    project_type: initialData.project_type || 'Kantor / Ruko / Publik',
     building_area_m2: initialData.building_area_m2 || '',
     estimated_budget: initialData.estimated_budget || '',
     location: '',
@@ -296,10 +296,13 @@ export function InquiryForm({ initialData = {}, company = {}, meta = {} }) {
                       onChange={(e) => setData('project_type', e.target.value)}
                       className="w-full px-4 py-3 bg-white text-slate-900 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium text-[14px]"
                     >
-                      <option value="Gedung">Gedung</option>
+                      <option value="Hunian">Hunian</option>
+                      <option value="Kantor / Ruko / Publik">Kantor / Ruko / Publik</option>
                       <option value="Gudang">Gudang</option>
-                      <option value="Perkantoran / Komersial">Perkantoran / Komersial</option>
-                      <option value="Renovasi">Renovasi</option>
+                      <option value="Kesehatan">Kesehatan</option>
+                      <option value="Pendidikan">Pendidikan</option>
+                      <option value="Komersial Khusus">Komersial Khusus</option>
+                      <option value="Renovasi Hunian">Renovasi Hunian</option>
                     </select>
                   </div>
                 </div>

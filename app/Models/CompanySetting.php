@@ -466,11 +466,18 @@ class CompanySetting extends Model
                 'subtitle' => 'Dapatkan estimasi awal biaya pembangunan proyek Anda secara transparan berdasarkan kategori bangunan, luas lantai, dan kelas material standar SNI.',
                 'building_options' => [
                     [
-                        'id' => 'gedung',
-                        'label' => 'Gedung',
-                        'icon' => 'Building',
-                        'baseRatePerM2' => 5500000,
-                        'description' => 'Struktur beton bertulang, fasilitas publik, pendidikan & bertingkat',
+                        'id' => 'hunian',
+                        'label' => 'Hunian',
+                        'icon' => 'Home',
+                        'baseRatePerM2' => 4500000,
+                        'description' => 'Rumah tinggal, cluster perumahan, struktur beton bertulang & finishing rapi',
+                    ],
+                    [
+                        'id' => 'kantor',
+                        'label' => 'Kantor / Ruko / Publik',
+                        'icon' => 'Building2',
+                        'baseRatePerM2' => 5200000,
+                        'description' => 'Gedung kantor, ruko komersial, fasilitas layanan publik & fasad ACP/kaca',
                     ],
                     [
                         'id' => 'gudang',
@@ -480,18 +487,32 @@ class CompanySetting extends Model
                         'description' => 'Struktur baja WF, pelat beton heavy-duty, atap zincalume',
                     ],
                     [
-                        'id' => 'komersial',
-                        'label' => 'Perkantoran / Komersial',
-                        'icon' => 'Building2',
-                        'baseRatePerM2' => 5200000,
-                        'description' => 'Struktur beton bertulang, fasad ACP/kaca, partisi rapi',
+                        'id' => 'kesehatan',
+                        'label' => 'Kesehatan',
+                        'icon' => 'HeartPulse',
+                        'baseRatePerM2' => 6500000,
+                        'description' => 'Klinik, rumah sakit, ruang steril, tata udara HVAC & MEP medis',
                     ],
                     [
-                        'id' => 'renovasi',
-                        'label' => 'Renovasi',
+                        'id' => 'pendidikan',
+                        'label' => 'Pendidikan',
+                        'icon' => 'GraduationCap',
+                        'baseRatePerM2' => 5000000,
+                        'description' => 'Sekolah, kampus, laboratorium & aula dengan standar akustik dan K3',
+                    ],
+                    [
+                        'id' => 'komersial_khusus',
+                        'label' => 'Komersial Khusus',
+                        'icon' => 'Store',
+                        'baseRatePerM2' => 5800000,
+                        'description' => 'Showroom, hotel, pusat niaga, restoran & bangunan komersial tematik',
+                    ],
+                    [
+                        'id' => 'renovasi_hunian',
+                        'label' => 'Renovasi Hunian',
                         'icon' => 'Wrench',
                         'baseRatePerM2' => 2800000,
-                        'description' => 'Peremajaan fasad, perkuatan struktur, utilitas MEP baru',
+                        'description' => 'Peremajaan fasad, perluasan ruang, perkuatan struktur & MEP baru',
                     ],
                 ],
                 'material_tiers' => [
@@ -574,10 +595,15 @@ class CompanySetting extends Model
             }
         }
 
+        $legacyAliases = [
+            'kantor' => 'komersial',
+            'renovasi_hunian' => 'renovasi',
+        ];
+
         $normalized = [];
         foreach ($defaultOptions as $defaultOpt) {
             $id = $defaultOpt['id'];
-            $saved = $savedById[$id] ?? [];
+            $saved = $savedById[$id] ?? ($legacyAliases[$id] ?? null ? ($savedById[$legacyAliases[$id]] ?? []) : []);
             $rate = isset($saved['baseRatePerM2']) && is_numeric($saved['baseRatePerM2']) && (float) $saved['baseRatePerM2'] > 0
                 ? (int) $saved['baseRatePerM2']
                 : $defaultOpt['baseRatePerM2'];
