@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import Text from './Typography';
 import { DEFAULT_PROJECT_PLACEHOLDER, resolveImageUrl } from '../utils/imageUtils';
+import { DEFAULT_BADGE_COLOR, getBadgeContrastColor, normalizeBadgeColor } from '../utils/badgeUtils';
 
 const iconMap = {
   Building2,
@@ -32,15 +33,6 @@ const servicePhotos = [
   'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=900&q=80',
   'https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=900&q=80',
   'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=900&q=80',
-];
-
-const serviceStandards = [
-  'SNI 1729 & SNI 2847',
-  'Fabrikasi Baja WF Presisi',
-  'Garansi Struktur & Retensi',
-  'Instalasi Standar PUIL & NFPA',
-  'Perkerasan Rigid K-350/K-400',
-  'DED & As-Built Drawing Lengkap',
 ];
 
 export function ServicesSection({ services = [], meta = {} }) {
@@ -93,7 +85,9 @@ export function ServicesSection({ services = [], meta = {} }) {
           {services.map((service, idx) => {
             const IconComponent = iconMap[service.icon] || Building2;
             const photoUrl = resolveImageUrl(service.image_url, servicePhotos[idx % servicePhotos.length]);
-            const standardLabel = serviceStandards[idx % serviceStandards.length];
+            const badgeText = (service.badge_text || '').trim();
+            const badgeBgColor = normalizeBadgeColor(service.badge_color || DEFAULT_BADGE_COLOR);
+            const badgeTextColor = getBadgeContrastColor(badgeBgColor);
             const isActive = activeCardId === (service.id || idx);
 
             return (
@@ -122,9 +116,14 @@ export function ServicesSection({ services = [], meta = {} }) {
                       <IconComponent className="w-[18px] h-[18px] stroke-[2]" />
                     </div>
                     <div className="flex items-center gap-2 shrink-0 whitespace-nowrap">
-                      <span className="px-3 py-1 rounded-full bg-emerald-600 text-white text-[11px] font-bold tracking-[-0.015em] shadow-sm">
-                        {standardLabel}
-                      </span>
+                      {badgeText && (
+                        <span
+                          style={{ backgroundColor: badgeBgColor, color: badgeTextColor }}
+                          className="px-3 py-1 rounded-full text-[11px] font-bold tracking-[-0.015em] shadow-sm"
+                        >
+                          {badgeText}
+                        </span>
+                      )}
                       <span className="px-2.5 py-1 rounded-full bg-white/90 text-slate-900 text-[11px] font-extrabold tracking-[-0.015em]">
                         0{idx + 1}
                       </span>
@@ -192,10 +191,12 @@ export function ServicesSection({ services = [], meta = {} }) {
 
                     {/* Technical Deliverable Pills */}
                     <div className="flex flex-wrap items-center gap-1.5">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-[11px] font-bold tracking-[-0.015em]">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                        <span>{standardLabel}</span>
-                      </span>
+                      {badgeText && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-[11px] font-bold tracking-[-0.015em]">
+                          <CheckCircle2 className="w-3 h-3 shrink-0" style={{ color: badgeBgColor }} />
+                          <span>{badgeText}</span>
+                        </span>
+                      )}
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-[11px] font-bold tracking-[-0.015em]">
                         <ShieldCheck className="w-3 h-3 text-blue-600" />
                         <span>Mutu Teruji Lab</span>

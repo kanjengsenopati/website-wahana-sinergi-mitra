@@ -210,6 +210,8 @@ class AdminDashboardController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'icon' => 'required|string|max:50',
+            'badge_text' => 'nullable|string|max:80',
+            'badge_color' => ['nullable', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'image_url' => 'nullable|string',
             'short_description' => 'required|string',
             'full_description' => 'nullable|string',
@@ -221,6 +223,8 @@ class AdminDashboardController extends Controller
 
         Service::create([
             ...$validated,
+            'badge_text' => filled($validated['badge_text'] ?? null) ? trim($validated['badge_text']) : null,
+            'badge_color' => $validated['badge_color'] ?? '#059669',
             'slug' => $slug,
             'order' => $request->input('order', 0),
             'is_active' => $request->boolean('is_active', true),
@@ -234,6 +238,8 @@ class AdminDashboardController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'icon' => 'required|string|max:50',
+            'badge_text' => 'nullable|string|max:80',
+            'badge_color' => ['nullable', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'image_url' => 'nullable|string',
             'short_description' => 'required|string',
             'full_description' => 'nullable|string',
@@ -243,6 +249,8 @@ class AdminDashboardController extends Controller
 
         $service->update([
             ...$validated,
+            'badge_text' => filled($validated['badge_text'] ?? null) ? trim($validated['badge_text']) : null,
+            'badge_color' => $validated['badge_color'] ?? ($service->badge_color ?: '#059669'),
             'order' => $request->input('order', $service->order),
             'is_active' => $request->boolean('is_active', $service->is_active),
         ]);

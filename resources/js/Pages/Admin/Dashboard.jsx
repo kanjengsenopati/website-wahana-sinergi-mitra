@@ -63,6 +63,12 @@ import CurrencyInput from '../../Components/CurrencyInput';
 import ImageUploader from '../../Components/ImageUploader';
 import MultiImageUploader from '../../Components/MultiImageUploader';
 import {
+  BADGE_COLOR_PRESETS,
+  DEFAULT_BADGE_COLOR,
+  getBadgeContrastColor,
+  normalizeBadgeColor,
+} from '../../utils/badgeUtils';
+import {
   DEFAULT_PROJECT_PLACEHOLDER,
   DEFAULT_SITE_LOGO,
   DEFAULT_PROJECT_CATEGORIES,
@@ -577,6 +583,8 @@ export default function Dashboard({
   const [serviceForm, setServiceForm] = useState({
     title: '',
     icon: 'Building2',
+    badge_text: '',
+    badge_color: DEFAULT_BADGE_COLOR,
     image_url: '',
     short_description: '',
     full_description: '',
@@ -726,6 +734,8 @@ export default function Dashboard({
     setServiceForm({
       title: '',
       icon: 'Building2',
+      badge_text: '',
+      badge_color: DEFAULT_BADGE_COLOR,
       image_url: '',
       short_description: '',
       full_description: '',
@@ -740,6 +750,8 @@ export default function Dashboard({
     setServiceForm({
       title: item.title,
       icon: item.icon,
+      badge_text: item.badge_text || '',
+      badge_color: normalizeBadgeColor(item.badge_color),
       image_url: item.image_url || '',
       short_description: item.short_description,
       full_description: item.full_description || '',
@@ -3141,7 +3153,19 @@ export default function Dashboard({
                                 </span>
                               </div>
 
-                              <div className="absolute top-3.5 right-3.5">
+                              <div className="absolute top-3.5 right-3.5 flex items-center gap-1.5">
+                                {srv.badge_text && (
+                                  <span
+                                    style={{
+                                      backgroundColor: normalizeBadgeColor(srv.badge_color),
+                                      color: getBadgeContrastColor(srv.badge_color),
+                                    }}
+                                    className="text-[10px] font-bold px-2.5 py-1 rounded-full shadow-xs max-w-[140px] truncate"
+                                    title={srv.badge_text}
+                                  >
+                                    {srv.badge_text}
+                                  </span>
+                                )}
                                 <span className="text-[10px] font-bold text-white bg-slate-900/80 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10">
                                   Urutan: {srv.order || idx + 1}
                                 </span>
@@ -3281,6 +3305,70 @@ export default function Dashboard({
                       </div>
                     </div>
 
+                    {/* Custom Badge Text & Color */}
+                    <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 space-y-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
+                            Teks Badge Kartu (Opsional)
+                          </label>
+                          <input
+                            type="text"
+                            maxLength={80}
+                            value={serviceForm.badge_text}
+                            onChange={(e) => setServiceForm({ ...serviceForm, badge_text: e.target.value })}
+                            placeholder="Contoh: SNI 1729 & SNI 2847"
+                            className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                          />
+                          <p className="mt-1 text-[11px] text-slate-600">
+                            Kosongkan jika tidak ingin menampilkan badge pada kartu.
+                          </p>
+                        </div>
+
+                        <div>
+                          <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
+                            Warna Badge (Preset / Custom Hex)
+                          </label>
+                          <div className="flex flex-wrap items-center gap-2 mb-2">
+                            {BADGE_COLOR_PRESETS.map((preset) => {
+                              const isSelected = normalizeBadgeColor(serviceForm.badge_color) === preset.hex;
+                              return (
+                                <button
+                                  key={preset.hex}
+                                  type="button"
+                                  onClick={() => setServiceForm({ ...serviceForm, badge_color: preset.hex })}
+                                  title={`${preset.name} (${preset.hex})`}
+                                  style={{ backgroundColor: preset.hex }}
+                                  className={`w-7 h-7 rounded-full transition-transform cursor-pointer flex items-center justify-center ${
+                                    isSelected ? 'ring-2 ring-offset-2 ring-slate-900 scale-110' : 'hover:scale-105 opacity-90 hover:opacity-100'
+                                  }`}
+                                >
+                                  {isSelected && <Check className="w-3.5 h-3.5 text-white stroke-[3]" />}
+                                </button>
+                              );
+                            })}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="color"
+                              value={normalizeBadgeColor(serviceForm.badge_color)}
+                              onChange={(e) => setServiceForm({ ...serviceForm, badge_color: e.target.value.toUpperCase() })}
+                              className="w-10 h-9 p-0.5 rounded-lg border border-slate-200 bg-white cursor-pointer shrink-0"
+                              title="Pilih Warna Custom"
+                            />
+                            <input
+                              type="text"
+                              maxLength={7}
+                              value={serviceForm.badge_color}
+                              onChange={(e) => setServiceForm({ ...serviceForm, badge_color: e.target.value })}
+                              placeholder="#059669"
+                              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-800 uppercase focus:outline-none focus:ring-2 focus:ring-sky-500"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                     <div>
                       <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
                         Deskripsi Singkat (Tampil di Kartu) <span className="text-rose-500">*</span>
@@ -3367,9 +3455,17 @@ export default function Dashboard({
                           })()}
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <span className="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-bold shadow-xs">
-                            STANDAR MUTU &amp; K3
-                          </span>
+                          {(serviceForm.badge_text || '').trim() && (
+                            <span
+                              style={{
+                                backgroundColor: normalizeBadgeColor(serviceForm.badge_color),
+                                color: getBadgeContrastColor(serviceForm.badge_color),
+                              }}
+                              className="px-2.5 py-0.5 rounded-full text-[10px] font-bold shadow-xs max-w-[170px] truncate"
+                            >
+                              {serviceForm.badge_text.trim()}
+                            </span>
+                          )}
                           <span className="px-2 py-0.5 rounded-full bg-white/90 text-slate-900 text-[10px] font-black">
                             0{serviceForm.order || 1}
                           </span>

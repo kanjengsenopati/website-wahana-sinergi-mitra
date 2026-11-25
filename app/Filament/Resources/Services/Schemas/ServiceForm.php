@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Services\Schemas;
 
 use App\Support\MediaStorage;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -23,6 +24,13 @@ class ServiceForm
                 TextInput::make('icon')
                     ->required()
                     ->default('Building2'),
+                TextInput::make('badge_text')
+                    ->label('Teks Badge Layanan (Opsional)')
+                    ->maxLength(80)
+                    ->placeholder('Contoh: SNI 1729 & SNI 2847'),
+                ColorPicker::make('badge_color')
+                    ->label('Warna Badge')
+                    ->default('#059669'),
                 FileUpload::make('image_url')
                     ->label('Foto Banner Layanan')
                     ->image()
