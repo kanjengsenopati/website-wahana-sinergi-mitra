@@ -56,7 +56,7 @@ export function InquiryForm({ initialData = {}, company = {}, meta = {} }) {
     client_name: '',
     phone_wa: '',
     email: '',
-    project_type: initialData.project_type || 'Komersial / Ruko / Kantor',
+    project_type: initialData.project_type || 'Perkantoran / Komersial',
     building_area_m2: initialData.building_area_m2 || '',
     estimated_budget: initialData.estimated_budget || '',
     location: '',
@@ -297,14 +297,12 @@ export function InquiryForm({ initialData = {}, company = {}, meta = {} }) {
                       onChange={(e) => setData('project_type', e.target.value)}
                       className="w-full px-4 py-3 bg-white text-slate-900 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium text-[14px]"
                     >
-                      <option value="Komersial / Ruko / Kantor">Komersial / Ruko / Kantor</option>
-                      <option value="Gudang & Industri">Gudang & Bangunan Industri</option>
-                      <option value="Hunian Residensial">Hunian Residensial</option>
-                      <option value="Bangunan Pendidikan">Bangunan Pendidikan</option>
-                      <option value="Bangunan Kesehatan">Bangunan Kesehatan</option>
-                      <option value="Bangunan Penginapan">Bangunan Penginapan</option>
-                      <option value="Renovasi & Retrofitting">Renovasi & Retrofitting</option>
-                      <option value="Pekerjaan Sipil & Infrastruktur">Pekerjaan Sipil & Infrastruktur</option>
+                      <option value="Gedung">Gedung</option>
+                      <option value="Gudang">Gudang</option>
+                      <option value="Perkantoran / Komersial">Perkantoran / Komersial</option>
+                      <option value="Renovasi">Renovasi</option>
+                      <option value="Irigasi / Drainase">Irigasi / Drainase</option>
+                      <option value="Jalan">Jalan</option>
                     </select>
                   </div>
                 </div>

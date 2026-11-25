@@ -1,44 +1,66 @@
 import React, { useState, useMemo } from 'react';
-import { Calculator, ArrowRight, Check, HelpCircle, Building2, Warehouse, Home, Wrench, Sparkles } from 'lucide-react';
+import { Calculator, ArrowRight, Building, Warehouse, Building2, Wrench, Waves, Route, Sparkles } from 'lucide-react';
 import Text, { formatRupiah } from './Typography';
 
 const iconMap = {
+  Building,
   Warehouse,
   Building2,
-  Home,
   Wrench,
+  Waves,
+  Route,
   Calculator,
   Sparkles,
 };
 
 const defaultBuildingOptions = [
   {
+    id: 'gedung',
+    label: 'Gedung',
+    icon: 'Building',
+    baseRatePerM2: 5500000,
+    isCivil: false,
+    description: 'Struktur beton bertulang, fasilitas publik, pendidikan & bertingkat',
+  },
+  {
     id: 'gudang',
-    label: 'Gudang & Industri',
+    label: 'Gudang',
     icon: 'Warehouse',
     baseRatePerM2: 3600000,
+    isCivil: false,
     description: 'Struktur baja WF, pelat beton heavy-duty, atap zincalume',
   },
   {
     id: 'komersial',
-    label: 'Komersial / Ruko / Kantor',
+    label: 'Perkantoran / Komersial',
     icon: 'Building2',
     baseRatePerM2: 5200000,
+    isCivil: false,
     description: 'Struktur beton bertulang, fasad ACP/kaca, partisi rapi',
   },
   {
-    id: 'residensial',
-    label: 'Hunian Residensial',
-    icon: 'Home',
-    baseRatePerM2: 5800000,
-    description: 'Kusen aluminium powder coating, granit 60x60, sanitary Toto',
-  },
-  {
     id: 'renovasi',
-    label: 'Renovasi & Retrofitting',
+    label: 'Renovasi',
     icon: 'Wrench',
     baseRatePerM2: 2800000,
+    isCivil: false,
     description: 'Peremajaan fasad, perkuatan struktur, utilitas MEP baru',
+  },
+  {
+    id: 'irigasi',
+    label: 'Irigasi / Drainase',
+    icon: 'Waves',
+    baseRatePerM2: 1850000,
+    isCivil: true,
+    description: 'Saluran beton precast/cor, pintu air, pasangan batu kali',
+  },
+  {
+    id: 'jalan',
+    label: 'Jalan',
+    icon: 'Route',
+    baseRatePerM2: 1450000,
+    isCivil: true,
+    description: 'Perkerasan beton rigid / aspal hotmix, pemadatan CBR',
   },
 ];
 
@@ -55,6 +77,7 @@ export function CostEstimator({ data = {}, onApplyToForm }) {
       : defaultBuildingOptions;
     return raw.map((item) => ({
       ...item,
+      isCivil: Boolean(item.isCivil || item.id === 'irigasi' || item.id === 'jalan'),
       icon: typeof item.icon === 'string' ? (iconMap[item.icon] || Building2) : (item.icon || Building2),
     }));
   }, [data?.building_options]);
@@ -74,10 +97,12 @@ export function CostEstimator({ data = {}, onApplyToForm }) {
 
   // Calculation logic
   const calculation = useMemo(() => {
-    const selectedType = buildingOptions.find((b) => b.id === buildingType) || buildingOptions[1];
+    const selectedType = buildingOptions.find((b) => b.id === buildingType) || buildingOptions[0];
     const selectedTier = materialTiers.find((t) => t.id === materialTier) || materialTiers[1];
+    const isCivil = Boolean(selectedType.isCivil);
+    const effectiveFloors = isCivil ? 1 : floors;
 
-    const floorFactor = floors > 1 ? 1 + (floors - 1) * 0.08 : 1.0;
+    const floorFactor = effectiveFloors > 1 ? 1 + (effectiveFloors - 1) * 0.08 : 1.0;
     const baseUnitRate = selectedType.baseRatePerM2 * selectedTier.multiplier * floorFactor;
     const totalEstimate = Math.round(baseUnitRate * (Number(areaM2) || 0));
 
@@ -92,13 +117,16 @@ export function CostEstimator({ data = {}, onApplyToForm }) {
       structural,
       architectural,
       mep,
+      isCivil,
+      typeIcon: selectedType.icon,
       typeName: selectedType.label,
       tierName: selectedTier.name,
     };
-  }, [buildingType, areaM2, materialTier, floors]);
+  }, [buildingOptions, materialTiers, buildingType, areaM2, materialTier, floors]);
 
   const handleConsultationWhatsApp = () => {
-    const message = `Halo CV. Wahana Sinergi Mitra, saya telah melakukan simulasi RAB di website:%0A- Tipe: ${calculation.typeName}%0A- Luas: ${areaM2} m² (%0A- Jumlah Lantai: ${floors})%0A- Spek: ${calculation.tierName}%0A- Estimasi Anggaran: ${formatRupiah(calculation.totalEstimate)}%0A%0AMohon info jadwal survei lokasi dan penyusunan RAB detail. Terima kasih.`;
+    const floorText = calculation.isCivil ? 'Non-bertingkat (1x)' : `${floors} Lantai`;
+    const message = `Halo CV. Wahana Sinergi Mitra, saya telah melakukan simulasi RAB di website:%0A- Kategori Proyek: ${calculation.typeName}%0A- Luas: ${areaM2} m²%0A- Jumlah Lantai: ${floorText}%0A- Spek: ${calculation.tierName}%0A- Estimasi Anggaran: ${formatRupiah(calculation.totalEstimate)}%0A%0AMohon info jadwal survei lokasi dan penyusunan RAB detail. Terima kasih.`;
     window.open(`https://wa.me/6281234567890?text=${message}`, '_blank');
   };
 
@@ -135,7 +163,7 @@ export function CostEstimator({ data = {}, onApplyToForm }) {
                   <Text.Label title="1. Pilih Kategori Konstruksi" singleLine>
                     1. Pilih Kategori Konstruksi
                   </Text.Label>
-                  <Text.Caption>4 Spesialisasi WSM</Text.Caption>
+                  <Text.Caption>{buildingOptions.length} Spesialisasi WSM</Text.Caption>
                 </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -181,10 +209,13 @@ export function CostEstimator({ data = {}, onApplyToForm }) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <div className="flex items-center justify-between gap-2 min-w-0 mb-2">
-                    <Text.Label title="Luas Total Bangunan (m²)" singleLine>
-                      2. Luas Bangunan (m²)
+                    <Text.Label
+                      title={calculation.isCivil ? '2. Luas Area / Pekerjaan (m²)' : '2. Luas Bangunan (m²)'}
+                      singleLine
+                    >
+                      {calculation.isCivil ? '2. Luas Area / Pekerjaan (m²)' : '2. Luas Bangunan (m²)'}
                     </Text.Label>
-                    <span className="text-[12px] font-bold text-slate-700">{areaM2} m²</span>
+                    <span className="text-[12px] font-bold text-slate-700 shrink-0">{areaM2} m²</span>
                   </div>
                   <input
                     type="range"
@@ -202,28 +233,34 @@ export function CostEstimator({ data = {}, onApplyToForm }) {
                   </div>
                 </div>
 
-                <div>
+                <div className={calculation.isCivil ? 'opacity-50' : ''}>
                   <div className="flex items-center justify-between gap-2 min-w-0 mb-2">
-                    <Text.Label title="Jumlah Lantai" singleLine>
+                    <Text.Label title="3. Jumlah Lantai" singleLine>
                       3. Jumlah Lantai
                     </Text.Label>
-                    <span className="text-[12px] font-bold text-slate-700">{floors} Lantai</span>
+                    <span className="text-[12px] font-bold text-slate-700 shrink-0">
+                      {calculation.isCivil ? 'Non-bertingkat (1x)' : `${floors} Lantai`}
+                    </span>
                   </div>
                   <div className="grid grid-cols-4 gap-2">
-                    {[1, 2, 3, 4].map((f) => (
-                      <button
-                        key={f}
-                        type="button"
-                        onClick={() => setFloors(f)}
-                        className={`py-2.5 rounded-xl font-bold text-[13px] border transition-all ${
-                          floors === f
-                            ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
-                            : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                        }`}
-                      >
-                        {f} Lt
-                      </button>
-                    ))}
+                    {[1, 2, 3, 4].map((f) => {
+                      const isActiveFloor = !calculation.isCivil && floors === f;
+                      return (
+                        <button
+                          key={f}
+                          type="button"
+                          disabled={calculation.isCivil}
+                          onClick={() => setFloors(f)}
+                          className={`py-2.5 rounded-xl font-bold text-[13px] border transition-all ${
+                            isActiveFloor
+                              ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                          } disabled:cursor-not-allowed`}
+                        >
+                          {f} Lt
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -263,52 +300,76 @@ export function CostEstimator({ data = {}, onApplyToForm }) {
                 {/* Result Header */}
                 <div className="flex items-center justify-between gap-2 min-w-0 pb-4 border-b border-slate-100">
                   <div className="min-w-0 flex-1">
-                    <Text.Label title="Hasil Kalkulasi Anggaran" singleLine className="text-emerald-700">
+                    <Text.Label title="Hasil Simulasi RAB" singleLine className="text-emerald-700">
                       Hasil Simulasi RAB
                     </Text.Label>
-                    <Text.H2 title="Estimasi Investasi Total" singleLine>
+                    <Text.H2 title="Estimasi Investasi Konstruksi" singleLine>
                       Estimasi Investasi Konstruksi
                     </Text.H2>
                   </div>
-                  <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl shrink-0">
-                    <Sparkles className="w-5 h-5" />
+                  <div
+                    title={calculation.typeName}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-xl shrink-0 whitespace-nowrap max-w-[175px]"
+                  >
+                    <calculation.typeIcon className="w-4 h-4 shrink-0" />
+                    <span className="text-[12px] font-bold tracking-[-0.015em] truncate">
+                      {calculation.typeName}
+                    </span>
                   </div>
                 </div>
 
                 {/* Big Amount */}
                 <div className="bg-emerald-50/60 rounded-2xl p-5 border border-emerald-100">
                   <Text.Caption className="text-slate-600 block mb-1">
-                    Estimasi Total Anggaran Kasar ({areaM2} m² • {floors} Lantai)
+                    Estimasi Total Anggaran Kasar ({calculation.typeName} • {areaM2} m²{calculation.isCivil ? '' : ` • ${floors} Lantai`})
                   </Text.Caption>
                   <Text.Amount
                     value={calculation.totalEstimate}
                     className="text-[26px] sm:text-[32px] block leading-none mb-2"
                   />
-                  <div className="flex items-center justify-between text-[12px] font-semibold text-slate-600 pt-2 border-t border-emerald-200/50">
-                    <span>Estimasi Biaya per m²:</span>
-                    <span className="text-slate-900">{formatRupiah(calculation.ratePerM2)} / m²</span>
+                  <div className="space-y-1.5 pt-2.5 border-t border-emerald-200/50">
+                    <div className="flex items-center justify-between gap-2 text-[12px] font-semibold text-slate-600">
+                      <span>Kategori Proyek:</span>
+                      <span className="text-slate-900 font-bold truncate">{calculation.typeName}</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 text-[12px] font-semibold text-slate-600">
+                      <span>Estimasi Biaya per m²:</span>
+                      <span className="text-slate-900 font-bold tabular-nums">{formatRupiah(calculation.ratePerM2)} / m²</span>
+                    </div>
                   </div>
                 </div>
 
                 {/* Component Breakdown */}
                 <div className="space-y-2.5 pt-1">
-                  <Text.Label title="Rincian Komponen Pekerjaan" singleLine className="text-slate-600">
+                  <Text.Label title="Estimasi Rincian Pekerjaan" singleLine className="text-slate-600">
                     Estimasi Rincian Pekerjaan
                   </Text.Label>
                   
                   <div className="flex items-center justify-between text-[13px] py-1 border-b border-slate-100">
-                    <span className="text-slate-600">Pekerjaan Struktur (Pondasi & Baja/Beton):</span>
-                    <span className="font-bold text-slate-800">{formatRupiah(calculation.structural)}</span>
+                    <span className="text-slate-600">
+                      {calculation.isCivil
+                        ? 'Pekerjaan Tanah & Pondasi:'
+                        : 'Pekerjaan Struktur (Pondasi & Baja/Beton):'}
+                    </span>
+                    <span className="font-bold text-slate-800 tabular-nums">{formatRupiah(calculation.structural)}</span>
                   </div>
 
                   <div className="flex items-center justify-between text-[13px] py-1 border-b border-slate-100">
-                    <span className="text-slate-600">Pekerjaan Arsitektur & Finishing:</span>
-                    <span className="font-bold text-slate-800">{formatRupiah(calculation.architectural)}</span>
+                    <span className="text-slate-600">
+                      {calculation.isCivil
+                        ? 'Struktur Beton / Perkerasan:'
+                        : 'Pekerjaan Arsitektur & Finishing:'}
+                    </span>
+                    <span className="font-bold text-slate-800 tabular-nums">{formatRupiah(calculation.architectural)}</span>
                   </div>
 
                   <div className="flex items-center justify-between text-[13px] py-1 border-b border-slate-100">
-                    <span className="text-slate-600">Instalasi MEP (Mekanikal, Listrik & Plumbing):</span>
-                    <span className="font-bold text-slate-800">{formatRupiah(calculation.mep)}</span>
+                    <span className="text-slate-600">
+                      {calculation.isCivil
+                        ? 'Finishing & Utilitas Saluran/Jalan:'
+                        : 'Instalasi MEP (Mekanikal, Listrik & Plumbing):'}
+                    </span>
+                    <span className="font-bold text-slate-800 tabular-nums">{formatRupiah(calculation.mep)}</span>
                   </div>
                 </div>
 

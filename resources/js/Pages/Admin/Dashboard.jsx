@@ -335,10 +335,12 @@ export default function Dashboard({
     badge: sectionData?.estimator_data?.badge || 'Kalkulator Biaya Proyek',
     title: sectionData?.estimator_data?.title || 'Simulasi Estimasi Rencana Anggaran Biaya (RAB)',
     subtitle: sectionData?.estimator_data?.subtitle || 'Dapatkan estimasi awal biaya pembangunan proyek Anda secara transparan berdasarkan luas bangunan dan spesifikasi mutu material berstandar SNI.',
+    rate_gedung: sectionData?.estimator_data?.building_options?.find((b) => b.id === 'gedung')?.baseRatePerM2 || 5500000,
     rate_gudang: sectionData?.estimator_data?.building_options?.find((b) => b.id === 'gudang')?.baseRatePerM2 || 3600000,
     rate_komersial: sectionData?.estimator_data?.building_options?.find((b) => b.id === 'komersial')?.baseRatePerM2 || 5200000,
-    rate_residensial: sectionData?.estimator_data?.building_options?.find((b) => b.id === 'residensial')?.baseRatePerM2 || 5800000,
     rate_renovasi: sectionData?.estimator_data?.building_options?.find((b) => b.id === 'renovasi')?.baseRatePerM2 || 2800000,
+    rate_irigasi: sectionData?.estimator_data?.building_options?.find((b) => b.id === 'irigasi')?.baseRatePerM2 || 1850000,
+    rate_jalan: sectionData?.estimator_data?.building_options?.find((b) => b.id === 'jalan')?.baseRatePerM2 || 1450000,
   });
 
   const [workflowForm, setWorkflowForm] = useState({
@@ -416,10 +418,12 @@ export default function Dashboard({
   const handleSaveEstimatorSection = (e) => {
     e.preventDefault();
     const updatedOptions = [
-      { id: 'gudang', label: 'Gudang & Industri', icon: 'Warehouse', baseRatePerM2: Number(estimatorForm.rate_gudang), description: 'Struktur baja WF, pelat beton heavy-duty, atap zincalume' },
-      { id: 'komersial', label: 'Komersial / Ruko / Kantor', icon: 'Building2', baseRatePerM2: Number(estimatorForm.rate_komersial), description: 'Struktur beton bertulang, fasad ACP/kaca, partisi rapi' },
-      { id: 'residensial', label: 'Hunian Residensial', icon: 'Home', baseRatePerM2: Number(estimatorForm.rate_residensial), description: 'Kusen aluminium powder coating, granit 60x60, sanitary Toto' },
-      { id: 'renovasi', label: 'Renovasi & Retrofitting', icon: 'Wrench', baseRatePerM2: Number(estimatorForm.rate_renovasi), description: 'Peremajaan fasad, perkuatan struktur, utilitas MEP baru' },
+      { id: 'gedung', label: 'Gedung', icon: 'Building', isCivil: false, baseRatePerM2: Number(estimatorForm.rate_gedung), description: 'Struktur beton bertulang, fasilitas publik, pendidikan & bertingkat' },
+      { id: 'gudang', label: 'Gudang', icon: 'Warehouse', isCivil: false, baseRatePerM2: Number(estimatorForm.rate_gudang), description: 'Struktur baja WF, pelat beton heavy-duty, atap zincalume' },
+      { id: 'komersial', label: 'Perkantoran / Komersial', icon: 'Building2', isCivil: false, baseRatePerM2: Number(estimatorForm.rate_komersial), description: 'Struktur beton bertulang, fasad ACP/kaca, partisi rapi' },
+      { id: 'renovasi', label: 'Renovasi', icon: 'Wrench', isCivil: false, baseRatePerM2: Number(estimatorForm.rate_renovasi), description: 'Peremajaan fasad, perkuatan struktur, utilitas MEP baru' },
+      { id: 'irigasi', label: 'Irigasi / Drainase', icon: 'Waves', isCivil: true, baseRatePerM2: Number(estimatorForm.rate_irigasi), description: 'Saluran beton precast/cor, pintu air, pasangan batu kali' },
+      { id: 'jalan', label: 'Jalan', icon: 'Route', isCivil: true, baseRatePerM2: Number(estimatorForm.rate_jalan), description: 'Perkerasan beton rigid / aspal hotmix, pemadatan CBR' },
     ];
     router.post('/admin/sections/estimator_data', {
       data: {
@@ -1885,7 +1889,16 @@ export default function Dashboard({
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                               <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
-                                Gudang & Industri (Rp/m²)
+                                Gedung (Rp/m²)
+                              </label>
+                              <CurrencyInput
+                                value={estimatorForm.rate_gedung}
+                                onChange={(val) => setEstimatorForm({ ...estimatorForm, rate_gedung: val })}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
+                                Gudang (Rp/m²)
                               </label>
                               <CurrencyInput
                                 value={estimatorForm.rate_gudang}
@@ -1894,7 +1907,7 @@ export default function Dashboard({
                             </div>
                             <div>
                               <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
-                                Komersial / Ruko / Kantor (Rp/m²)
+                                Perkantoran / Komersial (Rp/m²)
                               </label>
                               <CurrencyInput
                                 value={estimatorForm.rate_komersial}
@@ -1903,20 +1916,29 @@ export default function Dashboard({
                             </div>
                             <div>
                               <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
-                                Hunian Residensial (Rp/m²)
-                              </label>
-                              <CurrencyInput
-                                value={estimatorForm.rate_residensial}
-                                onChange={(val) => setEstimatorForm({ ...estimatorForm, rate_residensial: val })}
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
-                                Renovasi & Retrofitting (Rp/m²)
+                                Renovasi (Rp/m²)
                               </label>
                               <CurrencyInput
                                 value={estimatorForm.rate_renovasi}
                                 onChange={(val) => setEstimatorForm({ ...estimatorForm, rate_renovasi: val })}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
+                                Irigasi / Drainase (Rp/m²)
+                              </label>
+                              <CurrencyInput
+                                value={estimatorForm.rate_irigasi}
+                                onChange={(val) => setEstimatorForm({ ...estimatorForm, rate_irigasi: val })}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[12px] font-bold text-slate-800 tracking-[-0.015em] mb-1">
+                                Jalan (Rp/m²)
+                              </label>
+                              <CurrencyInput
+                                value={estimatorForm.rate_jalan}
+                                onChange={(val) => setEstimatorForm({ ...estimatorForm, rate_jalan: val })}
                               />
                             </div>
                           </div>

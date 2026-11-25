@@ -459,10 +459,54 @@ class CompanySetting extends Model
                 'title' => 'Simulasi Estimasi Rencana {Anggaran Biaya (RAB)}',
                 'subtitle' => 'Dapatkan estimasi awal biaya pembangunan proyek Anda secara transparan berdasarkan kategori bangunan, luas lantai, dan kelas material standar SNI.',
                 'building_options' => [
-                    ['id' => 'gudang', 'label' => 'Gudang & Industri', 'baseRatePerM2' => 3600000, 'description' => 'Struktur baja WF, pelat beton heavy-duty, atap zincalume'],
-                    ['id' => 'komersial', 'label' => 'Komersial / Ruko / Kantor', 'baseRatePerM2' => 5200000, 'description' => 'Struktur beton bertulang, fasad ACP/kaca, partisi rapi'],
-                    ['id' => 'residensial', 'label' => 'Hunian Residensial', 'baseRatePerM2' => 5800000, 'description' => 'Kusen aluminium powder coating, granit 60x60, sanitary Toto'],
-                    ['id' => 'renovasi', 'label' => 'Renovasi & Retrofitting', 'baseRatePerM2' => 2800000, 'description' => 'Peremajaan fasad, perkuatan struktur, utilitas MEP baru'],
+                    [
+                        'id' => 'gedung',
+                        'label' => 'Gedung',
+                        'icon' => 'Building',
+                        'baseRatePerM2' => 5500000,
+                        'isCivil' => false,
+                        'description' => 'Struktur beton bertulang, fasilitas publik, pendidikan & bertingkat',
+                    ],
+                    [
+                        'id' => 'gudang',
+                        'label' => 'Gudang',
+                        'icon' => 'Warehouse',
+                        'baseRatePerM2' => 3600000,
+                        'isCivil' => false,
+                        'description' => 'Struktur baja WF, pelat beton heavy-duty, atap zincalume',
+                    ],
+                    [
+                        'id' => 'komersial',
+                        'label' => 'Perkantoran / Komersial',
+                        'icon' => 'Building2',
+                        'baseRatePerM2' => 5200000,
+                        'isCivil' => false,
+                        'description' => 'Struktur beton bertulang, fasad ACP/kaca, partisi rapi',
+                    ],
+                    [
+                        'id' => 'renovasi',
+                        'label' => 'Renovasi',
+                        'icon' => 'Wrench',
+                        'baseRatePerM2' => 2800000,
+                        'isCivil' => false,
+                        'description' => 'Peremajaan fasad, perkuatan struktur, utilitas MEP baru',
+                    ],
+                    [
+                        'id' => 'irigasi',
+                        'label' => 'Irigasi / Drainase',
+                        'icon' => 'Waves',
+                        'baseRatePerM2' => 1850000,
+                        'isCivil' => true,
+                        'description' => 'Saluran beton precast/cor, pintu air, pasangan batu kali',
+                    ],
+                    [
+                        'id' => 'jalan',
+                        'label' => 'Jalan',
+                        'icon' => 'Route',
+                        'baseRatePerM2' => 1450000,
+                        'isCivil' => true,
+                        'description' => 'Perkerasan beton rigid / aspal hotmix, pemadatan CBR',
+                    ],
                 ],
                 'material_tiers' => [
                     ['id' => 'standar', 'name' => 'Standar Proyek', 'multiplier' => 1.0, 'desc' => 'Bahan SNI teruji ekonomis'],
@@ -520,6 +564,53 @@ class CompanySetting extends Model
      */
     public static function getSectionData(string $section): array
     {
-        return static::getJson("section_{$section}", static::getDefaultSectionData($section));
+        $defaults = static::getDefaultSectionData($section);
+        $data = static::getJson("section_{$section}", $defaults);
+
+        if ($section === 'estimator_data') {
+            $data = static::normalizeEstimatorData($data, $defaults);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Normalize legacy 4-category estimator_data in DB into the 6 canonical project categories
+     * with representative icons while preserving any custom saved rates.
+     */
+    protected static function normalizeEstimatorData(array $data, array $defaults): array
+    {
+        $defaultOptions = $defaults['building_options'] ?? [];
+        $savedById = [];
+        foreach ($data['building_options'] ?? [] as $opt) {
+            if (is_array($opt) && ! empty($opt['id'])) {
+                $savedById[(string) $opt['id']] = $opt;
+            }
+        }
+
+        $normalized = [];
+        foreach ($defaultOptions as $defaultOpt) {
+            $id = $defaultOpt['id'];
+            $saved = $savedById[$id] ?? [];
+            $rate = isset($saved['baseRatePerM2']) && is_numeric($saved['baseRatePerM2']) && (float) $saved['baseRatePerM2'] > 0
+                ? (int) $saved['baseRatePerM2']
+                : $defaultOpt['baseRatePerM2'];
+
+            $normalized[] = [
+                'id' => $id,
+                'label' => $defaultOpt['label'],
+                'icon' => $defaultOpt['icon'],
+                'baseRatePerM2' => $rate,
+                'isCivil' => $defaultOpt['isCivil'],
+                'description' => $defaultOpt['description'],
+            ];
+        }
+
+        $data['building_options'] = $normalized;
+        if (empty($data['material_tiers'])) {
+            $data['material_tiers'] = $defaults['material_tiers'] ?? [];
+        }
+
+        return $data;
     }
 }
